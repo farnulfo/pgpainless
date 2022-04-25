@@ -2,10 +2,25 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
+buildscript {
+    repositories {
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+    }
+
+    dependencies {
+        classpath "gradle.plugin.org.mikeneck:graalvm-native-image-plugin:0.2"
+    }
+}
+
 plugins {
     id 'application'
     id "com.github.johnrengelman.shadow" version "6.1.0"
 }
+
+apply plugin: "org.mikeneck.graalvm-native-image"
+
 def generatedVersionDir = "${buildDir}/generated-version"
 
 sourceSets {
@@ -42,6 +57,7 @@ dependencies {
 
     implementation(project(":pgpainless-sop"))
     implementation "org.pgpainless:sop-java-picocli:$sopJavaVersion"
+    annotationProcessor "info.picocli:picocli-codegen:4.6.3"
 
     // https://mvnrepository.com/artifact/com.google.code.findbugs/jsr305
     implementation group: 'com.google.code.findbugs', name: 'jsr305', version: '3.0.2'
@@ -52,6 +68,23 @@ mainClassName = 'org.pgpainless.cli.PGPainlessCLI'
 application {
     mainClass = mainClassName
 }
+
+configurations {
+    generateConfig
+}
+dependencies {
+    //...
+    generateConfig 'info.picocli:picocli-codegen:4.6.3'
+}
+
+task(generateGraalReflectionConfig, dependsOn: 'classes', type: JavaExec) {
+    main = 'picocli.codegen.aot.graalvm.ReflectionConfigGenerator'
+    classpath = configurations.generateConfig + sourceSets.main.runtimeClasspath
+    def outputFile = "${buildDir}/resources/main/META-INF/native-image/${project.group}/${project.name}/reflect-config.json"
+    args = ["--output=$outputFile", 'sop.cli.picocli.SopCLI']
+}
+assemble.dependsOn generateGraalReflectionConfig
+
 /**
 jar {
     duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
@@ -78,4 +111,26 @@ run {
     }
 }
 
-// tasks."jar".dependsOn(":pgpainless-core:assemble", ":pgpainless-sop:assemble")
+nativeImage {
+    // dependsOn(':generateGraalReflectionConfig')
+    // dependsOn(':generateCompletionScript')
+    def graalHome = System.getenv("GRAALVM_HOME")
+    if (graalHome == null) {
+        throw new IllegalStateException("GRAALVM_HOME not set.")
+    }
+
+    graalVmHome = graalHome
+    mainClass = mainClassName
+    executableName = 'pgpainless-cli'
+    arguments(
+            '--no-fallback',
+//            '--enable-all-security-services',
+//            '--initialize-at-run-time=com.example.runtime',
+            '--enable-https',
+            '--enable-all-security-services',
+            '--allow-incomplete-classpath',
+            // '--report-unsupported-elements-at-runtime',
+            '--initialize-at-run-time=org.bouncycastle.jcajce.provider.drbg.DRBG$Default,org.bouncycastle.jcajce.provider.drbg.DRBG$NonceAndIV'
+    )
+}
+tasks."nativeImage".dependsOn('generateGraalReflectionConfig')
