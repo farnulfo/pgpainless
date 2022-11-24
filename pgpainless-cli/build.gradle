@@ -85,6 +85,14 @@ task(generateGraalReflectionConfig, dependsOn: 'classes', type: JavaExec) {
 }
 assemble.dependsOn generateGraalReflectionConfig
 
+task(generateGraalResourceConfig, dependsOn: 'classes', type: JavaExec) {
+    main = 'picocli.codegen.aot.graalvm.ResourceConfigGenerator'
+    classpath = configurations.generateConfig + sourceSets.main.runtimeClasspath
+    def outputFile = "${buildDir}/resources/main/META-INF/native-image/${project.group}/${project.name}/resource-config.json"
+    args = ["--output=$outputFile", 'sop.cli.picocli.SopCLI']
+}
+assemble.dependsOn generateGraalResourceConfig
+
 /**
 jar {
     duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
@@ -122,15 +130,5 @@ nativeImage {
     graalVmHome = graalHome
     mainClass = mainClassName
     executableName = 'pgpainless-cli'
-    arguments(
-            '--no-fallback',
-//            '--enable-all-security-services',
-//            '--initialize-at-run-time=com.example.runtime',
-            '--enable-https',
-            '--enable-all-security-services',
-            '--allow-incomplete-classpath',
-            // '--report-unsupported-elements-at-runtime',
-            '--initialize-at-run-time=org.bouncycastle.jcajce.provider.drbg.DRBG$Default,org.bouncycastle.jcajce.provider.drbg.DRBG$NonceAndIV'
-    )
 }
 tasks."nativeImage".dependsOn('generateGraalReflectionConfig')
