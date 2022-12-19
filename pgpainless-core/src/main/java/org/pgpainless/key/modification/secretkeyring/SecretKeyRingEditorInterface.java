@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Date;
+import java.util.List;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
@@ -122,6 +123,21 @@ public interface SecretKeyRingEditorInterface {
     SecretKeyRingEditorInterface replaceUserId(CharSequence oldUserId,
                                                CharSequence newUserId,
                                                SecretKeyRingProtector protector)
+        throws PGPException;
+
+    /**
+     * Replace all user-ids on the key with those from the <pre>newUserIds</pre> list.
+     * If the old primary user-id is not part of the given list, the first item from the list will become the new
+     * primary user-id instead.
+     * Old user-ids not part of the given list will be soft-revoked.
+     *
+     * @param newUserIds non-empty list of new user-ids
+     * @param protector protector to unlock the secret key
+     * @return editor
+     * @throws PGPException in case of an OpenPGP error
+     */
+    SecretKeyRingEditorInterface overwriteUserIds(List<CharSequence> newUserIds,
+                                                  SecretKeyRingProtector protector)
         throws PGPException;
 
     /**

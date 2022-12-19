@@ -158,7 +158,7 @@ public class SecretKeyRingEditor implements SecretKeyRingEditorInterface {
         PGPSignature signature = primaryUserId == null ?
                 info.getLatestDirectKeySelfSignature() : info.getLatestUserIdCertification(primaryUserId);
         final Date previousKeyExpiration = signature == null ? null :
-            SignatureSubpacketsUtil.getKeyExpirationTimeAsDate(signature, primaryKey);
+                SignatureSubpacketsUtil.getKeyExpirationTimeAsDate(signature, primaryKey);
 
         // Add new primary user-id signature
         addUserId(
@@ -266,6 +266,57 @@ public class SecretKeyRingEditor implements SecretKeyRingEditorInterface {
         }, protector);
 
         return revokeUserId(oldUID, protector);
+    }
+
+    @Override
+    public SecretKeyRingEditorInterface overwriteUserIds(List<CharSequence> newUserIds, SecretKeyRingProtector protector)
+            throws PGPException {
+        if (newUserIds.isEmpty()) {
+            throw new IllegalArgumentException("List of new user-ids MUST NOT be empty.");
+        }
+
+        KeyRingInfo info = PGPainless.inspectKeyRing(secretKeyRing);
+
+        boolean replacePrimaryUserId = true;
+        String oldPrimaryUserId = info.getPossiblyExpiredPrimaryUserId();
+        for (CharSequence newUserId : newUserIds) {
+            if (newUserId.toString().equals(oldPrimaryUserId)) {
+                replacePrimaryUserId = false;
+                break;
+            }
+        }
+
+        List<String> oldUserIds = info.getValidAndExpiredUserIds();
+        // revokeUserIds = oldUserIds - newUserIds
+        List<String> revokeUserIds = new ArrayList<>(oldUserIds);
+        for (CharSequence newUserId : newUserIds) {
+            revokeUserIds.remove(newUserId.toString());
+        }
+
+        // addUserIds = newUserIds - oldUserIds
+        List<String> addUserIds = new ArrayList<>();
+        for (CharSequence newUserId : newUserIds) {
+            if (!oldUserIds.contains(newUserId.toString())) {
+                addUserIds.add(newUserId.toString());
+            }
+        }
+
+        for (String revoke : revokeUserIds) {
+            removeUserId(revoke, protector);
+        }
+
+        if (replacePrimaryUserId) {
+            addPrimaryUserId(addUserIds.get(0), protector);
+            for (int i = 1; i < newUserIds.size(); i++) {
+                addUserId(addUserIds.get(i), protector);
+            }
+        } else {
+            for (CharSequence newUserId : newUserIds) {
+                addUserId(newUserId, protector);
+            }
+        }
+
+        return this;
     }
 
     // TODO: Move to utility class?
