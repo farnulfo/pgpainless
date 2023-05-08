@@ -6,9 +6,11 @@ package org.pgpainless.decryption_verification;
 
 import org.bouncycastle.openpgp.PGPException;
 import org.bouncycastle.util.io.Streams;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestTemplate;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.pgpainless.PGPainless;
 import org.pgpainless.util.Passphrase;
+import org.pgpainless.util.TestAllImplementations;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -46,17 +48,20 @@ public class SEIPDv2Test {
     public static final String PASSWORD = "password";
     public static final String PLAINTEXT = "Hello, world!";
 
-    @Test
+    @TestTemplate
+    @ExtendWith(TestAllImplementations.class)
     public void testDecryptEax() throws PGPException, IOException {
         testDecrypt(CIPHERTEXT_EAX);
     }
 
-    @Test
+    @TestTemplate
+    @ExtendWith(TestAllImplementations.class)
     public void testDecryptOcb() throws PGPException, IOException {
         testDecrypt(CIPHERTEXT_OCB);
     }
 
-    @Test
+    @TestTemplate
+    @ExtendWith(TestAllImplementations.class)
     public void testDecryptGcm() throws PGPException, IOException {
         testDecrypt(CIPHERTEXT_GCM);
     }
