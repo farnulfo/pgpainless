@@ -11,6 +11,7 @@ import java.io.OutputStream;
 import org.bouncycastle.bcpg.BCPGInputStream;
 import org.bouncycastle.bcpg.MarkerPacket;
 import org.bouncycastle.bcpg.Packet;
+import org.bouncycastle.bcpg.PaddingPacket;
 import org.bouncycastle.openpgp.PGPCompressedData;
 import org.bouncycastle.openpgp.PGPEncryptedDataList;
 import org.bouncycastle.openpgp.PGPException;
@@ -89,6 +90,12 @@ public class TeeBCPGInputStream {
         MarkerPacket markerPacket = (MarkerPacket) readPacket();
         delayedTee.squeeze();
         return markerPacket;
+    }
+
+    public PaddingPacket readPadding() throws IOException {
+        PaddingPacket paddingPacket = (PaddingPacket) readPacket();
+        delayedTee.squeeze();
+        return paddingPacket;
     }
 
     public void close() throws IOException {

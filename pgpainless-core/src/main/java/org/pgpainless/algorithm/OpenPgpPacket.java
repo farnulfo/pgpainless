@@ -30,6 +30,7 @@ public enum OpenPgpPacket {
     UATTR(PacketTags.USER_ATTRIBUTE),
     SEIPD(PacketTags.SYM_ENC_INTEGRITY_PRO),
     MDC(PacketTags.MOD_DETECTION_CODE),
+    PADDING(PacketTags.PADDING),
 
     EXP_1(PacketTags.EXPERIMENTAL_1),
     EXP_2(PacketTags.EXPERIMENTAL_2),

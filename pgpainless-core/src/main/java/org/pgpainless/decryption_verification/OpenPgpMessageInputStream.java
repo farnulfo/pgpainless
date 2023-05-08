@@ -330,6 +330,10 @@ public class OpenPgpMessageInputStream extends DecryptionStream {
                 case MDC:
                     throw new MalformedOpenPgpMessageException("Unexpected Packet in Stream: " + nextPacket);
 
+                case PADDING:
+                    packetInputStream.readPadding();
+                    break;
+
                     // Experimental Packets are not supported
                 case EXP_1:
                 case EXP_2:
