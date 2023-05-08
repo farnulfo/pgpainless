@@ -48,6 +48,11 @@ public class IntegrityProtectedInputStream extends InputStream {
 
         if (encryptedData.isIntegrityProtected() && !options.isIgnoreMDCErrors()) {
             try {
+                // SEIPDv2 does not need verification, since AEAD is used.
+                if (encryptedData.getVersion() == 6 || encryptedData.getVersion() == 5) {
+                    return;
+                }
+
                 if (!encryptedData.verify()) {
                     throw new ModificationDetectionException();
                 }
