@@ -106,6 +106,7 @@ public class JceImplementationFactory extends ImplementationFactory {
     @Override
     public SessionKeyDataDecryptorFactory getSessionKeyDataDecryptorFactory(PGPSessionKey sessionKey) {
             return new JceSessionKeyDataDecryptorFactoryBuilder()
+                    .setProvider(ProviderFactory.getProvider())
                     .build(sessionKey);
     }
 
