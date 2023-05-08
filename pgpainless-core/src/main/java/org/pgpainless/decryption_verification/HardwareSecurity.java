@@ -4,7 +4,10 @@
 
 package org.pgpainless.decryption_verification;
 
+import org.bouncycastle.bcpg.AEADEncDataPacket;
+import org.bouncycastle.bcpg.SymmetricEncIntegrityPacket;
 import org.bouncycastle.openpgp.PGPException;
+import org.bouncycastle.openpgp.PGPSessionKey;
 import org.bouncycastle.openpgp.operator.PGPDataDecryptor;
 import org.bouncycastle.openpgp.operator.PublicKeyDataDecryptorFactory;
 import org.bouncycastle.openpgp.operator.bc.BcPublicKeyDataDecryptorFactory;
@@ -77,9 +80,13 @@ public class HardwareSecurity {
         }
 
         @Override
-        public PGPDataDecryptor createDataDecryptor(int aeadAlgorithm, byte[] iv, int chunkSize, int encAlgorithm, byte[] key)
-                throws PGPException {
-            return factory.createDataDecryptor(aeadAlgorithm, iv, chunkSize, encAlgorithm, key);
+        public PGPDataDecryptor createDataDecryptor(AEADEncDataPacket aeadEncDataPacket, PGPSessionKey pgpSessionKey) throws PGPException {
+            return factory.createDataDecryptor(aeadEncDataPacket, pgpSessionKey);
+        }
+
+        @Override
+        public PGPDataDecryptor createDataDecryptor(SymmetricEncIntegrityPacket symmetricEncIntegrityPacket, PGPSessionKey pgpSessionKey) throws PGPException {
+            return factory.createDataDecryptor(symmetricEncIntegrityPacket, pgpSessionKey);
         }
 
         @Override
