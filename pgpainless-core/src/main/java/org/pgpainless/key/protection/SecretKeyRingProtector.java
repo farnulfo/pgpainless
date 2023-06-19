@@ -85,24 +85,6 @@ public interface SecretKeyRingProtector {
      * @param passphrase passphrase
      * @param keys key ring
      * @return protector
-     * @deprecated use {@link #unlockEachKeyWith(Passphrase, PGPSecretKeyRing)} instead.
-     *
-     * TODO: Remove in 1.2.X
-     */
-    @Deprecated
-    static SecretKeyRingProtector unlockAllKeysWith(@Nonnull Passphrase passphrase, @Nonnull PGPSecretKeyRing keys) {
-        return unlockEachKeyWith(passphrase, keys);
-    }
-
-    /**
-     * Use the provided passphrase to lock/unlock all keys in the provided key ring.
-     *
-     * This protector will use the provided passphrase to lock/unlock all subkeys present in the provided keys object.
-     * For other keys that are not present in the ring, it will return null.
-     *
-     * @param passphrase passphrase
-     * @param keys key ring
-     * @return protector
      */
     static SecretKeyRingProtector unlockEachKeyWith(@Nonnull Passphrase passphrase, @Nonnull PGPSecretKeyRing keys) {
         Map<Long, Passphrase> map = new ConcurrentHashMap<>();

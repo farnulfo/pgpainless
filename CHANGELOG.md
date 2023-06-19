@@ -11,6 +11,7 @@ SPDX-License-Identifier: CC0-1.0
 - Remove unused methods from `SignatureUtils`
 - Encryption: Allow anonymous recipients using wildcard key-IDs
 - Add `SignatureSubpacketsUtil.getRegularExpressions()`
+- Remove `SecretKeyRingProtector.unlockAllKeysWith()` in favor of `unlockAnyKeyWith()`
 - Tests, tests, tests
 
 ## 1.5.3
