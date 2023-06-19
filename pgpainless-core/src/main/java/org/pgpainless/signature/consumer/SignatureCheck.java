@@ -6,7 +6,6 @@ package org.pgpainless.signature.consumer;
 
 import org.bouncycastle.openpgp.PGPKeyRing;
 import org.bouncycastle.openpgp.PGPSignature;
-import org.pgpainless.key.OpenPgpFingerprint;
 import org.pgpainless.key.SubkeyIdentifier;
 
 /**
@@ -58,16 +57,4 @@ public class SignatureCheck {
         return signingKeyRing;
     }
 
-    /**
-     * Return the {@link OpenPgpFingerprint} of the key that created the signature.
-     *
-     * @return fingerprint of the signing key
-     * @deprecated use {@link #getSigningKeyIdentifier()} instead.
-     *
-     * TODO: Remove in 1.2.X
-     */
-    @Deprecated
-    public OpenPgpFingerprint getFingerprint() {
-        return signingKeyIdentifier.getSubkeyFingerprint();
-    }
 }
