@@ -12,6 +12,8 @@ allprojects {
         bouncyPgVersion = bouncyCastleVersion
         junitVersion = '5.8.2'
         logbackVersion = '1.2.11'
+        certDJavaVersion = '0.2.1'
+        pgpainlessCertDVersion = '0.2.1'
         mockitoVersion = '4.5.1'
         slf4jVersion = '1.7.36'
         sopJavaVersion = '6.1.0'

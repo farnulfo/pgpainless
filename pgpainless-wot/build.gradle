@@ -23,6 +23,7 @@ dependencies {
 
     // Certificate store
     api "org.pgpainless:pgp-certificate-store:$certDJavaVersion"
+    api "org.pgpainless:pgpainless-cert-d:$pgpainlessCertDVersion"
 }
 
 test {
