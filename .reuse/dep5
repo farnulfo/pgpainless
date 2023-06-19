@@ -69,3 +69,12 @@ License: Apache-2.0
 Files: pgpainless-cli/packaging/man/*
 Copyright: 2022 Paul Schaub <info@pgpainless.org>
 License: Apache-2.0
+
+# PGPainless-WOT and WOT-Dijkstra
+Files: wot-dijkstra/*
+Copyright: 2023 Paul Schaub <info@pgpainless.org>
+License: Apache-2.0
+
+Files: pgpainless-wot/*
+Copyright: 2023 Paul Schaub <info@pgpainless.org>
+License: Apache-2.0
