@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2023 Paul Schaub <vanitasvitae@fsfe.org>
+//
+// SPDX-License-Identifier: Apache-2.0
+
 package org.pgpainless.wot.dijkstra.sq;
 
 import java.util.ArrayList;
@@ -9,7 +13,7 @@ import org.bouncycastle.openpgp.PGPSignature;
 
 import javax.annotation.Nonnull;
 
-public class CertificationSet {
+public final class CertificationSet {
 
     private final CertSynopsis issuer;
     private final CertSynopsis target;
@@ -98,7 +102,7 @@ public class CertificationSet {
         }
 
         List<Certification> certificationsForUserId = certifications.get(certification.getUserId());
-        //noinspection Java8MapApi
+        // noinspection Java8MapApi
         if (certificationsForUserId == null) {
             certificationsForUserId = new ArrayList<>();
             certifications.put(certification.getUserId(), certificationsForUserId);

@@ -1,17 +1,13 @@
+// SPDX-FileCopyrightText: 2023 Paul Schaub <vanitasvitae@fsfe.org>
+//
+// SPDX-License-Identifier: Apache-2.0
+
 package org.pgpainless.wot.dijkstra.sq;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.bouncycastle.openpgp.PGPException;
-import org.bouncycastle.openpgp.PGPPublicKey;
-import org.bouncycastle.openpgp.PGPPublicKeyRing;
-import org.bouncycastle.openpgp.PGPSecretKeyRing;
 import org.junit.jupiter.api.Test;
-import org.pgpainless.PGPainless;
-
-import java.security.InvalidAlgorithmParameterException;
-import java.security.NoSuchAlgorithmException;
 
 public class NetworkTest {
 
@@ -29,6 +25,7 @@ public class NetworkTest {
     @Test
     public void testNetworkFromCertificates() {
         ReferenceTime referenceTime = ReferenceTime.now();
+        // TODO: Implement
     }
 
 

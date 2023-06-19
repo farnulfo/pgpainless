@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2023 Paul Schaub <vanitasvitae@fsfe.org>
+//
+// SPDX-License-Identifier: Apache-2.0
+
 package org.pgpainless.wot.dijkstra.sq;
 
 import java.io.IOException;
@@ -249,6 +253,7 @@ public class WotTestVectors {
                 })
                 .getCertifiedCertificate();
 
+        // CHECKSTYLE:OFF
         System.out.println("Foo Employee");
         System.out.println(PGPainless.asciiArmor(caCertifiedFooBankEmployeeCert));
 
@@ -263,6 +268,7 @@ public class WotTestVectors {
 
         System.out.println("Bar Employee");
         System.out.println(PGPainless.asciiArmor(barCaCertifiedEmployeeCert));
+        // CHECKSTYLE:ON
     }
 
     private static InputStream getTestResourceInputStream(String resource) {

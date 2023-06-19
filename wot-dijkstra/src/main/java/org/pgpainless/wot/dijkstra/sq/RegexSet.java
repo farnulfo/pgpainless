@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2023 Paul Schaub <vanitasvitae@fsfe.org>
+//
+// SPDX-License-Identifier: Apache-2.0
+
 package org.pgpainless.wot.dijkstra.sq;
 
 import java.util.Collections;
@@ -10,7 +14,7 @@ import javax.annotation.Nonnull;
 
 import org.bouncycastle.bcpg.sig.RegularExpression;
 
-public class RegexSet {
+public final class RegexSet {
 
     private final Set<String> regexStrings;
 

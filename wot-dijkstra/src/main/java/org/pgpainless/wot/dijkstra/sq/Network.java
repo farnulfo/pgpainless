@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2023 Paul Schaub <vanitasvitae@fsfe.org>
+//
+// SPDX-License-Identifier: Apache-2.0
+
 package org.pgpainless.wot.dijkstra.sq;
 
 import java.util.ArrayList;
@@ -12,7 +16,6 @@ import org.bouncycastle.openpgp.PGPPublicKeyRing;
 import org.bouncycastle.openpgp.PGPSignature;
 import org.pgpainless.algorithm.KeyFlag;
 import org.pgpainless.algorithm.RevocationState;
-import org.pgpainless.algorithm.RevocationStateType;
 import org.pgpainless.key.OpenPgpFingerprint;
 import org.pgpainless.key.info.KeyRingInfo;
 import org.pgpainless.key.util.RevocationAttributes;
@@ -96,13 +99,13 @@ public class Network {
         Map<OpenPgpFingerprint, CertSynopsis> certSynopsisMap = new HashMap<>();
 
         for (KeyRingInfo cert : validatedCertificates) {
-            //noinspection Java8MapApi
+            // noinspection Java8MapApi
             if (byFingerprint.get(cert.getFingerprint()) == null) {
                 byFingerprint.put(cert.getFingerprint(), cert);
             }
             List<KeyRingInfo> byKeyIdEntry = byKeyId.get(cert.getKeyId());
 
-            //noinspection Java8MapApi
+            // noinspection Java8MapApi
             if (byKeyIdEntry == null) {
                 byKeyIdEntry = new ArrayList<>();
                 byKeyId.put(cert.getKeyId(), byKeyIdEntry);

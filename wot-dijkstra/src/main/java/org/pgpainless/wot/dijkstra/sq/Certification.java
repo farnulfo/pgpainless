@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2023 Paul Schaub <vanitasvitae@fsfe.org>
+//
+// SPDX-License-Identifier: Apache-2.0
+
 package org.pgpainless.wot.dijkstra.sq;
 
 import java.util.Date;
@@ -38,7 +42,7 @@ public class Certification {
         this.creationTime = creationTime;
         this.expirationTime = expirationTime;
         this.exportable = exportable;
-        this.trustAmount=  trustAmount;
+        this.trustAmount = trustAmount;
         this.trustDepth = trustDepth;
         this.regex = regex;
     }
@@ -110,7 +114,7 @@ public class Certification {
     }
 
     /**
-     * Get the creation time of the certification,
+     * Get the creation time of the certification.
      *
      * @return creation time
      */
