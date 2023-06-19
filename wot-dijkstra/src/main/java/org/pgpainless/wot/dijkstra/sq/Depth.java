@@ -1,8 +1,14 @@
+// SPDX-FileCopyrightText: 2023 Paul Schaub <vanitasvitae@fsfe.org>
+//
+// SPDX-License-Identifier: Apache-2.0
+
 package org.pgpainless.wot.dijkstra.sq;
+
+import org.pgpainless.wot.dijkstra.IntegerUtils;
 
 import javax.annotation.Nonnull;
 
-public class Depth implements Comparable<Depth> {
+public final class Depth implements Comparable<Depth> {
 
     private final Optional<Integer> depth;
 
@@ -55,7 +61,7 @@ public class Depth implements Comparable<Depth> {
             if (o.isUnconstrained()) {
                 return -1;
             } else {
-                return Integer.compare(getLimit().get(), o.getLimit().get());
+                return IntegerUtils.compare(getLimit().get(), o.getLimit().get());
             }
         }
     }

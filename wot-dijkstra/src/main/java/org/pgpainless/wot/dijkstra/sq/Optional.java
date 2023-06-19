@@ -1,9 +1,13 @@
+// SPDX-FileCopyrightText: 2023 Paul Schaub <vanitasvitae@fsfe.org>
+//
+// SPDX-License-Identifier: Apache-2.0
+
 package org.pgpainless.wot.dijkstra.sq;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-public class Optional<T> {
+public final class Optional<T> {
 
     private final T item;
 
