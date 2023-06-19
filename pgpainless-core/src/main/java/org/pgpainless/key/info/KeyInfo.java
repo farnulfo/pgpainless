@@ -11,9 +11,9 @@ import org.bouncycastle.bcpg.ECDSAPublicBCPGKey;
 import org.bouncycastle.bcpg.ECPublicBCPGKey;
 import org.bouncycastle.bcpg.EdDSAPublicBCPGKey;
 import org.bouncycastle.bcpg.S2K;
-import org.bouncycastle.jcajce.provider.asymmetric.util.ECUtil;
 import org.bouncycastle.openpgp.PGPPublicKey;
 import org.bouncycastle.openpgp.PGPSecretKey;
+import org.bouncycastle.openpgp.PGPUtil;
 import org.pgpainless.algorithm.PublicKeyAlgorithm;
 import org.pgpainless.key.generation.type.eddsa.EdDSACurve;
 
@@ -89,7 +89,7 @@ public class KeyInfo {
     public static String getCurveName(ECPublicBCPGKey key) {
         ASN1ObjectIdentifier identifier = key.getCurveOID();
 
-        String curveName = ECUtil.getCurveName(identifier);
+        String curveName = PGPUtil.getCurveName(identifier);
         if (curveName != null) {
             return curveName;
         }

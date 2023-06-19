@@ -7,7 +7,7 @@ package org.pgpainless.key.generation.type.xdh;
 import javax.annotation.Nonnull;
 
 public enum XDHSpec {
-    _X25519("X25519", "curve25519", 256),
+    _X25519("X25519", "Curve25519", 256),
     ;
 
     final String name;
