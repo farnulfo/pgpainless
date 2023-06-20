@@ -72,7 +72,7 @@ public interface SecretKeyRingProtector {
     static CachingSecretKeyRingProtector defaultSecretKeyRingProtector(SecretKeyPassphraseProvider missingPassphraseCallback) {
         return new CachingSecretKeyRingProtector(
                 new HashMap<>(),
-                KeyRingProtectionSettings.secureDefaultSettings(),
+                KeyRingProtectionSettings.saltedAndIterated(),
                 missingPassphraseCallback);
     }
 
@@ -163,6 +163,6 @@ public interface SecretKeyRingProtector {
      * @return protector
      */
     static SecretKeyRingProtector fromPassphraseMap(@Nonnull Map<Long, Passphrase> passphraseMap) {
-        return new CachingSecretKeyRingProtector(passphraseMap, KeyRingProtectionSettings.secureDefaultSettings(), null);
+        return new CachingSecretKeyRingProtector(passphraseMap, KeyRingProtectionSettings.saltedAndIterated(), null);
     }
 }

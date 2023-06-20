@@ -40,7 +40,7 @@ public class CachingSecretKeyRingProtector implements SecretKeyRingProtector, Se
     public CachingSecretKeyRingProtector(@Nullable SecretKeyPassphraseProvider missingPassphraseCallback) {
         this(
                 new HashMap<>(),
-                KeyRingProtectionSettings.secureDefaultSettings(),
+                KeyRingProtectionSettings.saltedAndIterated(),
                 missingPassphraseCallback
         );
     }

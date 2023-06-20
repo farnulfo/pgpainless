@@ -32,8 +32,8 @@ import org.pgpainless.implementation.ImplementationFactory;
 import org.pgpainless.key.protection.KeyRingProtectionSettings;
 import org.pgpainless.key.protection.PasswordBasedSecretKeyRingProtector;
 import org.pgpainless.key.protection.UnlockSecretKey;
-import org.pgpainless.util.TestAllImplementations;
 import org.pgpainless.util.Passphrase;
+import org.pgpainless.util.TestAllImplementations;
 
 public class ChangeSecretKeyRingPassphraseTest {
 
@@ -54,7 +54,7 @@ public class ChangeSecretKeyRingPassphraseTest {
 
         PGPSecretKeyRing changedPassphraseKeyRing = secretKeys;
 
-        assertEquals(KeyRingProtectionSettings.secureDefaultSettings().getEncryptionAlgorithm().getAlgorithmId(),
+        assertEquals(KeyRingProtectionSettings.saltedAndIterated().getEncryptionAlgorithm().getAlgorithmId(),
                 changedPassphraseKeyRing.getSecretKey().getKeyEncryptionAlgorithm());
 
         assertThrows(PGPException.class, () ->

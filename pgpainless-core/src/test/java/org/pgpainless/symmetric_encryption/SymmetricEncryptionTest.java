@@ -78,7 +78,7 @@ public class SymmetricEncryptionTest {
         // Test public key decryption
         PGPSecretKeyRingCollection decryptionKeys = TestKeys.getCryptieSecretKeyRingCollection();
         SecretKeyRingProtector protector = new PasswordBasedSecretKeyRingProtector(
-                KeyRingProtectionSettings.secureDefaultSettings(),
+                KeyRingProtectionSettings.saltedAndIterated(),
                 new SolitaryPassphraseProvider(Passphrase.fromPassword(TestKeys.CRYPTIE_PASSWORD)));
         decryptor = PGPainless.decryptAndOrVerify()
                 .onInputStream(new ByteArrayInputStream(ciphertext))

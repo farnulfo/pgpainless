@@ -16,7 +16,7 @@ import org.pgpainless.util.Passphrase;
 
 /**
  * Provides {@link PBESecretKeyDecryptor} and {@link PBESecretKeyEncryptor} objects while getting the passphrases
- * from a {@link SecretKeyPassphraseProvider} and using settings from an {@link KeyRingProtectionSettings}.
+ * from a {@link SecretKeyPassphraseProvider} and using settings from an {@link SaltedAndIteratedS2K}.
  */
 public class PasswordBasedSecretKeyRingProtector extends BaseSecretKeyRingProtector {
 

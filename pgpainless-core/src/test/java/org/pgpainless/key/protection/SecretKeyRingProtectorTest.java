@@ -106,7 +106,7 @@ public class SecretKeyRingProtectorTest {
         Map<Long, Passphrase> passphraseMap = new ConcurrentHashMap<>();
         passphraseMap.put(1L, Passphrase.emptyPassphrase());
         CachingSecretKeyRingProtector protector = new CachingSecretKeyRingProtector(passphraseMap,
-                KeyRingProtectionSettings.secureDefaultSettings(), new SecretKeyPassphraseProvider() {
+                KeyRingProtectionSettings.saltedAndIterated(), new SecretKeyPassphraseProvider() {
             @Override
             public Passphrase getPassphraseFor(Long keyId) {
                 return Passphrase.fromPassword("missingP455w0rd");

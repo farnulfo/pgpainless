@@ -739,7 +739,7 @@ public class SecretKeyRingEditor implements SecretKeyRingEditorInterface {
 
         @Override
         public WithPassphrase withSecureDefaultSettings() {
-            return withCustomSettings(KeyRingProtectionSettings.secureDefaultSettings());
+            return withCustomSettings(KeyRingProtectionSettings.saltedAndIterated());
         }
 
         @Override

@@ -14,7 +14,7 @@ import org.pgpainless.util.Passphrase;
 import javax.annotation.Nullable;
 
 /**
- * Basic {@link SecretKeyRingProtector} implementation that respects the users {@link KeyRingProtectionSettings} when
+ * Basic {@link SecretKeyRingProtector} implementation that respects the users {@link SaltedAndIteratedS2K} when
  * encrypting keys.
  */
 public class BaseSecretKeyRingProtector implements SecretKeyRingProtector {
@@ -24,16 +24,16 @@ public class BaseSecretKeyRingProtector implements SecretKeyRingProtector {
 
     /**
      * Constructor that uses the given {@link SecretKeyPassphraseProvider} to retrieve passphrases and PGPainless'
-     * default {@link KeyRingProtectionSettings}.
+     * default {@link SaltedAndIteratedS2K}.
      *
      * @param passphraseProvider provider for passphrases
      */
     public BaseSecretKeyRingProtector(SecretKeyPassphraseProvider passphraseProvider) {
-        this(passphraseProvider, KeyRingProtectionSettings.secureDefaultSettings());
+        this(passphraseProvider, KeyRingProtectionSettings.saltedAndIterated());
     }
 
     /**
-     * Constructor that uses the given {@link SecretKeyPassphraseProvider} and {@link KeyRingProtectionSettings}.
+     * Constructor that uses the given {@link SecretKeyPassphraseProvider} and {@link SaltedAndIteratedS2K}.
      *
      * @param passphraseProvider provider for passphrases
      * @param protectionSettings protection settings
@@ -61,10 +61,6 @@ public class BaseSecretKeyRingProtector implements SecretKeyRingProtector {
     public PBESecretKeyEncryptor getEncryptor(Long keyId) throws PGPException {
         Passphrase passphrase = passphraseProvider.getPassphraseFor(keyId);
         return passphrase == null || passphrase.isEmpty() ? null :
-                ImplementationFactory.getInstance().getPBESecretKeyEncryptor(
-                        protectionSettings.getEncryptionAlgorithm(),
-                        protectionSettings.getHashAlgorithm(),
-                        protectionSettings.getS2kCount(),
-                        passphrase);
+                protectionSettings.getEncryptor(passphrase);
     }
 }

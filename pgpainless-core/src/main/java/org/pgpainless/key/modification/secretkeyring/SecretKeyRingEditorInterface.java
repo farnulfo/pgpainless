@@ -536,7 +536,7 @@ public interface SecretKeyRingEditorInterface {
      */
     default WithKeyRingEncryptionSettings changePassphraseFromOldPassphrase(
             @Nullable Passphrase oldPassphrase) {
-        return changePassphraseFromOldPassphrase(oldPassphrase, KeyRingProtectionSettings.secureDefaultSettings());
+        return changePassphraseFromOldPassphrase(oldPassphrase, KeyRingProtectionSettings.saltedAndIterated());
     }
 
     /**
@@ -563,7 +563,7 @@ public interface SecretKeyRingEditorInterface {
     default WithKeyRingEncryptionSettings changeSubKeyPassphraseFromOldPassphrase(
             @Nonnull Long keyId,
             @Nullable Passphrase oldPassphrase) {
-        return changeSubKeyPassphraseFromOldPassphrase(keyId, oldPassphrase, KeyRingProtectionSettings.secureDefaultSettings());
+        return changeSubKeyPassphraseFromOldPassphrase(keyId, oldPassphrase, KeyRingProtectionSettings.saltedAndIterated());
     }
 
     WithKeyRingEncryptionSettings changeSubKeyPassphraseFromOldPassphrase(
