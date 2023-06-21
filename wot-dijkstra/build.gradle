@@ -2,8 +2,18 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
+    }
+}
+
 plugins {
     id 'java-library'
+    id 'org.jetbrains.kotlin.jvm' version "$kotlinVersion"
 }
 
 group 'org.pgpainless'
@@ -13,6 +23,8 @@ repositories {
 }
 
 dependencies {
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
+
     testImplementation "org.junit.jupiter:junit-jupiter-api:$junitVersion"
     testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
 
