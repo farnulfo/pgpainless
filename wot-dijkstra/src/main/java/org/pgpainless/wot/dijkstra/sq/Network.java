@@ -58,4 +58,13 @@ public class Network {
         return referenceTime;
     }
 
+    public String toString() {
+        StringBuilder sb = new StringBuilder("Network with " + getNodes().size() + " nodes, " + getEdges().size() + " edges:\n");
+        for (OpenPgpFingerprint issuer : getNodes().keySet()) {
+            for (CertificationSet edge : getReverseEdges().get(issuer)) {
+                sb.append(edge);
+            }
+        }
+        return sb.toString();
+    }
 }

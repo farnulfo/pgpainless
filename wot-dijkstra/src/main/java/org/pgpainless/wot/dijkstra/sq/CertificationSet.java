@@ -110,4 +110,15 @@ public final class CertificationSet {
         // TODO: Prevent duplicates, only keep newest timestamped sig?
         certificationsForUserId.add(certification);
     }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        for (Map.Entry<Optional<String>, List<Certification>> entry : certifications.entrySet()) {
+            for (Certification certification : entry.getValue()) {
+                sb.append(certification).append("\n");
+            }
+        }
+        return sb.toString();
+    }
 }
