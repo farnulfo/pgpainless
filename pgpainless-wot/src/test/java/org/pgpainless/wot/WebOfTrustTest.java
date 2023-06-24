@@ -19,6 +19,6 @@ public class WebOfTrustTest {
         WebOfTrust wot = new WebOfTrust(store);
         wot.initialize();
 
-        // TODO: Test stuff
+        System.out.println(wot);
     }
 }

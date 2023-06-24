@@ -13,17 +13,23 @@ import java.util.List;
 import java.util.Map;
 
 import org.bouncycastle.bcpg.sig.RevocationReason;
+import org.bouncycastle.openpgp.PGPPublicKey;
 import org.bouncycastle.openpgp.PGPPublicKeyRing;
 import org.bouncycastle.openpgp.PGPSignature;
 import org.pgpainless.PGPainless;
 import org.pgpainless.algorithm.KeyFlag;
 import org.pgpainless.algorithm.RevocationState;
+import org.pgpainless.exception.SignatureValidationException;
 import org.pgpainless.key.OpenPgpFingerprint;
 import org.pgpainless.key.info.KeyRingInfo;
+import org.pgpainless.key.util.KeyRingUtils;
 import org.pgpainless.key.util.RevocationAttributes;
 import org.pgpainless.policy.Policy;
+import org.pgpainless.signature.SignatureUtils;
+import org.pgpainless.signature.consumer.SignatureVerifier;
 import org.pgpainless.signature.subpackets.SignatureSubpacketsUtil;
 import org.pgpainless.wot.dijkstra.sq.CertSynopsis;
+import org.pgpainless.wot.dijkstra.sq.Certification;
 import org.pgpainless.wot.dijkstra.sq.CertificationSet;
 import org.pgpainless.wot.dijkstra.sq.Network;
 import org.pgpainless.wot.dijkstra.sq.Optional;
@@ -66,7 +72,10 @@ public class WebOfTrust implements CertificateAuthority {
             Iterable<Certificate> certificates,
             Policy policy,
             Optional<ReferenceTime> optReferenceTime) {
+
         ReferenceTime referenceTime = optReferenceTime.isPresent() ? optReferenceTime.get() : ReferenceTime.now();
+
+        // Parse all certificates
         List<KeyRingInfo> validCerts = new ArrayList<>();
         for (Certificate cert : certificates) {
             try {
@@ -91,6 +100,7 @@ public class WebOfTrust implements CertificateAuthority {
 
         return fromValidCertificates(
                 validCerts,
+                policy,
                 referenceTime
         );
     }
@@ -104,6 +114,7 @@ public class WebOfTrust implements CertificateAuthority {
      */
     public static Network fromValidCertificates(
             Iterable<KeyRingInfo> validatedCertificates,
+            Policy policy,
             ReferenceTime referenceTime) {
 
         Map<OpenPgpFingerprint, KeyRingInfo> byFingerprint = new HashMap<>();
@@ -116,12 +127,14 @@ public class WebOfTrust implements CertificateAuthority {
             if (byFingerprint.get(cert.getFingerprint()) == null) {
                 byFingerprint.put(cert.getFingerprint(), cert);
             }
-            List<KeyRingInfo> byKeyIdEntry = byKeyId.get(cert.getKeyId());
 
+            List<KeyRingInfo> byKeyIdEntry = byKeyId.get(cert.getKeyId());
             // noinspection Java8MapApi
             if (byKeyIdEntry == null) {
                 byKeyIdEntry = new ArrayList<>();
-                byKeyId.put(cert.getKeyId(), byKeyIdEntry);
+                for (PGPPublicKey key : cert.getValidSubkeys()) {
+                    byKeyId.put(key.getKeyID(), byKeyIdEntry);
+                }
             }
             byKeyIdEntry.add(cert);
 
@@ -132,12 +145,130 @@ public class WebOfTrust implements CertificateAuthority {
                             new HashSet<>(cert.getValidUserIds())));
         }
 
+        Map<OpenPgpFingerprint, Map<OpenPgpFingerprint, List<Certification>>> certifications = new HashMap<>();
+
+        for (KeyRingInfo validatedTarget : validatedCertificates) {
+            PGPPublicKeyRing validatedKeyRing = KeyRingUtils.publicKeys(validatedTarget.getKeys());
+            OpenPgpFingerprint targetFingerprint = OpenPgpFingerprint.of(validatedKeyRing);
+            PGPPublicKey validatedPrimaryKey = validatedKeyRing.getPublicKey();
+            CertSynopsis target = certSynopsisMap.get(targetFingerprint);
+
+            // Direct-Key Signatures by X on Y
+            List<PGPSignature> delegations = SignatureUtils.getDelegations(validatedKeyRing);
+            for (PGPSignature delegation : delegations) {
+                List<KeyRingInfo> issuerCandidates = byKeyId.get(delegation.getKeyID());
+                if (issuerCandidates == null) {
+                    continue;
+                }
+
+                for (KeyRingInfo candidate : issuerCandidates) {
+                    PGPPublicKeyRing issuerKeyRing = KeyRingUtils.publicKeys(candidate.getKeys());
+                    OpenPgpFingerprint issuerFingerprint = OpenPgpFingerprint.of(issuerKeyRing);
+                    PGPPublicKey issuerSigningKey = issuerKeyRing.getPublicKey(delegation.getKeyID());
+                    CertSynopsis issuer = certSynopsisMap.get(issuerFingerprint);
+
+                    try {
+                        System.out.println("Sig from " + issuerFingerprint + " on " + targetFingerprint);
+                        boolean valid = SignatureVerifier.verifyDirectKeySignature(delegation, issuerSigningKey, validatedPrimaryKey, policy, referenceTime.getTimestamp());
+
+                        if (valid) {
+                            Map<OpenPgpFingerprint, List<Certification>> sigsBy = certifications.get(issuerFingerprint);
+                            if (sigsBy == null) {
+                                sigsBy = new HashMap<>();
+                                certifications.put(issuerFingerprint, sigsBy);
+                            }
+
+                            List<Certification> targetSigs = sigsBy.get(targetFingerprint);
+                            if (targetSigs == null) {
+                                targetSigs = new ArrayList<>();
+                                sigsBy.put(targetFingerprint, targetSigs);
+                            }
+
+                            targetSigs.add(new Certification(issuer, Optional.empty(), target, delegation));
+                        }
+                    } catch (SignatureValidationException e) {
+                        LOGGER.warn("Cannot verify signature by " + issuerFingerprint + " on cert of " + targetFingerprint, e);
+                    }
+                }
+            }
+
+            Iterator<String> userIds = validatedPrimaryKey.getUserIDs();
+            while (userIds.hasNext()) {
+                String userId = userIds.next();
+                List<PGPSignature> userIdSigs = SignatureUtils.get3rdPartyCertificationsFor(userId, validatedKeyRing);
+                for (PGPSignature certification : userIdSigs) {
+                    List<KeyRingInfo> issuerCandidates = byKeyId.get(certification.getKeyID());
+                    if (issuerCandidates == null) {
+                        continue;
+                    }
+
+                    for (KeyRingInfo candidate : issuerCandidates) {
+                        PGPPublicKeyRing issuerKeyRing = KeyRingUtils.publicKeys(candidate.getKeys());
+                        OpenPgpFingerprint issuerFingerprint = OpenPgpFingerprint.of(issuerKeyRing);
+                        PGPPublicKey issuerSigningKey = issuerKeyRing.getPublicKey(certification.getKeyID());
+                        CertSynopsis issuer = certSynopsisMap.get(issuerFingerprint);
+
+                        try {
+                            System.out.println("Sig from " + issuerFingerprint + " for " + userId + " on " + targetFingerprint);
+                            boolean valid = SignatureVerifier.verifySignatureOverUserId(userId, certification, issuerSigningKey, validatedPrimaryKey, policy, referenceTime.getTimestamp());
+
+                            if (valid) {
+                                Map<OpenPgpFingerprint, List<Certification>> sigsBy = certifications.get(issuerFingerprint);
+                                if (sigsBy == null) {
+                                    sigsBy = new HashMap<>();
+                                    certifications.put(issuerFingerprint, sigsBy);
+                                }
+
+                                List<Certification> targetSigs = sigsBy.get(targetFingerprint);
+                                if (targetSigs == null) {
+                                    targetSigs = new ArrayList<>();
+                                    sigsBy.put(targetFingerprint, targetSigs);
+                                }
+
+                                targetSigs.add(new Certification(issuer, Optional.just(userId), target, certification));
+                            }
+                        } catch (SignatureValidationException e) {
+                            LOGGER.warn("Cannot verify signature for '" + userId + "' by " + issuerFingerprint + " on cert of " + targetFingerprint, e);
+                        }
+                    }
+                }
+            }
+        }
+
+        // Re-order data structure
+
+        // Issuer -> Target, Signatures by an issuer
         Map<OpenPgpFingerprint, List<CertificationSet>> edges = new HashMap<>();
+        // Target -> Issuer, Signatures on the target
         Map<OpenPgpFingerprint, List<CertificationSet>> reverseEdges = new HashMap<>();
+
+        // for each issuer
+        for (OpenPgpFingerprint issuerFp : certifications.keySet()) {
+            Map<OpenPgpFingerprint, List<Certification>> issuedBy = certifications.get(issuerFp);
+
+            List<CertificationSet> edge = new ArrayList<>();
+            // for each target
+            for (OpenPgpFingerprint targetFp : issuedBy.keySet()) {
+                List<Certification> onCert = issuedBy.get(targetFp);
+                CertificationSet edgeSigs = CertificationSet.empty(certSynopsisMap.get(issuerFp), certSynopsisMap.get(targetFp));
+                for (Certification certification : onCert) {
+                    edgeSigs.add(certification);
+                }
+                edge.add(edgeSigs);
+
+                List<CertificationSet> reverseEdge = reverseEdges.get(targetFp);
+                if (reverseEdge == null) {
+                    reverseEdge = new ArrayList<>();
+                    reverseEdges.put(targetFp, reverseEdge);
+                }
+                reverseEdge.add(edgeSigs);
+
+            }
+            edges.put(issuerFp, edge);
+        }
 
         return new Network(certSynopsisMap, edges, reverseEdges, referenceTime);
     }
-
 
     private static RevocationState revocationStateFromSignature(PGPSignature revocation) {
         if (revocation == null) {
