@@ -11,6 +11,8 @@ public class AJavaClass {
      * Used by {@link org.pgpainless.kotlin_experiments.java_from_kotlin.AccessJavaFromKotlin}.
      */
     public void doSomething() {
+        // CHECKSTYLE:OFF
         System.out.println("Something has been done.");
+        // CHECKSTYLE:ON
     }
 }

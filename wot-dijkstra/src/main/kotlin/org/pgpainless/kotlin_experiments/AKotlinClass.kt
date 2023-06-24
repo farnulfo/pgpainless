@@ -10,6 +10,8 @@ package org.pgpainless.kotlin_experiments
 class AKotlinClass {
 
     fun printToStdout() {
+        // CHECKSTYLE:OFF
         println("'Hello, World' from Kotlin!")
+        // CHECKSTYLE:ON
     }
 }
