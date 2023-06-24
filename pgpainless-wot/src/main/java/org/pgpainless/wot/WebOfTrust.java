@@ -157,4 +157,9 @@ public class WebOfTrust implements CertificateAuthority {
     public boolean isAuthorized(PGPPublicKeyRing certificate, String userId) {
         return false;
     }
+
+    @Override
+    public String toString() {
+        return network.toString();
+    }
 }

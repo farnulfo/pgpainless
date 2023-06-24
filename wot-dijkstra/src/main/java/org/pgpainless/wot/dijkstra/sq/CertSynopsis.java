@@ -71,4 +71,9 @@ public class CertSynopsis {
     public Set<String> userIds() {
         return new HashSet<>(userIds);
     }
+
+    @Override
+    public String toString() {
+        return fingerprint + (userIds.isEmpty() ? "" : "(" + userIds.iterator().next() + ")");
+    }
 }
