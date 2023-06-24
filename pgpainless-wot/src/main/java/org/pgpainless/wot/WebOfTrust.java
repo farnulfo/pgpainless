@@ -12,7 +12,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Supplier;
 
 import org.bouncycastle.bcpg.sig.RevocationReason;
 import org.bouncycastle.openpgp.PGPPublicKey;
@@ -36,6 +35,7 @@ import org.pgpainless.wot.dijkstra.sq.CertificationSet;
 import org.pgpainless.wot.dijkstra.sq.Network;
 import org.pgpainless.wot.dijkstra.sq.Optional;
 import org.pgpainless.wot.dijkstra.sq.ReferenceTime;
+import org.pgpainless.wot.sugar.Supplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pgp.certificate_store.certificate.Certificate;
@@ -140,7 +140,7 @@ public class WebOfTrust implements CertificateAuthority {
         return nb.buildNetwork();
     }
 
-    private static class NetworkBuilder {
+    private static final class NetworkBuilder {
 
         // Index structures
         private final Map<OpenPgpFingerprint, KeyRingInfo> byFingerprint = new HashMap<>();

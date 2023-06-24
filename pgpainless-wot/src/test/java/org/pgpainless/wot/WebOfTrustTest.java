@@ -19,6 +19,8 @@ public class WebOfTrustTest {
         WebOfTrust wot = new WebOfTrust(store);
         wot.initialize();
 
+        // CHECKSTYLE:OFF
         System.out.println(wot);
+        // CHECKSTYLE:ON
     }
 }

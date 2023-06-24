@@ -121,7 +121,7 @@ public final class CertificationSet {
         StringBuilder sb = new StringBuilder();
         for (Map.Entry<Optional<String>, List<Certification>> entry : certifications.entrySet()) {
             for (Certification certification : entry.getValue()) {
-                sb.append(certification).append("\n");
+                sb.append(certification).append('\n');
             }
         }
         return sb.toString();

@@ -15,6 +15,8 @@ public class AccessKotlinFromJava {
     public static void main(String[] args) {
         // from src/kotlin/.../
         AKotlinClass kotlin = new AKotlinClass();
+        // CHECKSTYLE:OFF
         kotlin.printToStdout();
+        // CHECKSTYLE:ON
     }
 }
