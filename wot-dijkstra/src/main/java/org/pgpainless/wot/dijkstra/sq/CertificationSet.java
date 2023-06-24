@@ -13,6 +13,11 @@ import org.bouncycastle.openpgp.PGPSignature;
 
 import javax.annotation.Nonnull;
 
+/**
+ * A {@link CertificationSet} is a set of {@link Certification Certifications} made by the same issuer, on the same
+ * target certificate.
+ * In some sense, a {@link CertificationSet} can be considered an edge in the web of trust.
+ */
 public final class CertificationSet {
 
     private final CertSynopsis issuer;
