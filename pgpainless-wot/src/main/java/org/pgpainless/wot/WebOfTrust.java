@@ -41,6 +41,18 @@ import org.slf4j.LoggerFactory;
 import pgp.certificate_store.certificate.Certificate;
 import pgp.certificate_store.exception.BadDataException;
 
+/**
+ * Build a Web of Trust from a set of certificates.
+ * <p>
+ * The process of building a WoT is as follows:
+ * <ul>
+ *     <li>Consume and synopsize all certificates as network nodes</li>
+ *     <li>Iterate over cross-certificate signatures and perform signature verification</li>
+ *     <li>Identify signatures as edges between nodes</li>
+ * </ul>
+ *
+ * @see <a href="https://sequoia-pgp.gitlab.io/sequoia-wot/">OpenPGP Web of Trust</a>
+ */
 public class WebOfTrust implements CertificateAuthority {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(WebOfTrust.class);
@@ -122,7 +134,8 @@ public class WebOfTrust implements CertificateAuthority {
             Iterable<KeyRingInfo> validatedCertificates,
             Policy policy,
             ReferenceTime referenceTime) {
-        
+
+        // TODO: Move heavy lifting from NetworkBuilder constructor to buildNetwork()?
         NetworkBuilder nb = new NetworkBuilder(validatedCertificates, policy, referenceTime);
         return nb.buildNetwork();
     }
@@ -299,11 +312,17 @@ public class WebOfTrust implements CertificateAuthority {
             }
         }
 
+        /**
+         * Return the constructed, initialized {@link Network}.
+         *
+         * @return finished network
+         */
         public Network buildNetwork() {
             return new Network(certSynopsisMap, edges, reverseEdges, referenceTime);
         }
     }
 
+    // Map signature to its revocation state
     private static RevocationState revocationStateFromSignature(PGPSignature revocation) {
         if (revocation == null) {
             return RevocationState.notRevoked();
@@ -318,6 +337,7 @@ public class WebOfTrust implements CertificateAuthority {
                 RevocationState.hardRevoked() : RevocationState.softRevoked(revocation.getCreationTime());
     }
 
+    // Java 8 is not supported on old Android
     private static <K, V> V getOrDefault(Map<K, V> map, K key, Supplier<V> defaultValue) {
         V value = map.get(key);
         if (value == null) {
@@ -329,6 +349,7 @@ public class WebOfTrust implements CertificateAuthority {
 
     @Override
     public boolean isAuthorized(PGPPublicKeyRing certificate, String userId) {
+        // TODO: Heiko! Implement!
         return false;
     }
 
