@@ -22,11 +22,4 @@ public class NetworkTest {
         assertEquals(referenceTime, network.getReferenceTime());
     }
 
-    @Test
-    public void testNetworkFromCertificates() {
-        ReferenceTime referenceTime = ReferenceTime.now();
-        // TODO: Implement
-    }
-
-
 }
