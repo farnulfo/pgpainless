@@ -36,6 +36,12 @@ public final class CertificationSet {
         return new CertificationSet(issuer, target, new HashMap<>());
     }
 
+    public static CertificationSet fromCertification(Certification certification) {
+        CertificationSet set = CertificationSet.empty(certification.getIssuer(), certification.getTarget());
+        set.add(certification);
+        return set;
+    }
+
     /**
      * Create a {@link CertificationSet} from a single certification.
      *
@@ -65,6 +71,23 @@ public final class CertificationSet {
         this.issuer = issuer;
         this.target = target;
         this.certifications = new HashMap<>(certifications);
+    }
+
+    public CertSynopsis getIssuer() {
+        return issuer;
+    }
+
+    public CertSynopsis getTarget() {
+        return target;
+    }
+
+    public Map<Optional<String>, List<Certification>> getCertifications() {
+        // Copy to avoid side effects
+        Map<Optional<String>, List<Certification>> copy = new HashMap<>();
+        for (Optional<String> key : certifications.keySet()) {
+            copy.put(key, new ArrayList<>(certifications.get(key)));
+        }
+        return copy;
     }
 
     /**

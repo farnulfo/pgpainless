@@ -152,9 +152,6 @@ public class WebOfTrust implements CertificateAuthority {
         // Target -> Issuer, Signatures on the target
         private final Map<OpenPgpFingerprint, List<CertificationSet>> reverseEdges = new HashMap<>();
 
-        // TODO: Get rid of this
-        Map<OpenPgpFingerprint, Map<OpenPgpFingerprint, List<Certification>>> certifications = new HashMap<>();
-
         private final Iterable<KeyRingInfo> validatedCertificates;
         private final Policy policy;
         private final ReferenceTime referenceTime;
@@ -167,8 +164,7 @@ public class WebOfTrust implements CertificateAuthority {
             this.referenceTime = referenceTime;
 
             synopsizeCertificates();
-            processSignaturesOnCertificates();
-            identifyEdges();
+            findEdges();
         }
 
         private void synopsizeCertificates() {
@@ -204,15 +200,15 @@ public class WebOfTrust implements CertificateAuthority {
                             new HashSet<>(cert.getValidUserIds())));
         }
 
-        private void processSignaturesOnCertificates() {
+        private void findEdges() {
             // Identify certifications and delegations
             // Target = cert carrying a signature
             for (KeyRingInfo validatedTarget : validatedCertificates) {
-                processSigsOnCert(validatedTarget);
+                findEdgesWithTarget(validatedTarget);
             }
         }
 
-        private void processSigsOnCert(KeyRingInfo validatedTarget) {
+        private void findEdgesWithTarget(KeyRingInfo validatedTarget) {
             PGPPublicKeyRing validatedTargetKeyRing = KeyRingUtils.publicKeys(validatedTarget.getKeys());
             OpenPgpFingerprint targetFingerprint = OpenPgpFingerprint.of(validatedTargetKeyRing);
             PGPPublicKey targetPrimaryKey = validatedTargetKeyRing.getPublicKey();
@@ -221,7 +217,7 @@ public class WebOfTrust implements CertificateAuthority {
             // Direct-Key Signatures (delegations) by X on Y
             List<PGPSignature> delegations = SignatureUtils.getDelegations(validatedTargetKeyRing);
             for (PGPSignature delegation : delegations) {
-                indexAndVerifyDelegation(targetPrimaryKey, target, delegation);
+                processDelegation(targetPrimaryKey, target, delegation);
             }
 
             // Certification Signatures by X on Y over user-ID U
@@ -229,38 +225,38 @@ public class WebOfTrust implements CertificateAuthority {
             while (userIds.hasNext()) {
                 String userId = userIds.next();
                 List<PGPSignature> userIdSigs = SignatureUtils.get3rdPartyCertificationsFor(userId, validatedTargetKeyRing);
-                indexAndVerifyCertifications(targetPrimaryKey, target, userId, userIdSigs);
+                processCertification(targetPrimaryKey, target, userId, userIdSigs);
             }
         }
 
-        private void indexAndVerifyDelegation(PGPPublicKey targetPrimaryKey, CertSynopsis target, PGPSignature delegation) {
+        private void processDelegation(PGPPublicKey targetPrimaryKey,
+                                       CertSynopsis target,
+                                       PGPSignature delegation) {
             List<KeyRingInfo> issuerCandidates = byKeyId.get(delegation.getKeyID());
             if (issuerCandidates == null) {
                 return;
             }
 
             for (KeyRingInfo candidate : issuerCandidates) {
-
                 PGPPublicKeyRing issuerKeyRing = KeyRingUtils.publicKeys(candidate.getKeys());
                 OpenPgpFingerprint issuerFingerprint = OpenPgpFingerprint.of(issuerKeyRing);
                 PGPPublicKey issuerSigningKey = issuerKeyRing.getPublicKey(delegation.getKeyID());
                 CertSynopsis issuer = certSynopsisMap.get(issuerFingerprint);
-                boolean valid = false;
                 try {
-                    valid = SignatureVerifier.verifyDirectKeySignature(delegation, issuerSigningKey, targetPrimaryKey, policy, referenceTime.getTimestamp());
+                    boolean valid = SignatureVerifier.verifyDirectKeySignature(delegation, issuerSigningKey,
+                            targetPrimaryKey, policy, referenceTime.getTimestamp());
+                    if (valid) {
+                        indexEdge(new Certification(issuer, Optional.empty(), target, delegation));
+                    }
                 } catch (SignatureValidationException e) {
                     LOGGER.warn("Cannot verify signature by " + issuerFingerprint + " on cert of " + OpenPgpFingerprint.of(targetPrimaryKey), e);
-                }
-
-                if (valid) {
-                    Map<OpenPgpFingerprint, List<Certification>> sigsBy = getOrDefault(certifications, issuerFingerprint, HashMap::new);
-                    List<Certification> targetSigs = getOrDefault(sigsBy, target.getFingerprint(), ArrayList::new);
-                    targetSigs.add(new Certification(issuer, Optional.empty(), target, delegation));
                 }
             }
         }
 
-        private void indexAndVerifyCertifications(PGPPublicKey targetPrimaryKey, CertSynopsis target, String userId, List<PGPSignature> userIdSigs) {
+        private void processCertification(PGPPublicKey targetPrimaryKey,
+                                          CertSynopsis target,
+                                          String userId, List<PGPSignature> userIdSigs) {
             for (PGPSignature certification : userIdSigs) {
                 List<KeyRingInfo> issuerCandidates = byKeyId.get(certification.getKeyID());
                 if (issuerCandidates == null) {
@@ -274,12 +270,10 @@ public class WebOfTrust implements CertificateAuthority {
                     CertSynopsis issuer = certSynopsisMap.get(issuerFingerprint);
 
                     try {
-                        boolean valid = SignatureVerifier.verifySignatureOverUserId(userId, certification, issuerSigningKey, targetPrimaryKey, policy, referenceTime.getTimestamp());
-
+                        boolean valid = SignatureVerifier.verifySignatureOverUserId(userId, certification,
+                                issuerSigningKey, targetPrimaryKey, policy, referenceTime.getTimestamp());
                         if (valid) {
-                            Map<OpenPgpFingerprint, List<Certification>> sigsBy = getOrDefault(certifications, issuerFingerprint, HashMap::new);
-                            List<Certification> targetSigs = getOrDefault(sigsBy, target.getFingerprint(), ArrayList::new);
-                            targetSigs.add(new Certification(issuer, Optional.just(userId), target, certification));
+                            indexEdge(new Certification(issuer, Optional.just(userId), target, certification));
                         }
                     } catch (SignatureValidationException e) {
                         LOGGER.warn("Cannot verify signature for '" + userId + "' by " + issuerFingerprint + " on cert of " + target.getFingerprint(), e);
@@ -288,28 +282,37 @@ public class WebOfTrust implements CertificateAuthority {
             }
         }
 
-        private void identifyEdges() {
-            // Re-order data structure
-            for (OpenPgpFingerprint issuerFp : certifications.keySet()) {
-                Map<OpenPgpFingerprint, List<Certification>> issuedBy = certifications.get(issuerFp);
+        private void indexEdge(Certification certification) {
+            OpenPgpFingerprint issuer = certification.getIssuer().getFingerprint();
+            OpenPgpFingerprint target = certification.getTarget().getFingerprint();
 
-                // one issuer can issue many edges
-                List<CertificationSet> outEdges = new ArrayList<>();
-                for (OpenPgpFingerprint targetFp : issuedBy.keySet()) {
+            List<CertificationSet> outEdges = getOrDefault(edges, issuer, ArrayList::new);
+            indexOutEdge(outEdges, certification);
 
-                    List<Certification> onCert = issuedBy.get(targetFp);
-                    CertificationSet edgeSigs = CertificationSet.empty(certSynopsisMap.get(issuerFp), certSynopsisMap.get(targetFp));
-                    for (Certification certification : onCert) {
-                        edgeSigs.add(certification);
-                    }
-                    outEdges.add(edgeSigs);
+            List<CertificationSet> inEdges = getOrDefault(reverseEdges, target, ArrayList::new);
+            indexInEdge(inEdges, certification);
+        }
 
-                    List<CertificationSet> reverseEdge = getOrDefault(reverseEdges, targetFp, ArrayList::new);
-                    reverseEdge.add(edgeSigs);
-
+        private void indexOutEdge(List<CertificationSet> outEdges, Certification certification) {
+            OpenPgpFingerprint target = certification.getTarget().getFingerprint();
+            for (CertificationSet outEdge : outEdges) {
+                if (target.equals(outEdge.getTarget().getFingerprint())) {
+                    outEdge.add(certification);
+                    return;
                 }
-                edges.put(issuerFp, outEdges);
             }
+            outEdges.add(CertificationSet.fromCertification(certification));
+        }
+
+        private void indexInEdge(List<CertificationSet> inEdges, Certification certification) {
+            OpenPgpFingerprint issuer = certification.getIssuer().getFingerprint();
+            for (CertificationSet inEdge : inEdges) {
+                if (issuer.equals(inEdge.getIssuer().getFingerprint())) {
+                    inEdge.add(certification);
+                    return;
+                }
+            }
+            inEdges.add(CertificationSet.fromCertification(certification));
         }
 
         /**
@@ -320,6 +323,10 @@ public class WebOfTrust implements CertificateAuthority {
         public Network buildNetwork() {
             return new Network(certSynopsisMap, edges, reverseEdges, referenceTime);
         }
+    }
+
+    Network getNetwork() {
+        return network;
     }
 
     // Map signature to its revocation state

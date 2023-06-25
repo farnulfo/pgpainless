@@ -10,6 +10,8 @@ import pgp.certificate_store.exception.BadDataException;
 
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.NoSuchElementException;
+
 import pgp.certificate_store.certificate.Certificate;
 
 public class WebOfTrustCertificateStore extends PGPCertificateDirectory {
@@ -20,7 +22,15 @@ public class WebOfTrustCertificateStore extends PGPCertificateDirectory {
 
     public Iterator<Certificate> getAllItems()
             throws BadDataException, IOException {
-        Iterator<Certificate> trustRootAndCerts = new PrefixedIterator<>(getTrustRootCertificate(), items());
+        Certificate trustRoot;
+        try {
+            trustRoot = getTrustRootCertificate();
+        } catch (NoSuchElementException e) {
+            // ignore
+            trustRoot = null;
+        }
+
+        Iterator<Certificate> trustRootAndCerts = new PrefixedIterator<>(trustRoot, items());
         return trustRootAndCerts;
     }
 }
