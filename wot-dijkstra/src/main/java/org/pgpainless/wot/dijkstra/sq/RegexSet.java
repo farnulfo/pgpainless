@@ -12,8 +12,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.annotation.Nonnull;
 
-import org.bouncycastle.bcpg.sig.RegularExpression;
-
 public final class RegexSet {
 
     private final Set<String> regexStrings;
@@ -22,20 +20,17 @@ public final class RegexSet {
         this.regexStrings = regexStrings;
     }
 
-    public static RegexSet fromList(@Nonnull List<RegularExpression> regexList) {
-        Set<String> regexStringSet = new HashSet<>();
-        for (RegularExpression regex : regexList) {
-            regexStringSet.add(regex.getRegex());
-        }
+    public static RegexSet fromExpressionList(@Nonnull List<String> regexList) {
+        Set<String> regexStringSet = new HashSet<>(regexList);
         return new RegexSet(regexStringSet);
     }
 
-    public static RegexSet fromRegex(@Nonnull RegularExpression regex) {
-        return fromList(Collections.singletonList(regex));
+    public static RegexSet fromExpression(@Nonnull String regex) {
+        return fromExpressionList(Collections.singletonList(regex));
     }
 
     public static RegexSet wildcard() {
-        return fromList(Collections.emptyList());
+        return fromExpressionList(Collections.emptyList());
     }
 
     public boolean matches(String string) {

@@ -246,7 +246,7 @@ public class WebOfTrust implements CertificateAuthority {
                     boolean valid = SignatureVerifier.verifyDirectKeySignature(delegation, issuerSigningKey,
                             targetPrimaryKey, policy, referenceTime.getTimestamp());
                     if (valid) {
-                        indexEdge(new Certification(issuer, Optional.empty(), target, delegation));
+                        indexEdge(CertificationFactory.fromDelegation(issuer, target, delegation));
                     }
                 } catch (SignatureValidationException e) {
                     LOGGER.warn("Cannot verify signature by " + issuerFingerprint + " on cert of " + OpenPgpFingerprint.of(targetPrimaryKey), e);
@@ -273,7 +273,7 @@ public class WebOfTrust implements CertificateAuthority {
                         boolean valid = SignatureVerifier.verifySignatureOverUserId(userId, certification,
                                 issuerSigningKey, targetPrimaryKey, policy, referenceTime.getTimestamp());
                         if (valid) {
-                            indexEdge(new Certification(issuer, Optional.just(userId), target, certification));
+                            indexEdge(CertificationFactory.fromCertification(issuer, userId, target, certification));
                         }
                     } catch (SignatureValidationException e) {
                         LOGGER.warn("Cannot verify signature for '" + userId + "' by " + issuerFingerprint + " on cert of " + target.getFingerprint(), e);

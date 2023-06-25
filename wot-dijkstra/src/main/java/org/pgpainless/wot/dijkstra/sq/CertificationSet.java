@@ -9,8 +9,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.bouncycastle.openpgp.PGPSignature;
-
 import javax.annotation.Nonnull;
 
 /**
@@ -40,29 +38,6 @@ public final class CertificationSet {
         CertificationSet set = CertificationSet.empty(certification.getIssuer(), certification.getTarget());
         set.add(certification);
         return set;
-    }
-
-    /**
-     * Create a {@link CertificationSet} from a single certification.
-     *
-     * @param issuer issuer
-     * @param target target
-     * @param userId user-id
-     * @param certification certification
-     * @return singleton set
-     */
-    public static CertificationSet fromCertification(
-            CertSynopsis issuer,
-            CertSynopsis target,
-            Optional<String> userId,
-            PGPSignature certification) {
-
-        Map<Optional<String>, List<Certification>> certificationMap = new HashMap<>();
-        List<Certification> certificationList = new ArrayList<>();
-        certificationList.add(new Certification(issuer, userId, target, certification));
-        certificationMap.put(userId, certificationList);
-
-        return new CertificationSet(issuer, target, certificationMap);
     }
 
     private CertificationSet(CertSynopsis issuer,
