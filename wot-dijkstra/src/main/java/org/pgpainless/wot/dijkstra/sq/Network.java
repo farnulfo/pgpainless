@@ -113,7 +113,11 @@ public class Network {
 
         StringBuilder sb = new StringBuilder("Network with " + getNodes().size() + " nodes, " + edgeNum + " edges:\n");
         for (OpenPgpFingerprint issuer : getNodes().keySet()) {
-            for (CertificationSet edge : getReverseEdges().get(issuer)) {
+            List<CertificationSet> edges = getEdges().get(issuer);
+            if (edges == null) {
+                continue;
+            }
+            for (CertificationSet edge : edges) {
                 sb.append(edge);
             }
         }
