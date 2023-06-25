@@ -97,6 +97,36 @@ public class Network {
     }
 
     /**
+     * Return the total number of edges on the network.
+     *
+     * @return number of edges
+     */
+    public int getNumberOfEdges() {
+        int num = 0;
+        for (List<CertificationSet> outEdges : edges.values()) {
+            num += outEdges.size();
+        }
+        return num;
+    }
+
+    /**
+     * Return the total number of signatures the network comprises.
+     *
+     * @return number of signatures
+     */
+    public int getNumberOfSignatures() {
+        int num = 0;
+        for (List<CertificationSet> edgesPerIssuer : edges.values()) {
+            for (CertificationSet edge : edgesPerIssuer) {
+                for (List<Certification> sigsPerDatum : edge.getCertifications().values()) {
+                    num += sigsPerDatum.size();
+                }
+            }
+        }
+        return num;
+    }
+
+    /**
      * Return the {@link ReferenceTime} which was used when creating the {@link Network}.
      *
      * @return reference time
