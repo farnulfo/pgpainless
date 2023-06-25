@@ -76,6 +76,8 @@ public class Network {
     /**
      * Return all edges of the {@link Network}, indexed by the {@link OpenPgpFingerprint fingerprint} of the issuer.
      * An edge consists of a {@link CertificationSet} containing all signatures made by the issuer on the target.
+     * TODO: Do we care about immutability, or can we ignore that issue since Network is only used by
+     *  WebOfTrust anyways?
      *
      * @return map of edges
      */
@@ -85,6 +87,8 @@ public class Network {
 
     /**
      * Return all reversed edges of the {@link Network}, indexed by the {@link OpenPgpFingerprint fingerprint} of the target.
+     * TODO: Do we care about immutability, or can we ignore that issue since Network is only used by
+     *  WebOfTrust anyways?
      *
      * @return map of reversed edges
      */
