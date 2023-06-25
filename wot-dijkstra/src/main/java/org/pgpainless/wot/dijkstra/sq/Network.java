@@ -11,6 +11,19 @@ import javax.annotation.Nonnull;
 
 import org.pgpainless.key.OpenPgpFingerprint;
 
+/**
+ * A network consists of nodes, and edges between them.
+ * For the Web of Trust, nodes consist of {@link CertSynopsis CertSynopses}, while the edges between the nodes are
+ * {@link CertificationSet CertificationSets}.
+ * Edges can hereby be accessed in two ways:
+ * <ul>
+ *     <li>{@link #getEdges()} returns a {@link Map} keyed by the {@link OpenPgpFingerprint fingerprint} of an issuer,
+ *     whose values are {@link List Lists} containing all edges originating from the issuer.</li>
+ *     <li>{@link #getReverseEdges()} on the other hand returns a {@link Map} keyed by the
+ *     {@link OpenPgpFingerprint fingerprint} of a target, whose value are {@link List Lists} containing all edges
+ *     pointing to the target.</li>
+ * </ul>
+ */
 public class Network {
 
     private final Map<OpenPgpFingerprint, CertSynopsis> nodes;
@@ -18,6 +31,14 @@ public class Network {
     private final Map<OpenPgpFingerprint, List<CertificationSet>> reverseEdges;
     private final ReferenceTime referenceTime;
 
+    /**
+     * Create a {@link Network} from a set of nodes, edges, reversed edges and a reference time.
+     *
+     * @param nodes map containing all nodes of the network, keyed by their fingerprints
+     * @param edges map containing all edges of the network, keyed by the fingerprint of the issuer
+     * @param reverseEdges map containing all reversed edges of the network, keyed by the fingerprint of the target
+     * @param referenceTime reference time
+     */
     public Network(Map<OpenPgpFingerprint, CertSynopsis> nodes,
                    Map<OpenPgpFingerprint, List<CertificationSet>> edges,
                    Map<OpenPgpFingerprint, List<CertificationSet>> reverseEdges,
@@ -42,18 +63,40 @@ public class Network {
                 referenceTime);
     }
 
+    /**
+     * Return all nodes ({@link CertSynopsis}) of the {@link Network}, indexed by their
+     * {@link OpenPgpFingerprint fingerprints}.
+     *
+     * @return nodes of the network
+     */
     public Map<OpenPgpFingerprint, CertSynopsis> getNodes() {
         return new HashMap<>(nodes);
     }
 
+    /**
+     * Return all edges of the {@link Network}, indexed by the {@link OpenPgpFingerprint fingerprint} of the issuer.
+     * An edge consists of a {@link CertificationSet} containing all signatures made by the issuer on the target.
+     *
+     * @return map of edges
+     */
     public Map<OpenPgpFingerprint, List<CertificationSet>> getEdges() {
         return new HashMap<>(edges);
     }
 
+    /**
+     * Return all reversed edges of the {@link Network}, indexed by the {@link OpenPgpFingerprint fingerprint} of the target.
+     *
+     * @return map of reversed edges
+     */
     public Map<OpenPgpFingerprint, List<CertificationSet>> getReverseEdges() {
         return new HashMap<>(reverseEdges);
     }
 
+    /**
+     * Return the {@link ReferenceTime} which was used when creating the {@link Network}.
+     *
+     * @return reference time
+     */
     public ReferenceTime getReferenceTime() {
         return referenceTime;
     }
