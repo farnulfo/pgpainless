@@ -89,8 +89,9 @@ public class WebOfTrust implements CertificateAuthority {
             Optional<ReferenceTime> optReferenceTime) {
 
         ReferenceTime referenceTime = optReferenceTime.isPresent() ? optReferenceTime.get() : ReferenceTime.now();
-        Iterable<KeyRingInfo> validCerts = parseValidCertificates(certificates, policy, referenceTime.getTimestamp());
+        List<KeyRingInfo> validCerts = parseValidCertificates(certificates, policy, referenceTime.getTimestamp());
 
+        LOGGER.debug("Successfully parsed " + validCerts.size() + " certificates.");
         return fromValidCertificates(
                 validCerts,
                 policy,
@@ -98,7 +99,7 @@ public class WebOfTrust implements CertificateAuthority {
         );
     }
 
-    private static Iterable<KeyRingInfo> parseValidCertificates(Iterable<Certificate> certificates, Policy policy, Date referenceTime) {
+    private static List<KeyRingInfo> parseValidCertificates(Iterable<Certificate> certificates, Policy policy, Date referenceTime) {
         // Parse all certificates
         List<KeyRingInfo> validCerts = new ArrayList<>();
         for (Certificate cert : certificates) {
@@ -132,7 +133,7 @@ public class WebOfTrust implements CertificateAuthority {
      * @return network
      */
     public static Network fromValidCertificates(
-            Iterable<KeyRingInfo> validatedCertificates,
+            List<KeyRingInfo> validatedCertificates,
             Policy policy,
             ReferenceTime referenceTime) {
 
@@ -141,34 +142,38 @@ public class WebOfTrust implements CertificateAuthority {
         return nb.buildNetwork();
     }
 
+    /**
+     * Class for building the {@link Network Flow network} from the given set of OpenPGP keys.
+     *
+     */
     private static final class NetworkBuilder {
 
-        // Index structures
+        // certificates keyed by fingerprint
         private final Map<OpenPgpFingerprint, KeyRingInfo> byFingerprint = new HashMap<>();
+        // certificates keyed by (sub-) key-id
         private final Map<Long, List<KeyRingInfo>> byKeyId = new HashMap<>();
+        // certificate synopses keyed by fingerprint
         private final Map<OpenPgpFingerprint, CertSynopsis> certSynopsisMap = new HashMap<>();
 
-        // Issuer -> Target, Signatures by an issuer
+        // Issuer -> Target, edges keyed by issuer
         private final Map<OpenPgpFingerprint, List<CertificationSet>> edges = new HashMap<>();
-        // Target -> Issuer, Signatures on the target
+        // Target -> Issuer, edges keyed by target
         private final Map<OpenPgpFingerprint, List<CertificationSet>> reverseEdges = new HashMap<>();
 
-        private final Iterable<KeyRingInfo> validatedCertificates;
         private final Policy policy;
         private final ReferenceTime referenceTime;
 
-        private NetworkBuilder(Iterable<KeyRingInfo> validatedCertificates,
+        private NetworkBuilder(List<KeyRingInfo> validatedCertificates,
                                Policy policy,
                                ReferenceTime referenceTime) {
-            this.validatedCertificates = validatedCertificates;
             this.policy = policy;
             this.referenceTime = referenceTime;
 
-            synopsizeCertificates();
-            findEdges();
+            synopsizeCertificates(validatedCertificates);
+            findEdges(validatedCertificates);
         }
 
-        private void synopsizeCertificates() {
+        private void synopsizeCertificates(List<KeyRingInfo> validatedCertificates) {
             for (KeyRingInfo cert : validatedCertificates) {
                 synopsize(cert);
             }
@@ -209,7 +214,7 @@ public class WebOfTrust implements CertificateAuthority {
 
         }
 
-        private void findEdges() {
+        private void findEdges(List<KeyRingInfo> validatedCertificates) {
             // Identify certifications and delegations
             // Target = cert carrying a signature
             for (KeyRingInfo validatedTarget : validatedCertificates) {
