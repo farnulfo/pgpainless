@@ -5,13 +5,6 @@
 package org.pgpainless.wot.dijkstra.sq;
 
 import java.util.Date;
-import java.util.List;
-
-import org.bouncycastle.bcpg.sig.Exportable;
-import org.bouncycastle.bcpg.sig.RegularExpression;
-import org.bouncycastle.bcpg.sig.TrustSignature;
-import org.bouncycastle.openpgp.PGPSignature;
-import org.pgpainless.signature.subpackets.SignatureSubpacketsUtil;
 
 public class Certification {
 
@@ -61,29 +54,6 @@ public class Certification {
         this.trustDepth = Depth.limited(0);
         this.trustAmount = 120;
         this.regex = RegexSet.wildcard();
-    }
-
-    public Certification(CertSynopsis issuer,
-                         Optional<String> targetUserId,
-                         CertSynopsis target,
-                         PGPSignature signature) {
-        this.issuer = issuer;
-        this.target = target;
-        this.userId = targetUserId;
-        this.creationTime = SignatureSubpacketsUtil.getSignatureCreationTime(signature).getTime();
-        this.expirationTime = Optional.maybe(SignatureSubpacketsUtil.getSignatureExpirationTimeAsDate(signature));
-        Exportable exportablePacket = SignatureSubpacketsUtil.getExportableCertification(signature);
-        this.exportable = exportablePacket == null || exportablePacket.isExportable();
-        TrustSignature trustSignaturePacket = SignatureSubpacketsUtil.getTrustSignature(signature);
-        if (trustSignaturePacket == null) {
-            this.trustDepth = Depth.limited(0);
-            this.trustAmount = 120;
-        } else {
-            this.trustDepth = Depth.auto(trustSignaturePacket.getDepth());
-            this.trustAmount = trustSignaturePacket.getTrustAmount();
-        }
-        List<RegularExpression> regularExpressionList = SignatureSubpacketsUtil.getRegularExpressions(signature);
-        this.regex = RegexSet.fromList(regularExpressionList);
     }
 
     /**
