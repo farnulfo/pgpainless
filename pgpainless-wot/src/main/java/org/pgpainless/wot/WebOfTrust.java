@@ -12,6 +12,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 import org.bouncycastle.bcpg.sig.RevocationReason;
 import org.bouncycastle.openpgp.PGPPublicKey;
@@ -193,11 +194,19 @@ public class WebOfTrust implements CertificateAuthority {
             certsWithKey.add(cert);
 
             // index synopses
+            Date expirationDate;
+            try {
+                expirationDate = cert.getExpirationDateForUse(KeyFlag.CERTIFY_OTHER);
+            } catch (NoSuchElementException e) {
+                // Some keys are malformed and have no KeyFlags
+                return;
+            }
             certSynopsisMap.put(cert.getFingerprint(),
                     new CertSynopsis(cert.getFingerprint(),
-                            cert.getExpirationDateForUse(KeyFlag.CERTIFY_OTHER),
+                            expirationDate,
                             revocationStateFromSignature(cert.getRevocationSelfSignature()),
                             new HashSet<>(cert.getValidUserIds())));
+
         }
 
         private void findEdges() {
