@@ -28,20 +28,9 @@ public class TestCertificateStores {
         }
     };
 
-    private static InputStream requireResource(String resourceName) {
-        InputStream inputStream = TestCertificateStores.class.getClassLoader().getResourceAsStream(resourceName);
-        if (inputStream == null) {
-            throw new TestAbortedException("Cannot read resource " + resourceName + ": InputStream is null.");
-        }
-        return inputStream;
-    }
-
     public static WebOfTrustCertificateStore disconnectedGraph()
             throws BadDataException, IOException, InterruptedException {
-        SubkeyLookup subkeyLookup = new InMemorySubkeyLookup();
-        KeyMaterialReaderBackend readerBackend = new KeyMaterialReader();
-        PGPCertificateDirectory.Backend backend = new InMemoryCertificateDirectoryBackend(readerBackend);
-        WebOfTrustCertificateStore wotStore = new WebOfTrustCertificateStore(backend, subkeyLookup);
+        WebOfTrustCertificateStore wotStore = createInMemoryStore();
 
         wotStore.insertTrustRoot(getTestVector("cross_signed/foobankCaCert.asc"), merger);
         wotStore.insert(getTestVector("cross_signed/foobankEmployeeCert.asc"), merger);
@@ -50,6 +39,37 @@ public class TestCertificateStores {
         wotStore.insert(getTestVector("cross_signed/barbankEmployeeCert.asc"), merger);
 
         return wotStore;
+    }
+
+    public static WebOfTrustCertificateStore emptyGraph() {
+        WebOfTrustCertificateStore wotStore = createInMemoryStore();
+
+        return wotStore;
+    }
+
+    public static WebOfTrustCertificateStore oneDelegationGraph() throws BadDataException, IOException, InterruptedException {
+        WebOfTrustCertificateStore wotStore = createInMemoryStore();
+        wotStore.insert(getTestVector("cross_signed/foobankAdminCert.asc"), merger);
+        wotStore.insert(getTestVector("cross_signed/barbankCaCert.asc"), merger);
+
+        return wotStore;
+    }
+
+    private static WebOfTrustCertificateStore createInMemoryStore() {
+        SubkeyLookup subkeyLookup = new InMemorySubkeyLookup();
+        KeyMaterialReaderBackend readerBackend = new KeyMaterialReader();
+        PGPCertificateDirectory.Backend backend = new InMemoryCertificateDirectoryBackend(readerBackend);
+        WebOfTrustCertificateStore wotStore = new WebOfTrustCertificateStore(backend, subkeyLookup);
+
+        return wotStore;
+    }
+
+    private static InputStream requireResource(String resourceName) {
+        InputStream inputStream = TestCertificateStores.class.getClassLoader().getResourceAsStream(resourceName);
+        if (inputStream == null) {
+            throw new TestAbortedException("Cannot read resource " + resourceName + ": InputStream is null.");
+        }
+        return inputStream;
     }
 
     private static InputStream getTestVector(String testVectorName) {

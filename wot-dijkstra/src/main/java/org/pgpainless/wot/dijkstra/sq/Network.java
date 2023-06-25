@@ -102,7 +102,12 @@ public class Network {
     }
 
     public String toString() {
-        StringBuilder sb = new StringBuilder("Network with " + getNodes().size() + " nodes, " + getEdges().size() + " edges:\n");
+        int edgeNum = 0;
+        for (List<CertificationSet> edgesFrom : edges.values()) {
+            edgeNum += edgesFrom.size();
+        }
+
+        StringBuilder sb = new StringBuilder("Network with " + getNodes().size() + " nodes, " + edgeNum + " edges:\n");
         for (OpenPgpFingerprint issuer : getNodes().keySet()) {
             for (CertificationSet edge : getReverseEdges().get(issuer)) {
                 sb.append(edge);
