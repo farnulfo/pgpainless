@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -198,6 +197,12 @@ public class WebOfTrust implements CertificateAuthority {
             }
             certsWithKey.add(cert);
 
+            Map<String, RevocationState> userIds = new HashMap<>();
+            for (String userId : cert.getUserIds()) {
+                RevocationState state = revocationStateFromSignature(cert.getUserIdRevocation(userId));
+                userIds.put(userId, state);
+            }
+
             // index synopses
             Date expirationDate;
             try {
@@ -210,7 +215,7 @@ public class WebOfTrust implements CertificateAuthority {
                     new CertSynopsis(cert.getFingerprint(),
                             expirationDate,
                             revocationStateFromSignature(cert.getRevocationSelfSignature()),
-                            new HashSet<>(cert.getValidUserIds())));
+                            userIds));
 
         }
 
