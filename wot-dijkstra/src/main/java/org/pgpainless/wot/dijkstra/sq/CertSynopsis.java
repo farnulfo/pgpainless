@@ -4,19 +4,20 @@
 
 package org.pgpainless.wot.dijkstra.sq;
 
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+
 import org.pgpainless.algorithm.RevocationState;
 import org.pgpainless.key.OpenPgpFingerprint;
-
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
 
 public class CertSynopsis {
 
     private final OpenPgpFingerprint fingerprint;
     private final Date expirationTime;
     private final RevocationState revocationState;
-    private final Set<String> userIds;
+    private final Map<String, RevocationState> userIds;
 
     /**
      * Create a new {@link CertSynopsis}.
@@ -29,7 +30,7 @@ public class CertSynopsis {
     public CertSynopsis(OpenPgpFingerprint fingerprint,
                         Date expirationTime,
                         RevocationState revocationState,
-                        Set<String> userIds) {
+                        Map<String, RevocationState> userIds) {
         this.fingerprint = fingerprint;
         this.expirationTime = expirationTime;
         this.revocationState = revocationState;
@@ -68,12 +69,12 @@ public class CertSynopsis {
      *
      * @return user-ids
      */
-    public Set<String> userIds() {
-        return new HashSet<>(userIds);
+    public Map<String, RevocationState> userIds() {
+        return new HashMap<>(userIds);
     }
 
     @Override
     public String toString() {
-        return fingerprint + (userIds.isEmpty() ? "" : "(" + userIds.iterator().next() + ")");
+        return fingerprint + (userIds.isEmpty() ? "" : "(" + userIds.keySet().iterator().next() + ")");
     }
 }
