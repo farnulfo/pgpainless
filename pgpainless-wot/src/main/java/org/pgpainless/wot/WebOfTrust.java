@@ -36,9 +36,11 @@ import org.pgpainless.wot.dijkstra.sq.Network;
 import org.pgpainless.wot.dijkstra.sq.Optional;
 import org.pgpainless.wot.dijkstra.sq.ReferenceTime;
 import org.pgpainless.wot.sugar.IterableIterator;
+import org.pgpainless.wot.sugar.PrefixedIterator;
 import org.pgpainless.wot.sugar.Supplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import pgp.cert_d.PGPCertificateDirectory;
 import pgp.certificate_store.certificate.Certificate;
 import pgp.certificate_store.exception.BadDataException;
 
@@ -58,10 +60,10 @@ public class WebOfTrust implements CertificateAuthority {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(WebOfTrust.class);
 
-    private final WebOfTrustCertificateStore certificateStore;
+    private final PGPCertificateDirectory certificateStore;
     private Network network;
 
-    public WebOfTrust(WebOfTrustCertificateStore certificateStore) {
+    public WebOfTrust(PGPCertificateDirectory certificateStore) {
         this.certificateStore = certificateStore;
     }
 
@@ -69,8 +71,15 @@ public class WebOfTrust implements CertificateAuthority {
      * Do the heavy lifting of calculating the web of trust.
      */
     public void initialize() throws BadDataException, IOException {
-        Iterator<Certificate> certificates = certificateStore.getAllItems();
-        IterableIterator<Certificate> iterable = new IterableIterator<>(certificates);
+        Certificate trustRoot = null;
+        try {
+            trustRoot = certificateStore.getTrustRootCertificate();
+        } catch (NoSuchElementException e) {
+            // ignore
+        }
+        Iterator<Certificate> certificates = certificateStore.items();
+        Iterator<Certificate> withTrustRoot = new PrefixedIterator<>(trustRoot, certificates);
+        IterableIterator<Certificate> iterable = new IterableIterator<>(withTrustRoot);
         network = fromCertificates(iterable, PGPainless.getPolicy(), Optional.just(ReferenceTime.now()));
     }
 
