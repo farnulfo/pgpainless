@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package org.pgpainless.wot;
+package org.pgpainless.wot.sugar;
 
 import java.util.Iterator;
 

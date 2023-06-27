@@ -4,6 +4,7 @@
 
 package org.pgpainless.wot;
 
+import org.pgpainless.wot.sugar.PrefixedIterator;
 import pgp.cert_d.PGPCertificateDirectory;
 import pgp.cert_d.ReadOnlyPGPCertificateDirectory;
 import pgp.cert_d.WritingPGPCertificateDirectory;

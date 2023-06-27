@@ -35,6 +35,7 @@ import org.pgpainless.wot.dijkstra.sq.CertificationSet;
 import org.pgpainless.wot.dijkstra.sq.Network;
 import org.pgpainless.wot.dijkstra.sq.Optional;
 import org.pgpainless.wot.dijkstra.sq.ReferenceTime;
+import org.pgpainless.wot.sugar.IterableIterator;
 import org.pgpainless.wot.sugar.Supplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
