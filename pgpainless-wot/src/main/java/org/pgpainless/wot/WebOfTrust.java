@@ -154,9 +154,9 @@ public class WebOfTrust implements CertificateAuthority {
         // certificate synopses keyed by fingerprint
         private final Map<OpenPgpFingerprint, CertSynopsis> certSynopsisMap = new HashMap<>();
 
-        // Issuer -> Target, edges keyed by issuer
+        // Issuer -> Targets, edges keyed by issuer
         private final Map<OpenPgpFingerprint, List<CertificationSet>> edges = new HashMap<>();
-        // Target -> Issuer, edges keyed by target
+        // Target -> Issuers, edges keyed by target
         private final Map<OpenPgpFingerprint, List<CertificationSet>> reverseEdges = new HashMap<>();
 
         private final Policy policy;
