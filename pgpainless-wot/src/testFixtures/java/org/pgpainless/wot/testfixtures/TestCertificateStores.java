@@ -4,9 +4,11 @@
 
 package org.pgpainless.wot.testfixtures;
 
+import java.io.IOException;
+import java.io.InputStream;
+
 import org.opentest4j.TestAbortedException;
 import org.pgpainless.certificate_store.KeyMaterialReader;
-import org.pgpainless.wot.WebOfTrustCertificateStore;
 import pgp.cert_d.PGPCertificateDirectory;
 import pgp.cert_d.backend.InMemoryCertificateDirectoryBackend;
 import pgp.cert_d.subkey_lookup.InMemorySubkeyLookup;
@@ -15,9 +17,6 @@ import pgp.certificate_store.certificate.KeyMaterial;
 import pgp.certificate_store.certificate.KeyMaterialMerger;
 import pgp.certificate_store.certificate.KeyMaterialReaderBackend;
 import pgp.certificate_store.exception.BadDataException;
-
-import java.io.IOException;
-import java.io.InputStream;
 
 public class TestCertificateStores {
 
@@ -28,9 +27,9 @@ public class TestCertificateStores {
         }
     };
 
-    public static WebOfTrustCertificateStore disconnectedGraph()
+    public static PGPCertificateDirectory disconnectedGraph()
             throws BadDataException, IOException, InterruptedException {
-        WebOfTrustCertificateStore wotStore = createInMemoryStore();
+        PGPCertificateDirectory wotStore = createInMemoryStore();
 
         wotStore.insertTrustRoot(getTestVector("cross_signed/foobankCaCert.asc"), merger);
         wotStore.insert(getTestVector("cross_signed/foobankEmployeeCert.asc"), merger);
@@ -41,27 +40,26 @@ public class TestCertificateStores {
         return wotStore;
     }
 
-    public static WebOfTrustCertificateStore emptyGraph() {
-        WebOfTrustCertificateStore wotStore = createInMemoryStore();
+    public static PGPCertificateDirectory emptyGraph() {
+        PGPCertificateDirectory wotStore = createInMemoryStore();
 
         return wotStore;
     }
 
-    public static WebOfTrustCertificateStore oneDelegationGraph() throws BadDataException, IOException, InterruptedException {
-        WebOfTrustCertificateStore wotStore = createInMemoryStore();
+    public static PGPCertificateDirectory oneDelegationGraph() throws BadDataException, IOException, InterruptedException {
+        PGPCertificateDirectory wotStore = createInMemoryStore();
         wotStore.insert(getTestVector("cross_signed/foobankAdminCert.asc"), merger);
         wotStore.insert(getTestVector("cross_signed/barbankCaCert.asc"), merger);
 
         return wotStore;
     }
 
-    private static WebOfTrustCertificateStore createInMemoryStore() {
+    private static PGPCertificateDirectory createInMemoryStore() {
         SubkeyLookup subkeyLookup = new InMemorySubkeyLookup();
         KeyMaterialReaderBackend readerBackend = new KeyMaterialReader();
         PGPCertificateDirectory.Backend backend = new InMemoryCertificateDirectoryBackend(readerBackend);
-        WebOfTrustCertificateStore wotStore = new WebOfTrustCertificateStore(backend, subkeyLookup);
-
-        return wotStore;
+        PGPCertificateDirectory store = new PGPCertificateDirectory(backend, subkeyLookup);
+        return store;
     }
 
     private static InputStream requireResource(String resourceName) {

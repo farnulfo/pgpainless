@@ -18,6 +18,7 @@ import org.pgpainless.wot.dijkstra.sq.CertificationSet;
 import org.pgpainless.wot.dijkstra.sq.Network;
 import org.pgpainless.wot.testfixtures.TestCertificateStores;
 import org.pgpainless.wot.testfixtures.WotTestVectors;
+import pgp.cert_d.PGPCertificateDirectory;
 import pgp.certificate_store.exception.BadDataException;
 
 public class WebOfTrustTest {
@@ -34,7 +35,7 @@ public class WebOfTrustTest {
 
     @Test
     public void testWithTwoNodesAndOneDelegation() throws BadDataException, IOException, InterruptedException {
-        WebOfTrustCertificateStore store = TestCertificateStores.oneDelegationGraph();
+        PGPCertificateDirectory store = TestCertificateStores.oneDelegationGraph();
         WebOfTrust wot = new WebOfTrust(store);
         wot.initialize();
         Network network = wot.getNetwork();
@@ -51,7 +52,7 @@ public class WebOfTrustTest {
     @Test
     public void testWithCrossSignedCertificates()
             throws BadDataException, IOException, InterruptedException {
-        WebOfTrustCertificateStore store = TestCertificateStores.disconnectedGraph();
+        PGPCertificateDirectory store = TestCertificateStores.disconnectedGraph();
         WebOfTrust wot = new WebOfTrust(store);
         wot.initialize();
         Network network = wot.getNetwork();
@@ -139,7 +140,7 @@ public class WebOfTrustTest {
 
     @Test
     public void testWotCreationOfEmptyCertificates() throws BadDataException, IOException {
-        WebOfTrustCertificateStore store = TestCertificateStores.emptyGraph();
+        PGPCertificateDirectory store = TestCertificateStores.emptyGraph();
         WebOfTrust wot = new WebOfTrust(store);
         wot.initialize();
         Network network = wot.getNetwork();
