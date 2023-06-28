@@ -6,11 +6,21 @@ package org.pgpainless.wot.dijkstra.sq
 
 import java.util.*
 
+/**
+ * Reference time for Web of Trust calculations.
+ */
 interface ReferenceTime {
 
+    /**
+     * Timestamp as [Date].
+     */
     val timestamp: Date
 
     companion object {
+
+        /**
+         * Create a [ReferenceTime] with a timestamp that corresponds to the current time.
+         */
         @JvmStatic
         fun now(): ReferenceTime {
             val now = Date()
@@ -20,6 +30,9 @@ interface ReferenceTime {
             }
         }
 
+        /**
+         * Create a [ReferenceTime] from the given [stamp] timestamp.
+         */
         @JvmStatic
         fun timestamp(stamp: Date): ReferenceTime {
             return object: ReferenceTime {

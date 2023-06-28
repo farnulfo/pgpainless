@@ -30,11 +30,19 @@ class Network(
         }
     }
 
+    /**
+     * The total number of edges on the network.
+     *
+     * @return number of edges
+     */
     val numberOfEdges: Int
         get() {
             return edges.values.sumOf { it.size }
         }
 
+    /**
+     * The total number of signatures the network comprises.
+     */
     val numberOfSignatures: Int
         get() {
             return edges.values
