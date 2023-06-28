@@ -140,9 +140,9 @@ public class Certification {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append(issuer.getFingerprint()).append((issuer.userIds().isEmpty() ? " " : " (" + issuer.userIds().keySet().iterator().next() + ") "));
+        sb.append(issuer.getFingerprint()).append((issuer.getUserIds().isEmpty() ? " " : " (" + issuer.getUserIds().keySet().iterator().next() + ") "));
         sb.append(userId.isPresent() ? "certifies" : "delegates to").append(userId.isPresent() ? " [" + userId.get() + "] " : " ").append(target.getFingerprint())
-                .append(userId.isEmpty() && !target.userIds().isEmpty() ? " (" + target.userIds().keySet().iterator().next() + ")" : "");
+                .append(userId.isEmpty() && !target.getUserIds().isEmpty() ? " (" + target.getUserIds().keySet().iterator().next() + ")" : "");
         return sb.toString();
     }
 }
