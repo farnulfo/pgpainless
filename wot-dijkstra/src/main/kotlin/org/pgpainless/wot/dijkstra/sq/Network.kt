@@ -60,7 +60,7 @@ class Network(
         for (issuer in nodes.keys) {
             val outEdges = edges[issuer] ?: continue
             for (edge in outEdges) {
-                sb.append(edge)
+                sb.appendLine(edge)
             }
         }
         return sb.toString()
