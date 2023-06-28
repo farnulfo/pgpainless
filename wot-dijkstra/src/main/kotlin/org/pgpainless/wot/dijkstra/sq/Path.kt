@@ -100,7 +100,7 @@ class Path(
         }
 
         var cyclic = root.fingerprint == certification.target.fingerprint
-        for (i in 0..edges.size) {
+        for (i in 0 until edges.size) {
             val edge = edges[i]
             if (cyclic) {
                 break
