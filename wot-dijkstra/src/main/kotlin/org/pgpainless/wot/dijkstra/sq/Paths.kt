@@ -6,6 +6,9 @@ package org.pgpainless.wot.dijkstra.sq
 
 class Paths(val paths: MutableList<Item>) {
 
+    constructor():
+        this(mutableListOf<Item>())
+
     fun add(path: Path, amount: Int) {
         require(amount <= path.amount) {
             "Amount too small. TODO: Better error message"
