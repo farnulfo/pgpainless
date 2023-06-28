@@ -48,4 +48,8 @@ data class RegexSet(val regexStrings: Set<String>) {
             Pattern.compile(it).matcher(string).find()
         }
     }
+
+    override fun toString(): String {
+        return regexStrings.joinToString(", ")
+    }
 }

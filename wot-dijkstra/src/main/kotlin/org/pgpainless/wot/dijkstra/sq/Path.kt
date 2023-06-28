@@ -120,4 +120,8 @@ class Path(
         residualDepth = certification.trustDepth.min(residualDepth.decrease(1))
         edges.add(certification)
     }
+
+    override fun toString(): String {
+        return "{${root.fingerprint}} => {${edges.map { it.target }.joinToString(" -> ")}} (residual {$residualDepth})"
+    }
 }

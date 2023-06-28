@@ -46,6 +46,8 @@ class Paths(private val _paths: MutableList<Item>) {
      * @param amount trust amount
      */
     data class Item(val path: Path, val amount: Int) {
-
+        override fun toString(): String {
+            return "$path ($amount)"
+        }
     }
 }
