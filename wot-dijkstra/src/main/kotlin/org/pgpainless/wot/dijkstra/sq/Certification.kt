@@ -15,7 +15,7 @@ data class Certification(
         val exportable: Boolean,
         val trustAmount: Int,
         val trustDepth: Depth,
-        val regex: RegexSet
+        val regexes: RegexSet
 ) {
 
     constructor(
