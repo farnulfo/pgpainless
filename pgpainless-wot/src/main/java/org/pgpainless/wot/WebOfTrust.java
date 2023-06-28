@@ -33,7 +33,6 @@ import org.pgpainless.wot.dijkstra.sq.CertSynopsis;
 import org.pgpainless.wot.dijkstra.sq.Certification;
 import org.pgpainless.wot.dijkstra.sq.CertificationSet;
 import org.pgpainless.wot.dijkstra.sq.Network;
-import org.pgpainless.wot.dijkstra.sq.Optional;
 import org.pgpainless.wot.dijkstra.sq.ReferenceTime;
 import org.pgpainless.wot.sugar.IterableIterator;
 import org.pgpainless.wot.sugar.PrefixedIterator;
@@ -80,7 +79,7 @@ public class WebOfTrust implements CertificateAuthority {
         Iterator<Certificate> certificates = certificateStore.items();
         Iterator<Certificate> withTrustRoot = new PrefixedIterator<>(trustRoot, certificates);
         IterableIterator<Certificate> iterable = new IterableIterator<>(withTrustRoot);
-        network = fromCertificates(iterable, PGPainless.getPolicy(), Optional.just(ReferenceTime.now()));
+        network = fromCertificates(iterable, PGPainless.getPolicy(), ReferenceTime.now());
     }
 
 
@@ -95,9 +94,9 @@ public class WebOfTrust implements CertificateAuthority {
     public static Network fromCertificates(
             Iterable<Certificate> certificates,
             Policy policy,
-            Optional<ReferenceTime> optReferenceTime) {
+            ReferenceTime optReferenceTime) {
 
-        ReferenceTime referenceTime = optReferenceTime.isPresent() ? optReferenceTime.get() : ReferenceTime.now();
+        ReferenceTime referenceTime = optReferenceTime == null ? ReferenceTime.now() : optReferenceTime;
         List<KeyRingInfo> validCerts = parseValidCertificates(certificates, policy, referenceTime.getTimestamp());
 
         LOGGER.debug("Successfully parsed " + validCerts.size() + " certificates.");
