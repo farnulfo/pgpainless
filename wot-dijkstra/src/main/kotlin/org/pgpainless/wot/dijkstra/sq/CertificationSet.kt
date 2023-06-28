@@ -39,7 +39,7 @@ data class CertificationSet(
          * @param certification certification
          */
         @JvmStatic
-        fun fromCertification(certification: Certification) : CertificationSet {
+        fun fromCertification(certification: Certification): CertificationSet {
             val set = empty(certification.issuer, certification.target)
             set.add(certification)
             return set
@@ -72,7 +72,7 @@ data class CertificationSet(
      *
      * @param certification [Certification] with the same issuer fingerprint and target fingerprint as this object.
      */
-    fun add(certification : Certification) {
+    fun add(certification: Certification) {
         require(issuer.fingerprint == certification.issuer.fingerprint) { "Issuer fingerprint mismatch." }
         require(target.fingerprint == certification.target.fingerprint) { "Target fingerprint mismatch." }
 
@@ -85,6 +85,6 @@ data class CertificationSet(
     }
 
     override fun toString(): String {
-        return "$certifications"
+        return certifications.map { it.value }.flatten().joinToString("\n")
     }
 }
