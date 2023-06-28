@@ -49,9 +49,11 @@ data class Certification(
             this(issuer, target, targetUserId, creationTime, null, true, 120, Depth.limited(0), RegexSet.wildcard())
 
     override fun toString(): String {
-        return if (userId != null)
-            "$issuer certifies [$userId] ${target.fingerprint}"
-        else
-            "$issuer delegates to ${target.fingerprint}"
+        return if (trustDepth.limit == 0)
+            "${issuer.fingerprint} certifies binding: $userId <-> ${target.fingerprint} [$trustAmount]"
+        else {
+            val scope = if (regexes.regexStrings.isEmpty()) "" else ", scope: $regexes"
+            "${issuer.fingerprint} delegates to ${target.fingerprint} [$trustAmount, depth $trustDepth$scope]"
+        }
     }
 }
