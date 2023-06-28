@@ -49,16 +49,9 @@ data class Certification(
             this(issuer, target, targetUserId, creationTime, null, true, 120, Depth.limited(0), RegexSet.wildcard())
 
     override fun toString(): String {
-        val relation = if (userId != null) {
-            "certifies"
-        } else {
-            "delegates to"
-        }
-        val relationTarget = if (userId != null) {
-            "[$userId] ${target.fingerprint}"
-        } else {
-            "$target"
-        }
-        return "$issuer $relation $relationTarget"
+        return if (userId != null)
+            "$issuer certifies [$userId] ${target.fingerprint}"
+        else
+            "$issuer delegates to ${target.fingerprint}"
     }
 }
