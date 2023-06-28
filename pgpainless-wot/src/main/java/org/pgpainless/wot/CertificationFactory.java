@@ -14,7 +14,6 @@ import org.pgpainless.signature.subpackets.SignatureSubpacketsUtil;
 import org.pgpainless.wot.dijkstra.sq.CertSynopsis;
 import org.pgpainless.wot.dijkstra.sq.Certification;
 import org.pgpainless.wot.dijkstra.sq.Depth;
-import org.pgpainless.wot.dijkstra.sq.Optional;
 import org.pgpainless.wot.dijkstra.sq.RegexSet;
 
 /**
@@ -34,7 +33,7 @@ public class CertificationFactory {
     public static Certification fromDelegation(CertSynopsis issuer,
                                                CertSynopsis target,
                                                PGPSignature signature) {
-        return fromSignature(issuer, Optional.empty(), target, signature);
+        return fromSignature(issuer, null, target, signature);
     }
 
     /**
@@ -50,7 +49,7 @@ public class CertificationFactory {
                                                   String targetUserId,
                                                   CertSynopsis target,
                                                   PGPSignature signature) {
-        return fromSignature(issuer, Optional.just(targetUserId), target, signature);
+        return fromSignature(issuer, targetUserId, target, signature);
     }
 
     /**
@@ -63,7 +62,7 @@ public class CertificationFactory {
      * @return certification
      */
     public static Certification fromSignature(CertSynopsis issuer,
-                                              Optional<String> targetUserId,
+                                              String targetUserId,
                                               CertSynopsis target,
                                               PGPSignature signature) {
         return new Certification(
@@ -71,7 +70,7 @@ public class CertificationFactory {
                 target,
                 targetUserId,
                 SignatureSubpacketsUtil.getSignatureCreationTime(signature).getTime(),
-                Optional.maybe(SignatureSubpacketsUtil.getSignatureExpirationTimeAsDate(signature)),
+                SignatureSubpacketsUtil.getSignatureExpirationTimeAsDate(signature),
                 SignatureSubpacketsUtil.isExportable(signature),
                 getTrustAmountFrom(signature),
                 getTrustDepthFrom(signature),

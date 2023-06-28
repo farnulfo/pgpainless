@@ -8,6 +8,8 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -17,15 +19,15 @@ public class DepthTest {
     public void testUnlimitedItem() {
         Depth depth = Depth.unconstrained();
         assertTrue(depth.isUnconstrained());
-        assertFalse(depth.getLimit().isPresent());
+        assertNull(depth.getLimit());
     }
 
     @Test
     public void testLimitedItem() {
         Depth limited = Depth.limited(2);
         assertFalse(limited.isUnconstrained());
-        assertTrue(limited.getLimit().isPresent());
-        assertEquals(2, limited.getLimit().get());
+        assertNotNull(limited.getLimit());
+        assertEquals(2, limited.getLimit());
     }
 
     @Test
@@ -40,7 +42,7 @@ public class DepthTest {
         Depth limited = Depth.limited(1);
         Depth decreased = limited.decrease(1);
         assertFalse(decreased.isUnconstrained());
-        assertEquals(0, decreased.getLimit().get());
+        assertEquals(0, decreased.getLimit());
     }
 
     @Test
@@ -76,7 +78,7 @@ public class DepthTest {
     public void testAutoLimited() {
         Depth depth = Depth.auto(120);
         assertFalse(depth.isUnconstrained());
-        assertEquals(120, depth.getLimit().get());
+        assertEquals(120, depth.getLimit());
     }
 
     @Test
