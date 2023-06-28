@@ -32,7 +32,7 @@ data class RegexSet(val regexStrings: Set<String>) {
 
         for (regex in regexStrings) {
             val matcher = Pattern.compile(regex).matcher(string)
-            if (matcher.matches()) {
+            if (matcher.find()) {
                 return true
             }
         }
