@@ -8,5 +8,6 @@ include 'pgpainless-core',
         'pgpainless-sop',
         'pgpainless-cli',
         'pgpainless-wot',
+        'pgpainless-wot-cli',
         'wot-dijkstra'
 
