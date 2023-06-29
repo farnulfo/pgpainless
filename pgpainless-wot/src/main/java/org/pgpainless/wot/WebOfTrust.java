@@ -37,6 +37,7 @@ import org.pgpainless.wot.dijkstra.sq.ReferenceTime;
 import org.pgpainless.wot.sugar.IterableIterator;
 import org.pgpainless.wot.sugar.PrefixedIterator;
 import org.pgpainless.wot.sugar.Supplier;
+import org.pgpainless.wot.util.CertificationFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pgp.cert_d.PGPCertificateDirectory;
@@ -301,7 +302,7 @@ public class WebOfTrust {
                         boolean valid = SignatureVerifier.verifySignatureOverUserId(userId, certification,
                                 issuerSigningKey, targetPrimaryKey, policy, referenceTime.getTimestamp());
                         if (valid) {
-                            indexEdge(CertificationFactory.fromCertification(issuer, userId, target, certification));
+                            indexEdge(CertificationFactory.fromCertification(issuer, target, userId, certification));
                         }
                     } catch (SignatureValidationException e) {
                         LOGGER.warn("Cannot verify signature for '" + userId + "' by " + issuerFingerprint + " on cert of " + target.getFingerprint(), e);
