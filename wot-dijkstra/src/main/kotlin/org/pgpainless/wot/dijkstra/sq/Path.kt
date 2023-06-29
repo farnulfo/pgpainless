@@ -15,9 +15,9 @@ import kotlin.math.min
  * @param residualDepth residual depth that is decreased each time another edge is appended
  */
 class Path(
-        val root: CertSynopsis,
-        val edges: MutableList<Certification>,
-        var residualDepth: Depth
+        private val root: CertSynopsis,
+        private val edges: MutableList<Certification>,
+        private var residualDepth: Depth
 ) {
 
     /**

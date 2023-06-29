@@ -8,7 +8,6 @@ import org.bouncycastle.openpgp.PGPPublicKey
 import org.bouncycastle.openpgp.PGPSignature
 import org.pgpainless.PGPainless
 import org.pgpainless.algorithm.KeyFlag
-import org.pgpainless.algorithm.RevocationState
 import org.pgpainless.exception.SignatureValidationException
 import org.pgpainless.key.OpenPgpFingerprint
 import org.pgpainless.key.info.KeyRingInfo
@@ -122,6 +121,11 @@ class WebOfTrust(private val certificateStore: PGPCertificateStore) {
                 RevocationState.softRevoked(revocation.creationTime)
         }
 
+        @JvmStatic
+        private fun OpenPgpFingerprint.map(): Fingerprint {
+            return Fingerprint(toString())
+        }
+
         /**
          * Class for building the [Flow network][Network] from the given set of OpenPGP keys.
          *
@@ -133,19 +137,19 @@ class WebOfTrust(private val certificateStore: PGPCertificateStore) {
             private val LOGGER = LoggerFactory.getLogger(NetworkBuilder::class.java)
 
             // certificates keyed by fingerprint
-            private val byFingerprint: MutableMap<OpenPgpFingerprint, KeyRingInfo> = HashMap()
+            private val byFingerprint: MutableMap<Fingerprint, KeyRingInfo> = HashMap()
 
             // certificates keyed by (sub-) key-id
             private val byKeyId: MutableMap<Long, MutableList<KeyRingInfo>> = HashMap()
 
             // certificate synopses keyed by fingerprint
-            private val certSynopsisMap: MutableMap<OpenPgpFingerprint, CertSynopsis> = HashMap()
+            private val certSynopsisMap: MutableMap<Fingerprint, CertSynopsis> = HashMap()
 
             // Issuer -> Targets, edges keyed by issuer
-            private val edges: MutableMap<OpenPgpFingerprint, MutableList<CertificationSet>> = HashMap()
+            private val edges: MutableMap<Fingerprint, MutableList<CertificationSet>> = HashMap()
 
             // Target -> Issuers, edges keyed by target
-            private val reverseEdges: MutableMap<OpenPgpFingerprint, MutableList<CertificationSet>> = HashMap()
+            private val reverseEdges: MutableMap<Fingerprint, MutableList<CertificationSet>> = HashMap()
 
             init {
                 synopsizeCertificates(validatedCertificates)
@@ -161,8 +165,9 @@ class WebOfTrust(private val certificateStore: PGPCertificateStore) {
             private fun synopsize(cert: KeyRingInfo) {
 
                 // index by fingerprint
-                if (!byFingerprint.containsKey(cert.fingerprint)) {
-                    byFingerprint[cert.fingerprint] = cert
+                val certFingerprint = cert.fingerprint.map()
+                if (!byFingerprint.containsKey(certFingerprint)) {
+                    byFingerprint[certFingerprint] = cert
                 }
 
                 // index by key-ID
@@ -189,7 +194,7 @@ class WebOfTrust(private val certificateStore: PGPCertificateStore) {
                     // Some keys are malformed and have no KeyFlags
                     return
                 }
-                certSynopsisMap[cert.fingerprint] = CertSynopsis(cert.fingerprint,
+                certSynopsisMap[certFingerprint] = CertSynopsis(certFingerprint,
                         expirationDate,
                         revocationStateFromSignature(cert.revocationSelfSignature),
                         userIds)
@@ -205,7 +210,7 @@ class WebOfTrust(private val certificateStore: PGPCertificateStore) {
 
             private fun findEdgesWithTarget(validatedTarget: KeyRingInfo) {
                 val validatedTargetKeyRing = KeyRingUtils.publicKeys(validatedTarget.keys)
-                val targetFingerprint = OpenPgpFingerprint.of(validatedTargetKeyRing)
+                val targetFingerprint = OpenPgpFingerprint.of(validatedTargetKeyRing).map()
                 val targetPrimaryKey = validatedTargetKeyRing.publicKey!!
                 val target = certSynopsisMap[targetFingerprint]!!
 
@@ -231,7 +236,7 @@ class WebOfTrust(private val certificateStore: PGPCertificateStore) {
                         ?: return
                 for (candidate in issuerCandidates) {
                     val issuerKeyRing = KeyRingUtils.publicKeys(candidate.keys)
-                    val issuerFingerprint = OpenPgpFingerprint.of(issuerKeyRing)
+                    val issuerFingerprint = OpenPgpFingerprint.of(issuerKeyRing).map()
                     val issuerSigningKey = issuerKeyRing.getPublicKey(delegation.keyID)
                     val issuer = certSynopsisMap[issuerFingerprint]
                             ?: continue
@@ -257,7 +262,7 @@ class WebOfTrust(private val certificateStore: PGPCertificateStore) {
                             ?: continue
                     for (candidate in issuerCandidates) {
                         val issuerKeyRing = KeyRingUtils.publicKeys(candidate.keys)
-                        val issuerFingerprint = OpenPgpFingerprint.of(issuerKeyRing)
+                        val issuerFingerprint = OpenPgpFingerprint.of(issuerKeyRing).map()
                         val issuerSigningKey = issuerKeyRing.getPublicKey(certification.keyID)
                                 ?: continue
                         val issuer = certSynopsisMap[issuerFingerprint]
