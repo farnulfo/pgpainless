@@ -35,8 +35,8 @@ public class WebOfTrustTest {
 
     @Test
     public void testWithTwoNodesAndOneDelegation() throws BadDataException, IOException, InterruptedException {
-        PGPCertificateDirectory store = TestCertificateStores.oneDelegationGraph();
-        WebOfTrust wot = new WebOfTrust(store);
+        PGPCertificateDirectory certD = TestCertificateStores.oneDelegationGraph();
+        WebOfTrust wot = new WebOfTrust(certD);
         wot.initialize();
         Network network = wot.getNetwork();
 
@@ -52,8 +52,8 @@ public class WebOfTrustTest {
     @Test
     public void testWithCrossSignedCertificates()
             throws BadDataException, IOException, InterruptedException {
-        PGPCertificateDirectory store = TestCertificateStores.disconnectedGraph();
-        WebOfTrust wot = new WebOfTrust(store);
+        PGPCertificateDirectory certD = TestCertificateStores.disconnectedGraph();
+        WebOfTrust wot = new WebOfTrust(certD);
         wot.initialize();
         Network network = wot.getNetwork();
 
@@ -140,8 +140,8 @@ public class WebOfTrustTest {
 
     @Test
     public void testWotCreationOfEmptyCertificates() {
-        PGPCertificateDirectory store = TestCertificateStores.emptyGraph();
-        WebOfTrust wot = new WebOfTrust(store);
+        PGPCertificateDirectory certD = TestCertificateStores.emptyGraph();
+        WebOfTrust wot = new WebOfTrust(certD);
         wot.initialize();
         Network network = wot.getNetwork();
 

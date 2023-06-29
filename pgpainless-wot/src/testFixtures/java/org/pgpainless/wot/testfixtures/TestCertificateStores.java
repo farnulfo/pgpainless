@@ -29,37 +29,37 @@ public class TestCertificateStores {
 
     public static PGPCertificateDirectory disconnectedGraph()
             throws BadDataException, IOException, InterruptedException {
-        PGPCertificateDirectory wotStore = createInMemoryStore();
+        PGPCertificateDirectory certD = createInMemoryCertificateDirectory();
 
-        wotStore.insertTrustRoot(getTestVector("cross_signed/foobankCaCert.asc"), merger);
-        wotStore.insert(getTestVector("cross_signed/foobankEmployeeCert.asc"), merger);
-        wotStore.insert(getTestVector("cross_signed/foobankAdminCert.asc"), merger);
-        wotStore.insert(getTestVector("cross_signed/barbankCaCert.asc"), merger);
-        wotStore.insert(getTestVector("cross_signed/barbankEmployeeCert.asc"), merger);
+        certD.insertTrustRoot(getTestVector("cross_signed/foobankCaCert.asc"), merger);
+        certD.insert(getTestVector("cross_signed/foobankEmployeeCert.asc"), merger);
+        certD.insert(getTestVector("cross_signed/foobankAdminCert.asc"), merger);
+        certD.insert(getTestVector("cross_signed/barbankCaCert.asc"), merger);
+        certD.insert(getTestVector("cross_signed/barbankEmployeeCert.asc"), merger);
 
-        return wotStore;
+        return certD;
     }
 
     public static PGPCertificateDirectory emptyGraph() {
-        PGPCertificateDirectory wotStore = createInMemoryStore();
+        PGPCertificateDirectory certD = createInMemoryCertificateDirectory();
 
-        return wotStore;
+        return certD;
     }
 
     public static PGPCertificateDirectory oneDelegationGraph() throws BadDataException, IOException, InterruptedException {
-        PGPCertificateDirectory wotStore = createInMemoryStore();
-        wotStore.insert(getTestVector("cross_signed/foobankAdminCert.asc"), merger);
-        wotStore.insert(getTestVector("cross_signed/barbankCaCert.asc"), merger);
+        PGPCertificateDirectory certD = createInMemoryCertificateDirectory();
+        certD.insert(getTestVector("cross_signed/foobankAdminCert.asc"), merger);
+        certD.insert(getTestVector("cross_signed/barbankCaCert.asc"), merger);
 
-        return wotStore;
+        return certD;
     }
 
-    private static PGPCertificateDirectory createInMemoryStore() {
+    private static PGPCertificateDirectory createInMemoryCertificateDirectory() {
         SubkeyLookup subkeyLookup = new InMemorySubkeyLookup();
         KeyMaterialReaderBackend readerBackend = new KeyMaterialReader();
         PGPCertificateDirectory.Backend backend = new InMemoryCertificateDirectoryBackend(readerBackend);
-        PGPCertificateDirectory store = new PGPCertificateDirectory(backend, subkeyLookup);
-        return store;
+        PGPCertificateDirectory certD = new PGPCertificateDirectory(backend, subkeyLookup);
+        return certD;
     }
 
     private static InputStream requireResource(String resourceName) {
