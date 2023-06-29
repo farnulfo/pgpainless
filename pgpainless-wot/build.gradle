@@ -2,9 +2,19 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
+    }
+}
+
 plugins {
     id 'java-library'
     id 'java-test-fixtures'
+    id 'org.jetbrains.kotlin.jvm' version "$kotlinVersion"
 }
 
 group 'org.pgpainless'
@@ -14,6 +24,8 @@ repositories {
 }
 
 dependencies {
+    // Kotlin
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
     // JUnit
     testImplementation "org.junit.jupiter:junit-jupiter-api:$junitVersion"
     testImplementation "org.junit.jupiter:junit-jupiter-params:$junitVersion"
@@ -27,7 +39,7 @@ dependencies {
     testImplementation "ch.qos.logback:logback-classic:$logbackVersion"
 
     implementation(project(":pgpainless-core"))
-    implementation(project(":wot-dijkstra"))
+    api(project(":wot-dijkstra"))
 
     // Certificate store
     api "org.pgpainless:pgp-certificate-store:$certDJavaVersion"
