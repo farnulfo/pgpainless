@@ -25,29 +25,49 @@ import org.pgpainless.wot.util.CertificationFactory.Companion.fromCertification
 import org.pgpainless.wot.util.CertificationFactory.Companion.fromDelegation
 import org.slf4j.LoggerFactory
 import pgp.cert_d.PGPCertificateDirectory
+import pgp.cert_d.PGPCertificateStoreAdapter
+import pgp.cert_d.SpecialNames
+import pgp.certificate_store.PGPCertificateStore
 import pgp.certificate_store.certificate.Certificate
 import java.io.IOException
 import java.util.*
 
-class WebOfTrust(private val certificateStore: PGPCertificateDirectory) {
+/**
+ * Create a [WebOfTrust] based on a [PGPCertificateStore] instance.
+ *
+ * @param certificateStore certificate store
+ */
+class WebOfTrust(private val certificateStore: PGPCertificateStore) {
+
+    /**
+     * Create a [WebOfTrust] based on a [PGPCertificateDirectory] instance, which gets adapted to the
+     * [PGPCertificateStore] interface.
+     *
+     * @param certificateDirectory PGP-Certificate-Directory instance
+     */
+    constructor(certificateDirectory: PGPCertificateDirectory): this(PGPCertificateStoreAdapter(certificateDirectory))
 
     lateinit var network: Network
 
     fun initialize() {
+        val certificates = getAllCertificatesFromTheStore()
+        network = fromCertificates(certificates, PGPainless.getPolicy(), now())
+    }
+
+    private fun getAllCertificatesFromTheStore(): Sequence<Certificate> {
         var trustRoot: Certificate? = null
         try {
-            trustRoot = certificateStore.trustRootCertificate
+            trustRoot = certificateStore.getCertificate(SpecialNames.TRUST_ROOT)
         } catch (e: NoSuchElementException) {
             // ignore
         }
 
         val certificates = if (trustRoot == null) {
-            certificateStore.items().asSequence()
+            certificateStore.certificates.asSequence()
         } else {
-            sequenceOf(trustRoot) + certificateStore.items().asSequence()
+            sequenceOf(trustRoot) + certificateStore.certificates.asSequence()
         }
-
-        network = fromCertificates(certificates, PGPainless.getPolicy(), now())
+        return certificates
     }
 
     companion object {

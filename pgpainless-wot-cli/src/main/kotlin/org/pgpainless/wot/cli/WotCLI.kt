@@ -4,9 +4,14 @@
 
 package org.pgpainless.wot.cli
 
+import org.pgpainless.certificate_store.PGPainlessCertD
 import org.pgpainless.util.DateUtil
 import org.pgpainless.wot.cli.subcommands.*
 import org.pgpainless.wot.dijkstra.sq.ReferenceTime
+import pgp.cert_d.PGPCertificateDirectory
+import pgp.cert_d.PGPCertificateStoreAdapter
+import pgp.cert_d.subkey_lookup.InMemorySubkeyLookupFactory
+import pgp.certificate_store.PGPCertificateStore
 import picocli.CommandLine
 import picocli.CommandLine.*
 import java.io.File
@@ -28,13 +33,22 @@ class WotCLI: Callable<Int> {
     @Option(names = ["--trust-root", "-r"], required = true)
     var trustRoot: Array<String> = arrayOf()
 
-    @Option(names = ["--keyring", "-k"], description = ["Specify a keyring file."], required = true)
-    var keyring: File? = null
+    @ArgGroup(exclusive = true, multiplicity = "1")
+    lateinit var certificateSource: CertificateSource
+
+    class CertificateSource {
+        @Option(names = ["--keyring", "-k"], description = ["Specify a keyring file."], required = true)
+        var keyring: File? = null
+
+        @Option(names = ["--cert-d"], description = ["Specify a pgp-cert-d base directory."], required = true)
+        var pgpCertD: File? = null
+
+        @Option(names = ["--gpg"], description = ["Read trust roots and keyring from GnuPG."])
+        var gpg = false
+    }
+
 
     /*
-    @Option(names = ["--gpg"], description = ["Read trust roots and keyring from GnuPG."])
-    var gpg = false
-
     @Option(names = ["--network"], description = ["Look for missing certificates on a key server or the WKD."])
     var keyServer = "hkps://keyserver.ubuntu.com"
 
@@ -58,6 +72,17 @@ class WotCLI: Callable<Int> {
             val date = DateUtil.parseUTCDate(time)
             ReferenceTime.timestamp(date)
         }
+    }
+
+    fun getCertificateStore(): PGPCertificateStore {
+        requireNotNull(certificateSource.pgpCertD) {
+            "Currently, only --cert-d is supported."
+        }
+        val certD = PGPainlessCertD.fileBased(
+                certificateSource.pgpCertD,
+                InMemorySubkeyLookupFactory())
+
+        return PGPCertificateStoreAdapter(certD)
     }
 
     /**
