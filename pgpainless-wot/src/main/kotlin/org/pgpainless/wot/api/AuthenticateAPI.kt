@@ -8,6 +8,6 @@ package org.pgpainless.wot.api
  * Authenticate a binding.
  * A binding is a pair consisting of a certificate and a User ID.
  */
-class AuthenticateAPI() {
+class AuthenticateAPI {
 
 }
