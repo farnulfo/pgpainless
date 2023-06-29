@@ -12,9 +12,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.io.IOException;
 import java.util.List;
 
+import org.bouncycastle.openpgp.PGPPublicKeyRing;
 import org.junit.jupiter.api.Test;
 import org.pgpainless.key.OpenPgpFingerprint;
 import org.pgpainless.wot.dijkstra.sq.CertificationSet;
+import org.pgpainless.wot.dijkstra.sq.Fingerprint;
 import org.pgpainless.wot.dijkstra.sq.Network;
 import org.pgpainless.wot.testfixtures.TestCertificateStores;
 import org.pgpainless.wot.testfixtures.WotTestVectors;
@@ -23,14 +25,18 @@ import pgp.certificate_store.exception.BadDataException;
 
 public class WebOfTrustTest {
 
-    OpenPgpFingerprint fooBankCa = OpenPgpFingerprint.of(WotTestVectors.getTestVectors().getFreshFooBankCaCert());
-    OpenPgpFingerprint fooBankEmployee = OpenPgpFingerprint.of(WotTestVectors.getTestVectors().getFreshFooBankEmployeeCert());
-    OpenPgpFingerprint fooBankAdmin = OpenPgpFingerprint.of(WotTestVectors.getTestVectors().getFreshFooBankAdminCert());
-    OpenPgpFingerprint barBankCa = OpenPgpFingerprint.of(WotTestVectors.getTestVectors().getFreshBarBankCaCert());
-    OpenPgpFingerprint barBankEmployee = OpenPgpFingerprint.of(WotTestVectors.getTestVectors().getFreshBarBankEmployeeCert());
+    Fingerprint fooBankCa = fingerprintOf(WotTestVectors.getTestVectors().getFreshFooBankCaCert());
+    Fingerprint fooBankEmployee = fingerprintOf(WotTestVectors.getTestVectors().getFreshFooBankEmployeeCert());
+    Fingerprint fooBankAdmin = fingerprintOf(WotTestVectors.getTestVectors().getFreshFooBankAdminCert());
+    Fingerprint barBankCa = fingerprintOf(WotTestVectors.getTestVectors().getFreshBarBankCaCert());
+    Fingerprint barBankEmployee = fingerprintOf(WotTestVectors.getTestVectors().getFreshBarBankEmployeeCert());
 
     public WebOfTrustTest() throws IOException {
 
+    }
+
+    private static Fingerprint fingerprintOf(PGPPublicKeyRing cert) {
+        return new Fingerprint(OpenPgpFingerprint.of(cert).toString());
     }
 
     @Test
@@ -87,30 +93,30 @@ public class WebOfTrustTest {
         // CHECKSTYLE:ON
     }
 
-    private void assertHasIssuerAndTarget(CertificationSet certifications, OpenPgpFingerprint issuer, OpenPgpFingerprint target) {
+    private void assertHasIssuerAndTarget(CertificationSet certifications, Fingerprint issuer, Fingerprint target) {
         assertEquals(issuer, certifications.getIssuer().getFingerprint());
         assertEquals(target, certifications.getTarget().getFingerprint());
     }
 
-    private void assertHasEdge(Network network, OpenPgpFingerprint issuer, OpenPgpFingerprint target) {
+    private void assertHasEdge(Network network, Fingerprint issuer, Fingerprint target) {
         assertNotNull(getEdgeFromTo(network, issuer, target), "Expected edge from " + issuer + " to " + target + " but got none.");
     }
 
-    private void assertHasReverseEdge(Network network, OpenPgpFingerprint issuer, OpenPgpFingerprint target) {
+    private void assertHasReverseEdge(Network network, Fingerprint issuer, Fingerprint target) {
         assertNotNull(getReverseEdgeFromTo(network, issuer, target), "Expected reverse edge to " + target + " from " + issuer + " but got none.");
     }
 
-    private void assertHasNoEdge(Network network, OpenPgpFingerprint issuer, OpenPgpFingerprint target) {
+    private void assertHasNoEdge(Network network, Fingerprint issuer, Fingerprint target) {
         CertificationSet edge = getEdgeFromTo(network, issuer, target);
         assertNull(edge, "Expected no edge from " + issuer + " to " + target + " but got " + edge);
     }
 
-    private void assertHasNoReverseEdge(Network network, OpenPgpFingerprint issuer, OpenPgpFingerprint target) {
+    private void assertHasNoReverseEdge(Network network, Fingerprint issuer, Fingerprint target) {
         CertificationSet reverseEdge = getReverseEdgeFromTo(network, issuer, target);
         assertNull(reverseEdge, "Expected no reverse edge on " + target + " from " + issuer + " but got " + reverseEdge);
     }
 
-    private CertificationSet getEdgeFromTo(Network network, OpenPgpFingerprint issuer, OpenPgpFingerprint target) {
+    private CertificationSet getEdgeFromTo(Network network, Fingerprint issuer, Fingerprint target) {
         List<CertificationSet> edges = network.getEdges().get(issuer);
         if (edges == null) {
             return null;
@@ -124,7 +130,7 @@ public class WebOfTrustTest {
         return null;
     }
 
-    private CertificationSet getReverseEdgeFromTo(Network network, OpenPgpFingerprint issuer, OpenPgpFingerprint target) {
+    private CertificationSet getReverseEdgeFromTo(Network network, Fingerprint issuer, Fingerprint target) {
         List<CertificationSet> revEdges = network.getReverseEdges().get(target);
         if (revEdges == null) {
             return null;

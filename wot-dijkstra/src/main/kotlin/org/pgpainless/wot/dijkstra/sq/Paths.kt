@@ -9,7 +9,7 @@ package org.pgpainless.wot.dijkstra.sq
  *
  * @param paths list of paths
  */
-class Paths(val paths: MutableList<Item>) {
+class Paths(private val paths: MutableList<Item>) {
 
     /**
      * Empty collection of paths.
