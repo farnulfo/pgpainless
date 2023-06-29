@@ -139,7 +139,7 @@ public class WebOfTrustTest {
     }
 
     @Test
-    public void testWotCreationOfEmptyCertificates() throws BadDataException, IOException {
+    public void testWotCreationOfEmptyCertificates() {
         PGPCertificateDirectory store = TestCertificateStores.emptyGraph();
         WebOfTrust wot = new WebOfTrust(store);
         wot.initialize();
