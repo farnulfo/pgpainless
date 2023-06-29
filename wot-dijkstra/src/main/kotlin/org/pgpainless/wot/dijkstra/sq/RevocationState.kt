@@ -7,13 +7,26 @@ package org.pgpainless.wot.dijkstra.sq
 import java.util.*
 
 /**
- * Revocation State of
+ * Revocation State of a certificate.
  */
 class RevocationState private constructor(val type: Type, val timestamp: Date?) {
 
     enum class Type {
+        /**
+         * Signatures issued by a soft-revoked certificate after [timestamp] are no longer
+         * considered valid.
+         */
         Soft,
+
+        /**
+         * Signatures issued at any time by a hard-revoked certificate are no longer considered valid,
+         * even if the creation time is before [timestamp].
+         */
         Hard,
+
+        /**
+         * The certificate is still valid.
+         */
         None
     }
 
