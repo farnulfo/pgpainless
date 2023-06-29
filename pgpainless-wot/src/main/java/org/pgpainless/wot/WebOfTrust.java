@@ -55,7 +55,7 @@ import pgp.certificate_store.exception.BadDataException;
  *
  * @see <a href="https://sequoia-pgp.gitlab.io/sequoia-wot/">OpenPGP Web of Trust</a>
  */
-public class WebOfTrust implements CertificateAuthority {
+public class WebOfTrust {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(WebOfTrust.class);
 
@@ -380,12 +380,6 @@ public class WebOfTrust implements CertificateAuthority {
             map.put(key, value);
         }
         return value;
-    }
-
-    @Override
-    public boolean isAuthorized(PGPPublicKeyRing certificate, String userId) {
-        // TODO: Heiko! Implement!
-        return false;
     }
 
     @Override
