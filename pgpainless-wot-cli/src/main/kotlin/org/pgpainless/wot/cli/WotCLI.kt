@@ -8,11 +8,8 @@ import org.pgpainless.util.DateUtil
 import org.pgpainless.wot.cli.subcommands.*
 import org.pgpainless.wot.dijkstra.sq.ReferenceTime
 import picocli.CommandLine
-import picocli.CommandLine.Command
-import picocli.CommandLine.HelpCommand
-import picocli.CommandLine.Option
+import picocli.CommandLine.*
 import java.io.File
-import java.util.*
 import java.util.concurrent.Callable
 import kotlin.system.exitProcess
 
