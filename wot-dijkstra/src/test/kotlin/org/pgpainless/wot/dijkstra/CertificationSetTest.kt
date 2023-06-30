@@ -65,4 +65,16 @@ class CertificationSetTest {
         set.merge(set)
         assertEquals(2, set.certifications.size)
     }
+
+    @Test
+    fun testToString() {
+        val empty = CertificationSet.empty(alice, bob)
+        assertEquals("", empty.toString())
+
+        val twoCerts = CertificationSet.fromCertification(aliceSignsBob)
+        twoCerts.add(aliceSignsBobUserId)
+
+        assertEquals("0000000000000000000000000000000000000000 delegates to 1111111111111111111111111111111111111111\n" +
+                "0000000000000000000000000000000000000000 certifies [Bob <bob@example.org>] 1111111111111111111111111111111111111111", twoCerts.toString())
+    }
 }
