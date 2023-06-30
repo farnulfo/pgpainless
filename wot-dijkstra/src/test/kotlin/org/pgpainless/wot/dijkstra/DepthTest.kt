@@ -66,6 +66,16 @@ class DepthTest {
     }
 
     @Test
+    fun testMin() {
+        val unlimited = unconstrained()
+        val limit2 = limited(2)
+        assertEquals(limit2, limit2.min(unlimited))
+        assertEquals(limit2, unlimited.min(limit2))
+        assertEquals(limit2, limit2.min(limit2))
+        assertEquals(unlimited, unlimited.min(unlimited))
+    }
+
+    @Test
     fun testAutoUnconstrained() {
         val depth = auto(255)
         assertTrue(depth.isUnconstrained())
