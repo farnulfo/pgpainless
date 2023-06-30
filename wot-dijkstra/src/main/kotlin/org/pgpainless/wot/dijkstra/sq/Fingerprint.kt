@@ -4,12 +4,16 @@
 
 package org.pgpainless.wot.dijkstra.sq
 
-class Fingerprint(fingerprint: String) {
+class Fingerprint(fingerprint: String) : Comparable<Fingerprint> {
 
     val fingerprint: String
 
     init {
         this.fingerprint = fingerprint.uppercase()
+    }
+
+    override fun compareTo(other: Fingerprint): Int {
+        return fingerprint.compareTo(other.fingerprint)
     }
 
     override fun equals(other: Any?): Boolean {
