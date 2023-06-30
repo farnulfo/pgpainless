@@ -282,4 +282,9 @@ public class WotTestVectors {
         }
         return inputStream;
     }
+
+    public PGPPublicKeyRing getFelixKey()
+            throws IOException {
+        return PGPainless.readKeyRing().publicKeyRing(getTestResourceInputStream("test_vectors/anomalies/felix.pub"));
+    }
 }

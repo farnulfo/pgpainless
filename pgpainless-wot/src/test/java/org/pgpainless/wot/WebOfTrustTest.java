@@ -155,4 +155,14 @@ public class WebOfTrustTest {
         assertTrue(network.getEdges().isEmpty());
         assertTrue(network.getReverseEdges().isEmpty());
     }
+
+    @Test
+    public void testWotWithAnomaly() throws BadDataException, IOException, InterruptedException {
+        PGPCertificateDirectory store = TestCertificateStores.anomalyGraph();
+        WebOfTrust wot = new WebOfTrust(store);
+        wot.initialize();
+        Network network = wot.getNetwork();
+
+        assertEquals(1, network.getNodes().size());
+    }
 }
