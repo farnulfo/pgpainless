@@ -54,6 +54,13 @@ public class TestCertificateStores {
         return certD;
     }
 
+    public static PGPCertificateDirectory anomalyGraph()
+            throws BadDataException, IOException, InterruptedException {
+        PGPCertificateDirectory wotStore = createInMemoryCertificateDirectory();
+        wotStore.insert(getTestVector("anomalies/felix.pub"), merger);
+        return wotStore;
+    }
+
     private static PGPCertificateDirectory createInMemoryCertificateDirectory() {
         SubkeyLookup subkeyLookup = new InMemorySubkeyLookup();
         KeyMaterialReaderBackend readerBackend = new KeyMaterialReader();
