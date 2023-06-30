@@ -23,11 +23,7 @@ interface ReferenceTime {
          */
         @JvmStatic
         fun now(): ReferenceTime {
-            val now = Date()
-            return object: ReferenceTime {
-                override val timestamp: Date
-                    get() = now
-            }
+            return timestamp(Date())
         }
 
         /**
