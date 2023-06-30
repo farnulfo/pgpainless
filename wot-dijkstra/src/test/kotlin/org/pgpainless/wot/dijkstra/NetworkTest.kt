@@ -19,5 +19,7 @@ class NetworkTest {
         assert(network.edges.isEmpty())
         assert(network.reverseEdges.isEmpty())
         assertEquals(referenceTime, network.referenceTime)
+        assertEquals(0, network.numberOfEdges)
+        assertEquals(0, network.numberOfSignatures)
     }
 }
