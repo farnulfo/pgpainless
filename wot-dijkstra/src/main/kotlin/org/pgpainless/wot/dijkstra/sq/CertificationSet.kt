@@ -11,14 +11,22 @@ package org.pgpainless.wot.dijkstra.sq
  *
  * @param issuer synopsis of the certificate that issued the [Certifications][Certification]
  * @param target synopsis of the certificate that is targeted by the [Certifications][Certification]
- * @param certifications [MutableMap] keyed by user-ids, whose values are [MutableLists][MutableList] of
+ * @param certifications [Map] keyed by user-ids, whose values are [Lists][List] of
  * [Certifications][Certification] that are calculated over the key user-id. Note, that the key can also be null for
  * [Certifications][Certification] over the targets primary key.
  */
-data class CertificationSet(
+class CertificationSet(
         val issuer: CertSynopsis,
         val target: CertSynopsis,
-        val certifications: MutableMap<String?, MutableList<Certification>>) {
+        certifications: Map<String?, List<Certification>>) {
+
+    init {
+        certifications.forEach { (t, u) -> _certifications[t] = u.toMutableList() }
+    }
+
+    private val _certifications: MutableMap<String?, MutableList<Certification>> = mutableMapOf()
+    val certifications: Map<String?, List<Certification>>
+        get() = _certifications.toMutableMap()
 
     companion object {
 
@@ -76,10 +84,10 @@ data class CertificationSet(
         require(issuer.fingerprint == certification.issuer.fingerprint) { "Issuer fingerprint mismatch." }
         require(target.fingerprint == certification.target.fingerprint) { "Target fingerprint mismatch." }
 
-        var certificationsForUserId: MutableList<Certification>? = certifications[certification.userId]
+        var certificationsForUserId: MutableList<Certification>? = _certifications[certification.userId]
         if (certificationsForUserId == null) {
             certificationsForUserId = ArrayList()
-            certifications[certification.userId] = certificationsForUserId
+            _certifications[certification.userId] = certificationsForUserId
         }
         certificationsForUserId.add(certification)
     }
