@@ -93,7 +93,19 @@ class Depth(val limit: Int?) : Comparable<Depth> {
         }
     }
 
+    override fun equals(other: Any?): Boolean {
+        if (other !is Depth) {
+            return false
+        }
+
+        return limit == other.limit
+    }
+
     override fun toString() : String {
         return if (isUnconstrained()) { "unconstrained" } else { limit!!.toString() }
+    }
+
+    override fun hashCode(): Int {
+        return limit ?: 0
     }
 }
