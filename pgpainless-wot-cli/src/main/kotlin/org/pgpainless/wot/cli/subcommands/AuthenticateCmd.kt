@@ -6,10 +6,13 @@ package org.pgpainless.wot.cli.subcommands
 
 import org.pgpainless.wot.api.AuthenticateAPI
 import org.pgpainless.wot.cli.WotCLI
+import org.pgpainless.wot.dijkstra.sq.Fingerprint
+import org.pgpainless.wot.dijkstra.sq.Path
 import picocli.CommandLine
 import picocli.CommandLine.Command
 import picocli.CommandLine.Parameters
 import picocli.CommandLine.ParentCommand
+import java.text.SimpleDateFormat
 import java.util.concurrent.Callable
 
 @Command(name = "authenticate")
@@ -27,12 +30,46 @@ class AuthenticateCmd: Callable<Int> {
     @CommandLine.Option(names = ["--email"], description = ["Consider all user-IDs that contain the given email address."])
     var email = false
 
+    private val dateFormat: SimpleDateFormat = SimpleDateFormat("yyyy-MM-dd")
+
     /**
      * Execute the command.
      * @return exit code
      */
     override fun call(): Int {
-        val api = AuthenticateAPI()
-        TODO("Not yet implemented")
+        val result = parent.api.authenticate(AuthenticateAPI.Arguments(
+                Fingerprint(fingerprint), userId, email))
+        print(formatResult(result))
+        if (result.percentage < 100) {
+            return -1
+        }
+        return 0
+    }
+
+    internal fun formatResult(result: AuthenticateAPI.Result): String {
+        if (result.percentage < 100) {
+            return "No paths found."
+        }
+
+        val sb = StringBuilder()
+        sb.appendLine("[✓] ${result.fingerprint} ${result.userId}: fully authenticated (${result.percentage}%)")
+        for ((pIndex, path: Path) in result.paths.paths.withIndex()) {
+            sb.appendLine("  Path #${pIndex + 1} of ${result.paths.paths.size}, trust amount ${path.amount}:")
+            for ((cIndex, certification) in path.certifications.withIndex()) {
+                val issuerUserId = certification.issuer.userIds.keys.firstOrNull()?.let { " (\"${it}\")" } ?: ""
+                when (cIndex) {
+                    0 -> {
+                        sb.appendLine("    ◯ ${certification.issuer.fingerprint}${issuerUserId}")
+                    }
+                    else -> {
+                        sb.appendLine("    ├ ${certification.issuer.fingerprint}${issuerUserId}")
+                    }
+                }
+                sb.appendLine("    │   certified the following binding on ${dateFormat.format(certification.creationTime)}")
+            }
+            sb.appendLine("    └ ${result.fingerprint} \"${result.userId}\"")
+        }
+
+        return sb.toString()
     }
 }

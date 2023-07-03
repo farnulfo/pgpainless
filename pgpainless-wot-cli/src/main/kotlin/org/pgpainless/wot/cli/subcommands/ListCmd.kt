@@ -4,7 +4,6 @@
 
 package org.pgpainless.wot.cli.subcommands
 
-import org.pgpainless.wot.api.ListAPI
 import org.pgpainless.wot.cli.WotCLI
 import picocli.CommandLine
 import picocli.CommandLine.Command
@@ -22,7 +21,7 @@ class ListCmd: Callable<Int> {
      * @return exit code
      */
     override fun call(): Int {
-        val api = ListAPI()
+        val api = parent.api
         TODO("Not yet implemented")
     }
 }
