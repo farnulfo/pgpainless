@@ -20,14 +20,30 @@ class CertificationTest {
             null,
             RevocationState.notRevoked(),
             mapOf(Pair("Bob <bob@example.org>", RevocationState.notRevoked())))
+    private val charlie = CertSynopsis(
+            Fingerprint("22222222222222222222222222222222222222222222"),
+            null,
+            RevocationState.notRevoked(),
+            mapOf())
 
     @Test
-    fun testToString() {
+    fun `verify result of toString() on certification`() {
         val certification = Certification(alice, "Bob <bob@example.org>", bob, Date())
         assertEquals("0000000000000000000000000000000000000000 (Alice <alice@pgpainless.org>) certifies [Bob <bob@example.org>] 1111111111111111111111111111111111111111",
                 certification.toString())
+    }
+
+    @Test
+    fun `verify result of toString() on delegation`() {
         val delegation = Certification(alice, null, bob, Date())
         assertEquals("0000000000000000000000000000000000000000 (Alice <alice@pgpainless.org>) delegates to 1111111111111111111111111111111111111111",
+                delegation.toString())
+    }
+
+    @Test
+    fun `verify result of toString() on delegation with userId-less issuer`() {
+        val delegation = Certification(charlie, null, bob, Date())
+        assertEquals("22222222222222222222222222222222222222222222 delegates to 1111111111111111111111111111111111111111",
                 delegation.toString())
     }
 }
