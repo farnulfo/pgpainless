@@ -6,6 +6,7 @@ package org.pgpainless.wot.dijkstra
 
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.pgpainless.wot.dijkstra.sq.Depth
 import org.pgpainless.wot.dijkstra.sq.Depth.Companion.auto
 import org.pgpainless.wot.dijkstra.sq.Depth.Companion.limited
 import org.pgpainless.wot.dijkstra.sq.Depth.Companion.unconstrained
@@ -14,43 +15,54 @@ import kotlin.test.*
 class DepthTest {
 
     @Test
-    fun testUnlimitedItem() {
+    fun `verify Depth#unconstrained() is in fact unconstrained`() {
         val depth = unconstrained()
         assert(depth.isUnconstrained())
+    }
+
+    @Test
+    fun `verify Depth#unconstrained() has null depth`() {
+        val depth = unconstrained()
         assertNull(depth.limit)
     }
 
     @Test
-    fun testLimitedItem() {
+    fun `verify Depth#limited(2) initializes properly`() {
         val limited = limited(2)
-        assertFalse(limited.isUnconstrained())
         assertNotNull(limited.limit)
         assertEquals(2, limited.limit)
     }
 
     @Test
-    fun testDecreaseUnconstrainedYieldsUnconstrained() {
+    fun `verify Depth#limited(X) is not unconstrained`() {
+        val limited = limited(1)
+        assertFalse(limited.isUnconstrained())
+    }
+
+    @Test
+    fun `verify that decrease()ing an unconstrained Depth is an idempotent operation`() {
         val unconstrained = unconstrained()
         val decreased = unconstrained.decrease(20)
         assertTrue(decreased.isUnconstrained())
     }
 
     @Test
-    fun testDecreaseLimitedYieldsDecreasedLimited() {
-        val limited = limited(1)
-        val decreased = limited.decrease(1)
+    fun `verify that decrease()ing a limited Depth yields a properly decreased result`() {
+        val limited = limited(3)
+        val decreased = limited.decrease(2)
         assertFalse(decreased.isUnconstrained())
-        assertEquals(0, decreased.limit)
+        assertEquals(1, decreased.limit)
     }
 
     @Test
-    fun testDecreaseLimitedTooMuchYieldsException() {
-        val limited = limited(0)
-        assertThrows<IllegalArgumentException> { limited.decrease(1) }
+    fun `verify that decrease()ing a Depth object by a value greater than its current value fails`() {
+        assertThrows<IllegalArgumentException> { limited(0).decrease(1) }
+        assertThrows<IllegalArgumentException> { limited(1).decrease(2) }
+        assertThrows<IllegalArgumentException> { limited(17).decrease(42) }
     }
 
     @Test
-    fun testCompareTo() {
+    fun `verify proper function of compareTo()`() {
         val unlimited = unconstrained()
         val unlimited2 = unconstrained()
         val depth2 = limited(2)
@@ -66,30 +78,51 @@ class DepthTest {
     }
 
     @Test
-    fun testMin() {
-        val unlimited = unconstrained()
-        val limit2 = limited(2)
-        assertEquals(limit2, limit2.min(unlimited))
-        assertEquals(limit2, unlimited.min(limit2))
-        assertEquals(limit2, limit2.min(limit2))
-        assertEquals(unlimited, unlimited.min(unlimited))
+    fun `verify that min() of a Depth with itself yields itself`() {
+        val limit = limited(17)
+        assertEquals(limit, limit.min(limit))
     }
 
     @Test
-    fun testAutoUnconstrained() {
-        val depth = auto(255)
-        assertTrue(depth.isUnconstrained())
+    fun `verify that min() of two limited values returns the smaller one`() {
+        val limit1 = limited(1)
+        val limit4 = limited(4)
+
+        assertEquals(limit1, limit1.min(limit4))
+        assertEquals(limit1, limit4.min(limit1))
     }
 
     @Test
-    fun testAutoLimited() {
-        val depth = auto(120)
-        assertFalse(depth.isUnconstrained())
-        assertEquals(120, depth.limit)
+    fun `verify that min() of a limited and an unconstrained value yields the limited value`() {
+        val limit0 = limited(0)
+        val limit1 = limited(1)
+        assertEquals(limit0, unconstrained().min(limit0))
+        assertEquals(limit1, limit1.min(unconstrained()))
     }
 
     @Test
-    fun testOutOfBounds() {
+    fun `verify that the min() of unconstrained and unconstrained is unconstrained`() {
+        val unconstrained = unconstrained()
+        assertEquals(unconstrained, unconstrained.min(unconstrained))
+    }
+
+    @Test
+    fun `verify that Depth#auto(255) yields an unconstrained Depth`() {
+        assertTrue { auto(255).isUnconstrained() }
+        assertNull(auto(255).limit)
+    }
+
+    @Test
+    fun `verify that Depth#auto(X) for values from 0 to 254 yield limited Depth objects`() {
+        assertFalse { auto(0).isUnconstrained() }
+        assertFalse { auto(120).isUnconstrained() }
+        assertFalse { auto(254).isUnconstrained() }
+
+        assertNotNull(auto(42).limit)
+    }
+
+    @Test
+    fun `verify that depth values out of the range from 0 to 255 yield failures`() {
         assertThrows<IllegalArgumentException> { limited(-1) }
         assertThrows<IllegalArgumentException> { limited(256) }
         assertThrows<IllegalArgumentException> { auto(-1) }
@@ -97,12 +130,13 @@ class DepthTest {
     }
 
     @Test
-    fun testToStringUnconstrained() {
+    fun `verify that toString() of Depth#unconstrained() returns the String 'unconstrained'`() {
         assertEquals("unconstrained", unconstrained().toString())
     }
 
     @Test
-    fun testToStringLimited() {
+    fun `verify that toString() of a limited Depth returns the String of its value`() {
         assertEquals("1", limited(1).toString())
+        assertEquals("42", limited(42).toString())
     }
 }
