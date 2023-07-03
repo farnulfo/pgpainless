@@ -4,6 +4,11 @@
 
 package org.pgpainless.wot.api
 
-class ListAPI {
+import org.pgpainless.wot.dijkstra.sq.Paths
 
+interface ListAPI {
+
+    fun list(): Result
+
+    data class Result(val paths: Paths)
 }

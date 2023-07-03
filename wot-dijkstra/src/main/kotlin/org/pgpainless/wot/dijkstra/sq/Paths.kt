@@ -7,14 +7,19 @@ package org.pgpainless.wot.dijkstra.sq
 /**
  * List of individual [Paths][Path].
  *
- * @param paths list of paths
+ * @param _paths list of paths
  */
-class Paths(private val paths: MutableList<Item>) {
+class Paths(private val _paths: MutableList<Item>) {
 
     /**
      * Empty collection of paths.
      */
     constructor(): this(mutableListOf<Item>())
+
+    val paths: List<Path>
+        get() {
+            return _paths.map { it.path }
+        }
 
     /**
      * Add a [Path] to the list.
@@ -25,7 +30,7 @@ class Paths(private val paths: MutableList<Item>) {
         require(amount <= path.amount) {
             "Amount too small. TODO: Better error message"
         }
-        paths.add(Item(path, amount))
+        _paths.add(Item(path, amount))
     }
 
     /**
@@ -33,7 +38,7 @@ class Paths(private val paths: MutableList<Item>) {
      */
     val amount: Int
         get() {
-            return paths.sumOf { it.amount }
+            return _paths.sumOf { it.amount }
         }
 
     /**

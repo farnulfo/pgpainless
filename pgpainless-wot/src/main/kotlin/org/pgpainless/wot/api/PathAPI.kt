@@ -4,6 +4,28 @@
 
 package org.pgpainless.wot.api
 
-class PathAPI {
+import org.pgpainless.wot.dijkstra.sq.Fingerprint
 
+interface PathAPI {
+
+    fun path(arguments: Arguments): Result
+
+    data class Arguments(val rootFingerprint: Fingerprint, val pathFingerprints: List<Fingerprint>, val userId: String)
+
+    interface Result {
+
+        fun isSuccess(): Boolean
+
+        class Success: Result {
+            override fun isSuccess(): Boolean {
+                return true
+            }
+        }
+
+        data class Failure(val information: List<String>): Result {
+            override fun isSuccess(): Boolean {
+                return false
+            }
+        }
+    }
 }

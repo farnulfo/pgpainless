@@ -4,7 +4,6 @@
 
 package org.pgpainless.wot.cli.subcommands
 
-import org.pgpainless.wot.api.PathAPI
 import org.pgpainless.wot.cli.WotCLI
 import picocli.CommandLine
 import picocli.CommandLine.Command
@@ -29,7 +28,7 @@ class PathCmd: Callable<Int> {
      * @return exit code
      */
     override fun call(): Int {
-        val api = PathAPI()
+        val api = parent.api
         TODO("Not yet implemented")
     }
 }

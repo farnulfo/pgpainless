@@ -4,6 +4,13 @@
 
 package org.pgpainless.wot.api
 
-class LookupAPI {
+import org.pgpainless.wot.dijkstra.sq.Paths
 
+interface LookupAPI {
+
+    fun lookup(arguments: Arguments): Result
+
+    data class Arguments(val userId: String, val email: Boolean = false)
+
+    data class Result(val paths: Paths)
 }

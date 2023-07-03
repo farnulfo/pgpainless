@@ -6,9 +6,10 @@ package org.pgpainless.wot.cli
 
 import org.pgpainless.certificate_store.PGPainlessCertD
 import org.pgpainless.util.DateUtil
+import org.pgpainless.wot.api.WoTAPI
 import org.pgpainless.wot.cli.subcommands.*
+import org.pgpainless.wot.dijkstra.sq.Fingerprint
 import org.pgpainless.wot.dijkstra.sq.ReferenceTime
-import pgp.cert_d.PGPCertificateDirectory
 import pgp.cert_d.PGPCertificateStoreAdapter
 import pgp.cert_d.subkey_lookup.InMemorySubkeyLookupFactory
 import pgp.certificate_store.PGPCertificateStore
@@ -65,25 +66,32 @@ class WotCLI: Callable<Int> {
     @Option(names = ["--time"], description = ["Reference time."])
     var time: String? = null
 
-    fun getReferenceTime(): ReferenceTime {
-        return if (time == null) {
-            ReferenceTime.now()
-        } else {
-            val date = DateUtil.parseUTCDate(time)
-            ReferenceTime.timestamp(date)
+    private val referenceTime: ReferenceTime
+        get() {
+            return if (time == null) {
+                ReferenceTime.now()
+            } else {
+                val date = DateUtil.parseUTCDate(time)
+                ReferenceTime.timestamp(date)
+            }
         }
-    }
 
-    fun getCertificateStore(): PGPCertificateStore {
-        requireNotNull(certificateSource.pgpCertD) {
-            "Currently, only --cert-d is supported."
+    private val certificateStore: PGPCertificateStore
+        get() {
+            requireNotNull(certificateSource.pgpCertD) {
+                "Currently, only --cert-d is supported."
+            }
+            val certD = PGPainlessCertD.fileBased(
+                    certificateSource.pgpCertD,
+                    InMemorySubkeyLookupFactory())
+
+            return PGPCertificateStoreAdapter(certD)
         }
-        val certD = PGPainlessCertD.fileBased(
-                certificateSource.pgpCertD,
-                InMemorySubkeyLookupFactory())
 
-        return PGPCertificateStoreAdapter(certD)
-    }
+    private val trustRoots: List<Fingerprint>
+        get() {
+            return trustRoot.map { Fingerprint(it) }
+        }
 
     /**
      * Execute the command.
@@ -98,6 +106,17 @@ class WotCLI: Callable<Int> {
 
         return 0
     }
+
+    val api: WoTAPI
+        get() {
+            return WoTAPI(
+                    certStores = listOf(certificateStore),
+                    trustRoots = trustRoots,
+                    gossip = false,
+                    certificationNetwork = false,
+                    trustAmount = amount,
+                    referenceTime = referenceTime)
+        }
 
     companion object {
         @JvmStatic
