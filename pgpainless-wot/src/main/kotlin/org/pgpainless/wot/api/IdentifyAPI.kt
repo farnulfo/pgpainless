@@ -5,4 +5,5 @@
 package org.pgpainless.wot.api
 
 class IdentifyAPI {
+
 }
