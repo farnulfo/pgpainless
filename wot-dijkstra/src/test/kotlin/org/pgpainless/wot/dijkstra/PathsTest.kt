@@ -23,13 +23,13 @@ class PathsTest {
     private val alice_bob_2 = Certification(alice, bob, 160, Depth.limited(1))
 
     @Test
-    fun emptyPathsTest() {
+    fun `verify that an empty Paths object has an amount of zero`() {
         val empty = Paths()
         assertEquals(0, empty.amount)
     }
 
     @Test
-    fun singlePathTest() {
+    fun `verify that the amount of a Paths containing a single Path equals the Path's amount`() {
         val path = Path(alice).apply { append(alice_bob_1) }
         val single = Paths().apply { add(path, 140) }
 
@@ -37,7 +37,7 @@ class PathsTest {
     }
 
     @Test
-    fun twoPathsTest() {
+    fun `verify that the amounts of two Path objects sum up`() {
         val path1 = Path(alice).apply { append(alice_bob_1) }
         val path2 = Path(alice).apply { append(alice_bob_2) }
         val twoPaths = Paths().apply {
@@ -49,7 +49,7 @@ class PathsTest {
     }
 
     @Test
-    fun notEnoughAmountTest() {
+    fun `verify that a Path cannot be added if its amount is less than the method argument armound`() {
         val path = Path(alice).apply { append(alice_bob_1) }
         val paths = Paths()
         assertThrows<IllegalArgumentException> {
@@ -57,6 +57,9 @@ class PathsTest {
         }
     }
 
-    fun Certification(issuer: CertSynopsis, target: CertSynopsis, amount: Int, depth: Depth): Certification =
+    /**
+     * Factory method to create a [Certification] more easily for test purposes.
+     */
+    private fun Certification(issuer: CertSynopsis, target: CertSynopsis, amount: Int, depth: Depth): Certification =
             Certification(issuer, target, null, Date(), null, true, amount, depth, RegexSet.wildcard())
 }
