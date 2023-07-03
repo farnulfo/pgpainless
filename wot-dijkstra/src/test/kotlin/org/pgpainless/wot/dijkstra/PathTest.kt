@@ -37,7 +37,7 @@ class PathTest {
     private val root_root = Certification(root, root, 120, Depth.limited(1))
 
     @Test
-    fun emptyPathTest() {
+    fun `verify that an empty Path is properly initialized`() {
         val empty = Path(root)
         assertEquals(root, empty.target)
         assertEquals(listOf(root), empty.certificates)
@@ -47,31 +47,36 @@ class PathTest {
     }
 
     @Test
-    fun appendTest() {
+    fun `verify that append()ing multiple Certifications properly changes the trust amount of the Path`() {
         val path = Path(root)
-        assertEquals(listOf(root), path.certificates)
-
-        assertThrows<IllegalArgumentException> { path.append(alice_bob) }
-        assertEquals(listOf(root), path.certificates)
         assertEquals(1, path.length)
+        assertEquals(120, path.amount) // default amount of an empty path
 
         path.append(root_alice__fully_trusted)
         assertEquals(listOf(root_alice__fully_trusted), path.certifications)
         assertEquals(listOf(root, alice), path.certificates)
         assertEquals(alice, path.target)
         assertEquals(2, path.length)
-        assertEquals(255, path.amount)
+        assertEquals(255, path.amount) // single certification -> path has its amount
 
         path.append(alice_bob)
         assertEquals(listOf(root_alice__fully_trusted, alice_bob), path.certifications)
         assertEquals(listOf(root, alice, bob), path.certificates)
         assertEquals(bob, path.target)
         assertEquals(3, path.length)
-        assertEquals(120, path.amount)
+        assertEquals(120, path.amount) // second certification has less amount, so amount is capped to its value
     }
 
     @Test
-    fun appendTest2() {
+    fun `verify that append()ing a Certification whose issuer mismatches the target of the Path fails`() {
+        val path = Path(root)
+        assertEquals(listOf(root), path.certificates)
+        assertEquals(1, path.length)
+        assertThrows<IllegalArgumentException> { path.append(alice_bob) }
+    }
+
+    @Test
+    fun `verify that append()ing a Certification fails if it exceeds the Path's depth`() {
         val path = Path(root)
         path.append(root_alice__marginally_trusted)
         assertEquals(60, path.amount)
@@ -83,7 +88,7 @@ class PathTest {
     }
 
     @Test
-    fun appendTest3() {
+    fun `verify that append()ing a Certification fails of the result would contain cycles`() {
         val path = Path(root)
         path.append(root_alice__fully_trusted)
         assertThrows<IllegalArgumentException> {
@@ -93,11 +98,14 @@ class PathTest {
     }
 
     @Test
-    fun appendTest4() {
+    fun `verify that a Path cannot point to its own root`() {
         val path = Path(root)
         assertThrows<IllegalArgumentException> { path.append(root_root) }
     }
 
+    /**
+     * Factory method for legible initialization of [Certification] objects for test purposes.
+     */
     fun Certification(issuer: CertSynopsis, target: CertSynopsis, amount: Int, depth: Depth): Certification =
             Certification(issuer, target, null, Date(), null, true, amount, depth, RegexSet.wildcard())
 }
