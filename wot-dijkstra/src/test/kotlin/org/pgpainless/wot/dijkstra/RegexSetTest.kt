@@ -11,27 +11,31 @@ class RegexSetTest {
     private val pgpainlessOrgRegex = "<[^>]+[@.]pgpainless\\.org>\$"
 
     @Test
-    fun testWildcard() {
+    fun `verify that the wildcard RegexSet matches anything`() {
         val wildcard = RegexSet.wildcard()
         assertTrue { wildcard.matches("Alice <alice@pgpainless.org>") }
         assertTrue { wildcard.matches("Bob <bob@example.com>") }
+        assertTrue { wildcard.matches("") }
+        assertTrue { wildcard.matches("X Æ A-12") }
     }
 
     @Test
-    fun testDomainRegex() {
+    fun `verify that a single domain regex only matches UIDs from that domain`() {
         val exampleCom = RegexSet.fromExpression(exampleComRegex)
         assertTrue { exampleCom.matches("Bob <bob@example.com>") }
         assertTrue { exampleCom.matches("<admin@example.com>") }
+
         assertFalse { exampleCom.matches("Spoofed <bob@examp1e.com>") }
         assertFalse { exampleCom.matches("Alice <alice@pgpainless.org>") }
     }
 
     @Test
-    fun testMultipleDomainRegex() {
+    fun `verify that a RegexSet built from two different domain regexes only matches UIDs from either of the domains`() {
         val multi = RegexSet.fromExpressionList(listOf(exampleComRegex, pgpainlessOrgRegex))
         assertTrue { multi.matches("Bob <bob@example.com>") }
         assertTrue { multi.matches("Alice <alice@pgpainless.org>") }
         assertTrue { multi.matches("<info@pgpainless.org>") }
+
         assertFalse { multi.matches("Alice") }
         assertFalse { multi.matches("<info@examp1e.com>") }
     }
