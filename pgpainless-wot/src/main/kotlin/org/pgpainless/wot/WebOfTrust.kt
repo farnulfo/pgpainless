@@ -134,7 +134,10 @@ class WebOfTrust(private val certificateStore: PGPCertificateStore) {
                                                  private val policy: Policy,
                                                  private val referenceTime: ReferenceTime) {
 
-            private val LOGGER = LoggerFactory.getLogger(NetworkBuilder::class.java)
+            companion object {
+                @JvmStatic
+                private val LOGGER = LoggerFactory.getLogger(NetworkBuilder::class.java)
+            }
 
             // certificates keyed by fingerprint
             private val byFingerprint: MutableMap<Fingerprint, KeyRingInfo> = HashMap()
