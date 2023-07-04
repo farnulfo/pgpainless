@@ -4,7 +4,7 @@
 
 allprojects {
     ext {
-        shortVersion = '1.5.4-SNAPSHOT'
+        shortVersion = '1.5.4'
         isSnapshot = true
         pgpainlessMinAndroidSdk = 10
         javaSourceCompatibility = 1.8
