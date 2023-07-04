@@ -306,7 +306,7 @@ class Query(
     /// amount to use for the certification and whether any regular
     /// expressions should be respected.  To simply use the values in
     /// the certification return None using the callback: `|_| None`.
-     private
+    // FIXME: public for tests, should be private
     fun backwardPropagate(targetFpr: Fingerprint,
                           targetUserid: String,
                           selfSigned: Boolean,
