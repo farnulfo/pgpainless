@@ -38,7 +38,7 @@ class Path(
             return if (edges.isEmpty()) {
                 root
             } else {
-                edges[edges.size - 1].target
+                edges.last().target
             }
         }
 
@@ -48,8 +48,7 @@ class Path(
      */
     val certificates: List<CertSynopsis>
         get() {
-            val certs: MutableList<CertSynopsis> = ArrayList()
-            certs.add(root)
+            val certs: MutableList<CertSynopsis> = mutableListOf(root)
             for (certification in edges) {
                 certs.add(certification.target)
             }
@@ -67,7 +66,7 @@ class Path(
      * List of edges.
      */
     val certifications: List<Certification>
-        get() = ArrayList(edges)
+        get() = edges.toList()
 
     /**
      * Trust amount of the path.
@@ -99,16 +98,20 @@ class Path(
             "Not enough depth."
         }
 
+        // root is c's target -> illegal cycle
         var cyclic = root.fingerprint == certification.target.fingerprint
         for ((i, edge) in edges.withIndex()) {
             if (cyclic) {
                 break
             }
+            // existing edge points to c's target -> illegal cycle
             if (edge.target.fingerprint == certification.target.fingerprint) {
-                cyclic = if (i == edges.size - 1) {
-                    edge.userId == certification.userId
-                } else {
+                cyclic = if (edges.lastIndex != i) {
+                    // Cycle in the middle of the ~~street~~ path
                     true
+                } else {
+                    // Not a cycle, if we point to a different user-id
+                    edge.userId == certification.userId
                 }
             }
         }
