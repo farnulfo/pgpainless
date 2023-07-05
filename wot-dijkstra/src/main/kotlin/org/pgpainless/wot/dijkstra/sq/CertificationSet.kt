@@ -77,7 +77,8 @@ class CertificationSet(
 
     /**
      * Add a single [Certification] into this objects [certifications].
-     * If there are already some [Cer]
+     * Adding multiple [Certifications][Certification] for the same datum, but with different creation times results in
+     * only the most recent [Certification(s)][Certification] to be preserved.
      *
      * @param certification [Certification] with the same issuer fingerprint and target fingerprint as this object.
      */
