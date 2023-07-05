@@ -20,11 +20,11 @@ import kotlin.test.Test
 
 class WebOfTrustTest {
 
-    private val fooBankCa = fingerprintOf(WotTestVectors.getTestVectors().freshFooBankCaCert)
-    private val fooBankEmployee = fingerprintOf(WotTestVectors.getTestVectors().freshFooBankEmployeeCert)
-    private val fooBankAdmin = fingerprintOf(WotTestVectors.getTestVectors().freshFooBankAdminCert)
-    private val barBankCa = fingerprintOf(WotTestVectors.getTestVectors().freshBarBankCaCert)
-    private val barBankEmployee = fingerprintOf(WotTestVectors.getTestVectors().freshBarBankEmployeeCert)
+    private val fooBankCa = fingerprintOf(WotTestVectors.freshFooBankCaCert)
+    private val fooBankEmployee = fingerprintOf(WotTestVectors.freshFooBankEmployeeCert)
+    private val fooBankAdmin = fingerprintOf(WotTestVectors.freshFooBankAdminCert)
+    private val barBankCa = fingerprintOf(WotTestVectors.freshBarBankCaCert)
+    private val barBankEmployee = fingerprintOf(WotTestVectors.freshBarBankEmployeeCert)
 
     private fun fingerprintOf(cert: PGPPublicKeyRing): Fingerprint {
         return Fingerprint(OpenPgpFingerprint.of(cert).toString())

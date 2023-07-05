@@ -34,16 +34,19 @@ dependencies {
     testFixturesImplementation "org.junit.jupiter:junit-jupiter-api:$junitVersion"
     testFixturesImplementation "org.junit.jupiter:junit-jupiter-params:$junitVersion"
     testFixturesRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
+    testFixturesApi(project(":pgpainless-core"))
 
     // Logging
     testImplementation "ch.qos.logback:logback-classic:$logbackVersion"
 
-    implementation(project(":pgpainless-core"))
-    api(project(":wot-dijkstra"))
-
     // Certificate store
     api "org.pgpainless:pgp-certificate-store:$certDJavaVersion"
-    api "org.pgpainless:pgpainless-cert-d:$pgpainlessCertDVersion"
+    api ("org.pgpainless:pgpainless-cert-d:$pgpainlessCertDVersion") {
+        exclude(group: "org.pgpainless", module: "pgpainless-core")
+    }
+
+    implementation(project(":pgpainless-core"))
+    api(project(":wot-dijkstra"))
 }
 
 test {
