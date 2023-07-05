@@ -78,18 +78,11 @@ class Depth private constructor(val limit: Int?) : Comparable<Depth> {
     }
 
     override fun compareTo(other: Depth): Int {
-        return if (isUnconstrained()) {
-            if (other.isUnconstrained()) {
-                0
-            } else {
-                1
-            }
-        } else {
-            if (other.isUnconstrained()) {
-                -1
-            } else {
-                limit!!.compareTo(other.limit!!)
-            }
+        return when (Pair(isUnconstrained(), other.isUnconstrained())) {
+            Pair(true, true) -> 0
+            Pair(true, false) -> 1
+            Pair(false, true) -> -1
+            else -> limit!!.compareTo(other.limit!!)
         }
     }
 
