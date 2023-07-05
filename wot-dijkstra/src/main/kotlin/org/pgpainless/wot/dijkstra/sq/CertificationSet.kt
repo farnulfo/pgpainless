@@ -77,6 +77,7 @@ class CertificationSet(
 
     /**
      * Add a single [Certification] into this objects [certifications].
+     * If there are already some [Cer]
      *
      * @param certification [Certification] with the same issuer fingerprint and target fingerprint as this object.
      */
@@ -89,7 +90,18 @@ class CertificationSet(
             certificationsForUserId = ArrayList()
             _certifications[certification.userId] = certificationsForUserId
         }
-        certificationsForUserId.add(certification)
+
+        if (certificationsForUserId.isEmpty()) {
+            certificationsForUserId.add(certification)
+            return
+        }
+
+        val existing = certificationsForUserId[0]
+        if (existing.creationTime.before(certification.creationTime)) {
+            certificationsForUserId.clear() // throw away older certifications
+            certificationsForUserId.add(certification)
+        }
+        // else this certification is older, so ignore
     }
 
     override fun toString(): String {
