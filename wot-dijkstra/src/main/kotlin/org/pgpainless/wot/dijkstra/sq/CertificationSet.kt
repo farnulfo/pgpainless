@@ -21,7 +21,11 @@ class CertificationSet(
         certifications: Map<String?, List<Certification>>) {
 
     init {
-        certifications.forEach { (t, u) -> _certifications[t] = u.toMutableList() }
+        certifications.forEach { (_, certifications) ->
+            certifications.forEach {
+                add(it)
+            }
+        }
     }
 
     private val _certifications: MutableMap<String?, MutableList<Certification>> = mutableMapOf()
