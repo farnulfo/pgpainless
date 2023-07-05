@@ -9,6 +9,7 @@ import org.junit.jupiter.api.assertThrows
 import org.pgpainless.wot.dijkstra.sq.*
 import java.util.*
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class CertificationSetTest {
@@ -106,5 +107,28 @@ class CertificationSetTest {
 
         assertEquals("0000000000000000000000000000000000000000 delegates to 1111111111111111111111111111111111111111\n" +
                 "0000000000000000000000000000000000000000 certifies [Bob <bob@example.org>] 1111111111111111111111111111111111111111", twoCerts.toString())
+    }
+    
+    @Test
+    fun `verify that for multiple Certifications over the same datum, only the most recent certifications are preserved`() {
+        val now = Date()
+        val fiveSecondsBefore = Date(now.time - 5000)
+        val old = Certification(alice, "Bob <bob@example.org>", bob, fiveSecondsBefore)
+        val new = Certification(alice, "Bob <bob@example.org>", bob, now)
+        val new2 = Certification(alice, bob, "Bob <bob@example.org>", now, null, true, 44, Depth.auto(10), RegexSet.wildcard())
+
+        var set = CertificationSet(alice, bob, mapOf())
+        set.add(old)
+
+        assertEquals(listOf(old), set.certifications["Bob <bob@example.org>"])
+
+        set.add(new)
+        assertEquals(listOf(new), set.certifications["Bob <bob@example.org>"])
+
+        set.add(new2)
+        assertEquals(listOf(new, new2), set.certifications["Bob <bob@example.org>"])
+
+        set.add(old)
+        assertEquals(listOf(new, new2), set.certifications["Bob <bob@example.org>"])
     }
 }
