@@ -99,6 +99,6 @@ class Depth private constructor(val limit: Int?) : Comparable<Depth> {
     }
 
     override fun hashCode(): Int {
-        return limit ?: 0
+        return limit ?: 0 // TODO: 255?
     }
 }

@@ -56,6 +56,7 @@ class RevocationState private constructor(val type: Type, val timestamp: Date?) 
             if (referenceTime.timestamp.after(timestamp)) {
                 return true
             }
+            // return equal
             return abs(referenceTime.timestamp.time / 1000 - timestamp!!.time / 1000) == 0L // less than one second diff
         }
         return false
