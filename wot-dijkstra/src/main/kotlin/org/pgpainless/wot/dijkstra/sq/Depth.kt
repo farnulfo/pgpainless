@@ -7,7 +7,7 @@ package org.pgpainless.wot.dijkstra.sq
 /**
  * Depth of a trust signature.
  */
-class Depth(val limit: Int?) : Comparable<Depth> {
+class Depth private constructor(val limit: Int?) : Comparable<Depth> {
 
     companion object {
         /**
