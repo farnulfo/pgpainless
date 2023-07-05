@@ -43,16 +43,9 @@ data class RegexSet(val regexStrings: Set<String>) {
      * That is if at least one RegEx in the set matches the [string], or if the set represents a wildcard.
      */
     fun matches(string: String): Boolean {
-        if (regexStrings.isEmpty()) {
-            return true
+        // wildcard or any match
+        return regexStrings.isEmpty() || regexStrings.any {
+            Pattern.compile(it).matcher(string).find()
         }
-
-        for (regex in regexStrings) {
-            val matcher = Pattern.compile(regex).matcher(string)
-            if (matcher.find()) {
-                return true
-            }
-        }
-        return false
     }
 }
