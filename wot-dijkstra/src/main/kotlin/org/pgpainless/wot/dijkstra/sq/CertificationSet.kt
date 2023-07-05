@@ -90,26 +90,23 @@ class CertificationSet(
         require(issuer.fingerprint == certification.issuer.fingerprint) { "Issuer fingerprint mismatch." }
         require(target.fingerprint == certification.target.fingerprint) { "Target fingerprint mismatch." }
 
-        var certificationsForUserId: MutableList<Certification>? = _certifications[certification.userId]
-        if (certificationsForUserId == null) {
-            certificationsForUserId = ArrayList()
-            _certifications[certification.userId] = certificationsForUserId
-        }
-
+        val certificationsForUserId = _certifications.getOrPut(certification.userId) { mutableListOf() }
         if (certificationsForUserId.isEmpty()) {
             certificationsForUserId.add(certification)
             return
         }
 
         val existing = certificationsForUserId[0]
+        // if existing is older than this certification
         if (existing.creationTime.before(certification.creationTime)) {
-            certificationsForUserId.clear() // throw away older certifications
+            // throw away older certifications
+            certificationsForUserId.clear()
         }
-        // If our certification is newest
+        // If this certification is newest (or equally old!)
         if (!existing.creationTime.after(certification.creationTime)) {
             certificationsForUserId.add(certification)
         }
-        // else this certification is older, so ignore
+        // else this certification is older, so don't add it
     }
 
     override fun toString(): String {
