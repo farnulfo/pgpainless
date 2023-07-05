@@ -45,7 +45,7 @@ dependencies {
         exclude(group: "org.pgpainless", module: "pgpainless-core")
     }
 
-    implementation(project(":pgpainless-core"))
+    api(project(":pgpainless-core"))
     api(project(":wot-dijkstra"))
 }
 

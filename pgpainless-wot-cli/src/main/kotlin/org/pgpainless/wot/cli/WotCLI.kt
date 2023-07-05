@@ -68,10 +68,11 @@ class WotCLI: Callable<Int> {
 
     private val referenceTime: ReferenceTime
         get() {
-            return if (time == null) {
+            val cTime = time
+            return if (cTime == null) {
                 ReferenceTime.now()
             } else {
-                val date = DateUtil.parseUTCDate(time)
+                val date = DateUtil.parseUTCDate(cTime)
                 ReferenceTime.timestamp(date)
             }
         }
