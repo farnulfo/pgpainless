@@ -100,6 +100,9 @@ class CertificationSet(
         val existing = certificationsForUserId[0]
         if (existing.creationTime.before(certification.creationTime)) {
             certificationsForUserId.clear() // throw away older certifications
+        }
+        // If our certification is newest
+        if (!existing.creationTime.after(certification.creationTime)) {
             certificationsForUserId.add(certification)
         }
         // else this certification is older, so ignore
