@@ -13,14 +13,7 @@ class Fingerprint(fingerprint: String) {
     }
 
     override fun equals(other: Any?): Boolean {
-        if (other == null) {
-            return false
-        }
-        return if (other is Fingerprint) {
-            toString() == other.toString()
-        } else {
-            false
-        }
+        return other?.toString() == toString()
     }
 
     override fun hashCode(): Int {
