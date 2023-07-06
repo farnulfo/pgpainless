@@ -31,6 +31,7 @@ dependencies {
     testImplementation "org.jetbrains.kotlin:kotlin-test-junit5:$kotlinVersion"
 
     // Logging
+    api "org.slf4j:slf4j-api:$slf4jVersion"
     testImplementation "ch.qos.logback:logback-classic:$logbackVersion"
 
     // @Nullable, @Nonnull annotations
