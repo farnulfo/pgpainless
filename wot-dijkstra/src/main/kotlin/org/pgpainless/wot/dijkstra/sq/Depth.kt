@@ -50,6 +50,15 @@ class Depth private constructor(val limit: Int?) : Comparable<Depth> {
     }
 
     /**
+     * The value of this Depth, as used in OpenPGP.
+     *
+     * Unlimited is 255.
+     */
+    fun value(): Int {
+        return limit ?: 255
+    }
+
+    /**
      * Decrease the trust depth by one and return the result.
      * If the [Depth] is unconstrained, the result will still be unconstrained.
      * @throws IllegalArgumentException if the [Depth] cannot be decreased any further
