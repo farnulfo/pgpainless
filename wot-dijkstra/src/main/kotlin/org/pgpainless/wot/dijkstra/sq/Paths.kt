@@ -24,7 +24,7 @@ class Paths(private val _paths: MutableList<Item>) {
     /**
      * Add a [Path] to the list.
      *
-     * @throws IllegalArgumentException if the given amount is smaller of equal to the paths trust amount.
+     * @throws IllegalArgumentException if the given amount is smaller or equal to the paths trust amount.
      */
     fun add(path: Path, amount: Int) {
         require(amount <= path.amount) {
