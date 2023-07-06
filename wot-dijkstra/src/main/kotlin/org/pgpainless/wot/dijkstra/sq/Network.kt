@@ -26,6 +26,11 @@ class Network(
         fun empty(referenceTime: ReferenceTime): Network {
             return Network(HashMap(), HashMap(), HashMap(), referenceTime)
         }
+
+        @JvmStatic
+        fun builder(): Builder {
+            return Builder()
+        }
     }
 
     /**
@@ -59,5 +64,46 @@ class Network(
             }
         }
         return sb.toString()
+    }
+
+    class Builder internal constructor() {
+        private val nodes: MutableMap<Fingerprint, CertSynopsis> = mutableMapOf()
+        private val protoEdges: MutableMap<Pair<Fingerprint, Fingerprint>, CertificationSet> = mutableMapOf()
+        private var referenceTime: ReferenceTime = ReferenceTime.now()
+
+        fun addNode(node: CertSynopsis) {
+            nodes[node.fingerprint] = node
+        }
+
+        fun getNode(fingerprint: Fingerprint): CertSynopsis? {
+            return nodes[fingerprint]
+        }
+
+        fun addEdge(edge: Certification) {
+            protoEdges.getOrPut(Pair(edge.issuer.fingerprint, edge.target.fingerprint)) {
+                CertificationSet.empty(edge.issuer, edge.target)
+            }.add(edge)
+        }
+
+        fun setReferenceTime(time: ReferenceTime) {
+            this.referenceTime = time
+        }
+
+        fun build(): Network {
+            val edges = mutableMapOf<Fingerprint, MutableList<CertificationSet>>()
+            val revEdges = mutableMapOf<Fingerprint, MutableList<CertificationSet>>()
+
+            protoEdges.forEach { (pair, certificationSet) ->
+                edges.getOrPut(pair.first) {
+                    mutableListOf()
+                }.add(certificationSet)
+
+                revEdges.getOrPut(pair.second) {
+                    mutableListOf()
+                }.add(certificationSet)
+            }
+
+            return Network(nodes, edges, revEdges, referenceTime)
+        }
     }
 }
