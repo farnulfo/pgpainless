@@ -251,23 +251,6 @@ class WebOfTrust(private val certificateStore: PGPCertificateStore) {
         private fun Fingerprint(fingerprint: OpenPgpFingerprint) = Fingerprint(fingerprint.toString())
 
         /**
-         * Map a [PGPSignature] to its [RevocationState].
-         *
-         * @param revocation optional revocation signature
-         */
-        private fun RevocationState(revocation: PGPSignature?): RevocationState {
-            if (revocation == null) {
-                return RevocationState.notRevoked()
-            }
-            val revocationReason = SignatureSubpacketsUtil.getRevocationReason(revocation)
-                    ?: return RevocationState.hardRevoked()
-            return if (RevocationAttributes.Reason.isHardRevocation(revocationReason.revocationReason))
-                RevocationState.hardRevoked()
-            else
-                RevocationState.softRevoked(revocation.creationTime)
-        }
-
-        /**
          * Return the constructed, initialized [Network].
          *
          * @return finished network
@@ -334,6 +317,27 @@ class WebOfTrust(private val certificateStore: PGPCertificateStore) {
                         .map { KeyRingInfo(it, policy, referenceTime.timestamp) }
                         .toList()
             }
+        }
+    }
+
+    companion object {
+
+        @JvmStatic
+                /**
+                 * Map a [PGPSignature] to its [RevocationState].
+                 *
+                 * @param revocation optional revocation signature
+                 */
+        fun RevocationState(revocation: PGPSignature?): RevocationState {
+            if (revocation == null) {
+                return RevocationState.notRevoked()
+            }
+            val revocationReason = SignatureSubpacketsUtil.getRevocationReason(revocation)
+                    ?: return RevocationState.hardRevoked()
+            return if (RevocationAttributes.Reason.isHardRevocation(revocationReason.revocationReason))
+                RevocationState.hardRevoked()
+            else
+                RevocationState.softRevoked(revocation.creationTime)
         }
     }
 }
