@@ -67,7 +67,7 @@ class Network(
     }
 
     class Builder internal constructor() {
-        private val nodes: MutableMap<Fingerprint, CertSynopsis> = mutableMapOf()
+        val nodes: MutableMap<Fingerprint, CertSynopsis> = mutableMapOf()
         private val protoEdges: MutableMap<Pair<Fingerprint, Fingerprint>, CertificationSet> = mutableMapOf()
         private var referenceTime: ReferenceTime = ReferenceTime.now()
 
