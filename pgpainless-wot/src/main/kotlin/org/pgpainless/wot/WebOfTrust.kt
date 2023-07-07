@@ -128,11 +128,7 @@ class WebOfTrust(private val certificateStore: PGPCertificateStore) {
             }
 
             // map user-ids to revocation states
-            val userIds = buildMap<String, RevocationState> {
-                cert.userIds.forEach {
-                    put(it, RevocationState(cert.getUserIdRevocation(it)))
-                }
-            }
+            val userIds = cert.userIds.associateWith { RevocationState(cert.getUserIdRevocation(it)) }
 
             val node = CertSynopsis(certFingerprint,
                     expirationDate,
