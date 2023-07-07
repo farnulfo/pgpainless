@@ -28,21 +28,21 @@ class CertificationTest {
 
     @Test
     fun `verify result of toString() on certification`() {
-        val certification = Certification(alice, "Bob <bob@example.org>", bob, Date())
+        val certification = Certification(alice, bob, "Bob <bob@example.org>", Date())
         assertEquals("A certifies binding: Bob <bob@example.org> <-> B [120]",
                 certification.toString())
     }
 
     @Test
     fun `verify result of toString() on delegation`() {
-        val delegation = Certification(alice, null, bob, Date())
+        val delegation = Certification(alice, bob, null, Date())
         assertEquals("A certifies binding: null <-> B [120]",
                 delegation.toString())
     }
 
     @Test
     fun `verify result of toString() on delegation with userId-less issuer`() {
-        val delegation = Certification(charlie, null, bob, Date())
+        val delegation = Certification(charlie, bob, null, Date())
         assertEquals("C certifies binding: null <-> B [120]",
                 delegation.toString())
     }

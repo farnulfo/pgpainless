@@ -71,22 +71,25 @@ class Network(
         private val protoEdges: MutableMap<Pair<Fingerprint, Fingerprint>, CertificationSet> = mutableMapOf()
         private var referenceTime: ReferenceTime = ReferenceTime.now()
 
-        fun addNode(node: CertSynopsis) {
+        fun addNode(node: CertSynopsis): Builder {
             nodes[node.fingerprint] = node
+            return this
         }
 
         fun getNode(fingerprint: Fingerprint): CertSynopsis? {
             return nodes[fingerprint]
         }
 
-        fun addEdge(edge: Certification) {
+        fun addEdge(edge: Certification): Builder {
             protoEdges.getOrPut(Pair(edge.issuer.fingerprint, edge.target.fingerprint)) {
                 CertificationSet.empty(edge.issuer, edge.target)
             }.add(edge)
+            return this
         }
 
-        fun setReferenceTime(time: ReferenceTime) {
+        fun setReferenceTime(time: ReferenceTime): Builder {
             this.referenceTime = time
+            return this
         }
 
         fun build(): Network {

@@ -16,9 +16,15 @@ import java.util.*
  */
 data class CertSynopsis(
         val fingerprint: Fingerprint,
-        val expirationTime: Date?,
-        val revocationState: RevocationState,
-        val userIds : Map<String, RevocationState>) {
+        val expirationTime: Date? = null,
+        val revocationState: RevocationState = RevocationState.notRevoked(),
+        val userIds : Map<String, RevocationState> = mapOf()) {
+
+    constructor(fingerprint: String,
+            expirationTime: Date? = null,
+            revocationState: RevocationState = RevocationState.notRevoked(),
+            userIds: Map<String, RevocationState> = mapOf()):
+            this(Fingerprint(fingerprint), expirationTime, revocationState, userIds)
 
     override fun toString(): String {
         return if (userIds.isEmpty()) {

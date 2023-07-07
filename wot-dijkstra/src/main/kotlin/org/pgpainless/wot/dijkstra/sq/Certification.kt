@@ -43,8 +43,8 @@ data class Certification(
      */
     constructor(
             issuer: CertSynopsis,
-            targetUserId: String?,
             target: CertSynopsis,
+            targetUserId: String?,
             creationTime: Date) :
             this(issuer, target, targetUserId, creationTime, null, true, 120, Depth.limited(0), RegexSet.wildcard())
 

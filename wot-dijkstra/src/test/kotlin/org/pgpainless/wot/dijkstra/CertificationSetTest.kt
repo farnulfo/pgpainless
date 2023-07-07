@@ -17,10 +17,10 @@ class CertificationSetTest {
     private val bob = CertSynopsis(Fingerprint("B"), null, RevocationState.notRevoked(), mapOf())
     private val charlie = CertSynopsis(Fingerprint("C"), null, RevocationState.notRevoked(), mapOf())
 
-    private val aliceSignsBob = Certification(alice, null, bob, Date())
-    private val aliceSignsBobUserId = Certification(alice, "Bob <bob@example.org>", bob, Date())
-    private val aliceSignsCharlie = Certification(alice, null, charlie, Date())
-    private val charlieSignsBob = Certification(charlie, null, bob, Date())
+    private val aliceSignsBob = Certification(alice, bob, null, Date())
+    private val aliceSignsBobUserId = Certification(alice, bob, "Bob <bob@example.org>", Date())
+    private val aliceSignsCharlie = Certification(alice, charlie, null, Date())
+    private val charlieSignsBob = Certification(charlie, bob, null, Date())
 
     @Test
     fun `verify that properties of an empty CertificationSet are also empty`() {
@@ -112,8 +112,8 @@ class CertificationSetTest {
     fun `verify that for multiple Certifications over the same datum, only the most recent certifications are preserved`() {
         val now = Date()
         val fiveSecondsBefore = Date(now.time - 5000)
-        val old = Certification(alice, "Bob <bob@example.org>", bob, fiveSecondsBefore)
-        val new = Certification(alice, "Bob <bob@example.org>", bob, now)
+        val old = Certification(alice, bob, "Bob <bob@example.org>", fiveSecondsBefore)
+        val new = Certification(alice, bob, "Bob <bob@example.org>", now)
         val new2 = Certification(alice, bob, "Bob <bob@example.org>", now, null, true, 44, Depth.auto(10), RegexSet.wildcard())
 
         var set = CertificationSet(alice, bob, mapOf())
