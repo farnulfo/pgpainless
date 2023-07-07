@@ -7,23 +7,11 @@ import java.util.*
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-class PathTest {
+class PathTest: NetworkDSL {
 
-    private val root = CertSynopsis(
-            Fingerprint("aabbccddeeAABBCCDDEEaabbccddeeAABBCCDDEE"),
-            null,
-            RevocationState.notRevoked(),
-            mapOf())
-    private val alice = CertSynopsis(
-            Fingerprint("0000000000000000000000000000000000000000"),
-            null,
-            RevocationState.notRevoked(),
-            mapOf())
-    private val bob = CertSynopsis(
-            Fingerprint("1111111111111111111111111111111111111111"),
-            null,
-            RevocationState.notRevoked(),
-            mapOf())
+    private val root = CertSynopsis("aabbccddeeAABBCCDDEEaabbccddeeAABBCCDDEE")
+    private val alice = CertSynopsis("0000000000000000000000000000000000000000")
+    private val bob = CertSynopsis("1111111111111111111111111111111111111111")
 
     // Root -(255, 255)-> Alice
     private val root_alice__fully_trusted = Certification(root, alice, 255, Depth.unconstrained())
@@ -32,7 +20,7 @@ class PathTest {
     // Alice -(255,255)-> Root
     private val alice_root = Certification(alice, root, 255, Depth.unconstrained())
     // Alice -(120, 1)-> Bob
-    private val alice_bob = Certification(alice, bob, null, Date())
+    private val alice_bob = Certification(alice, bob)
     // Root -> Root
     private val root_root = Certification(root, root, 120, Depth.limited(1))
 
@@ -102,10 +90,4 @@ class PathTest {
         val path = Path(root)
         assertThrows<IllegalArgumentException> { path.append(root_root) }
     }
-
-    /**
-     * Factory method for legible initialization of [Certification] objects for test purposes.
-     */
-    fun Certification(issuer: CertSynopsis, target: CertSynopsis, amount: Int, depth: Depth): Certification =
-            Certification(issuer, target, null, Date(), null, true, amount, depth, RegexSet.wildcard())
 }
