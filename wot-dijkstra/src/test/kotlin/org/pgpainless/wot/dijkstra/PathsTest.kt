@@ -6,18 +6,10 @@ import org.pgpainless.wot.dijkstra.sq.*
 import java.util.*
 import kotlin.test.assertEquals
 
-class PathsTest {
+class PathsTest: NetworkDSL {
 
-    private val alice = CertSynopsis(
-            Fingerprint("0000000000000000000000000000000000000000"),
-            null,
-            RevocationState.notRevoked(),
-            mapOf())
-    private val bob = CertSynopsis(
-            Fingerprint("1111111111111111111111111111111111111111"),
-            null,
-            RevocationState.notRevoked(),
-            mapOf())
+    private val alice = CertSynopsis("0000000000000000000000000000000000000000")
+    private val bob = CertSynopsis("1111111111111111111111111111111111111111")
 
     private val alice_bob_1 = Certification(alice, bob, 140, Depth.unconstrained())
     private val alice_bob_2 = Certification(alice, bob, 160, Depth.limited(1))
@@ -56,10 +48,4 @@ class PathsTest {
             paths.add(path, 250)
         }
     }
-
-    /**
-     * Factory method to create a [Certification] more easily for test purposes.
-     */
-    private fun Certification(issuer: CertSynopsis, target: CertSynopsis, amount: Int, depth: Depth): Certification =
-            Certification(issuer, target, null, Date(), null, true, amount, depth, RegexSet.wildcard())
 }

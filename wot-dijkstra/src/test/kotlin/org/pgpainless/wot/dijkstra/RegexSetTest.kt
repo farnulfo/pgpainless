@@ -5,7 +5,7 @@ import org.pgpainless.wot.dijkstra.sq.RegexSet
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
-class RegexSetTest {
+class RegexSetTest: NetworkDSL {
 
     private val exampleComRegex = "<[^>]+[@.]example\\.com>\$"
     private val pgpainlessOrgRegex = "<[^>]+[@.]pgpainless\\.org>\$"
@@ -38,5 +38,12 @@ class RegexSetTest {
 
         assertFalse { multi.matches("Alice") }
         assertFalse { multi.matches("<info@examp1e.com>") }
+    }
+
+    @Test
+    fun `verify that a domain regex built with DLS properly works`() {
+        val regex = domainRegex("pgpainless.org")
+        assertTrue { regex.matches("Alice <alice@pgpainless.org>") }
+        assertFalse { regex.matches("<alice@pgpainless\\.org>") }
     }
 }

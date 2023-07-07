@@ -40,6 +40,9 @@ interface NetworkDSL {
     fun Certification(issuer: CertSynopsis, target: CertSynopsis, userId: String): Certification =
             Certification(issuer, target, userId, Date())
 
+    fun Certification(issuer: CertSynopsis, target: CertSynopsis, amount: Int, depth: Depth): Certification =
+            Certification(issuer, target, null, Date(), null, true, amount, depth, RegexSet.wildcard())
+
     /**
      * Add a single [CertSynopsis] built from a [String] fingerprint to the builder.
      */
@@ -148,6 +151,30 @@ interface NetworkDSL {
 
     fun Network.getEdgeFor(issuer: String, target: String, userId: String?): List<Certification>? {
         return getEdgeFor(Fingerprint(issuer), Fingerprint(target), userId)
+    }
+
+    fun Date.plusMillis(millis: Long): Date {
+        return Date(time + millis)
+    }
+
+    fun Date.plusSeconds(seconds: Long): Date {
+        return plusMillis(1000L * seconds)
+    }
+
+    fun Date.plusMinutes(minutes: Long): Date {
+        return plusSeconds(60 * minutes)
+    }
+
+    fun Date.plusHours(hours: Long): Date {
+        return plusMinutes(60 * hours)
+    }
+
+    fun Date.plusDays(days: Long): Date {
+        return plusHours(24 * days)
+    }
+
+    fun domainRegex(domain: String): RegexSet {
+        return RegexSet.fromExpression("<[^>]+[@.]" + domain.replace(".", "\\.") + ">$")
     }
 
     /**
