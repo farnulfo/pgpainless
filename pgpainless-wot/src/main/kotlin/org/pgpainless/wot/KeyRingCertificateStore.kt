@@ -15,24 +15,32 @@ import pgp.certificate_store.exception.BadNameException
 import java.io.InputStream
 
 /**
- * Implementation of [PGPCertificateStore] which is based on a [PGPPublicKeyRingCollection].
- * During initialization, all items in the [PGPPublicKeyRingCollection] are converted into [Certificates][Certificate]
+ * Implementation of [PGPCertificateStore] which is based on one or more [PGPPublicKeyRingCollection].
+ * During initialization, all items in the [PGPPublicKeyRingCollection]s are converted into [Certificates][Certificate]
  * and stored in a map keyed by their fingerprints.
+ *
+ * In case of fingerprint collisions across certificates from different collections, [Certificate] objects
+ * from a [PGPPublicKeyRingCollection] instance with a higher list index take precedence.
+ *
  * [Certificates][Certificate] being inserted using [insertCertificate] or [insertCertificateBySpecialName] are also
  * stored in that map, but are not being written into the [PGPPublicKeyRingCollection].
  */
-class KeyRingCertificateStore(baseKeyRing: PGPPublicKeyRingCollection) : PGPCertificateStore {
+class KeyRingCertificateStore(baseKeyRings: List<PGPPublicKeyRingCollection>) : PGPCertificateStore {
 
     // Keep certificates inserted only in memory
     private val certificates = mutableMapOf<String, Certificate>()
 
     init {
-        for (publicKeyRing in baseKeyRing) {
-            val fingerprint = OpenPgpFingerprint.of(publicKeyRing).toString()
-            val certificate = CertificateFactory.certificateFromPublicKeyRing(publicKeyRing, null)
-            certificates[fingerprint] = certificate
+        baseKeyRings.forEach { store ->
+            store.forEach {
+                val fingerprint = OpenPgpFingerprint.of(it).toString()
+                val certificate = CertificateFactory.certificateFromPublicKeyRing(it, null)
+                certificates[fingerprint] = certificate
+            }
         }
     }
+
+    constructor(baseKeyRing: PGPPublicKeyRingCollection): this(listOf(baseKeyRing))
 
     override fun getCertificate(identifier: String?): Certificate {
         if (identifier == null) {
