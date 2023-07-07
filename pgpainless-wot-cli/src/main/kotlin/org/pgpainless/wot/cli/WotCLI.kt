@@ -10,7 +10,7 @@ import org.pgpainless.wot.WebOfTrust
 import org.pgpainless.wot.cli.subcommands.*
 import org.pgpainless.wot.dijkstra.sq.Fingerprint
 import org.pgpainless.wot.dijkstra.sq.ReferenceTime
-import org.pgpainless.wot.dijkstra.sq.api.WoTAPI
+import org.pgpainless.wot.api.WoTAPI
 import pgp.cert_d.PGPCertificateStoreAdapter
 import pgp.cert_d.subkey_lookup.InMemorySubkeyLookupFactory
 import pgp.certificate_store.PGPCertificateStore
