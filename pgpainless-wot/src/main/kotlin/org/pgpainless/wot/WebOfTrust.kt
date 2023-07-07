@@ -69,6 +69,10 @@ class WebOfTrust(private val certificateStore: PGPCertificateStore) {
 
     /**
      * Class for building the [Flow network][Network] from the given set of OpenPGP keys.
+     *
+     * @param validatedCertificates list of validated certificates
+     * @param policy policy for signature evaluation
+     * @param referenceTime reference time for network evaluation
      */
     private class PGPNetworkFactory private constructor(validatedCertificates: List<KeyRingInfo>,
                                                         private val policy: Policy,
@@ -86,9 +90,15 @@ class WebOfTrust(private val certificateStore: PGPCertificateStore) {
 
         init {
             validatedCertificates.forEach { indexAsNode(it) }
-            validatedCertificates.forEach { findEdgesWithTarget(it) }
+            validatedCertificates.forEach { indexIncomingEdges(it) }
         }
 
+        /**
+         * Index the certificate by its [Fingerprint] and subkey-IDs and add it as a node to
+         * the [Network.Builder].
+         *
+         * @param cert validated certificate
+         */
         private fun indexAsNode(cert: KeyRingInfo) {
 
             // certificate expiration date
@@ -124,7 +134,13 @@ class WebOfTrust(private val certificateStore: PGPCertificateStore) {
             networkBuilder.addNode(node)
         }
 
-        private fun findEdgesWithTarget(validatedTarget: KeyRingInfo) {
+        /**
+         * Add all verifiable certifications on the certificate as incoming edges to
+         * the [Network.Builder].
+         *
+         * @param validatedTarget validated certificate
+         */
+        private fun indexIncomingEdges(validatedTarget: KeyRingInfo) {
             val validatedTargetKeyRing = KeyRingUtils.publicKeys(validatedTarget.keys)
             val targetFingerprint = Fingerprint(OpenPgpFingerprint.of(validatedTargetKeyRing))
             val targetPrimaryKey = validatedTargetKeyRing.publicKey!!
@@ -140,6 +156,7 @@ class WebOfTrust(private val certificateStore: PGPCertificateStore) {
             val userIds = targetPrimaryKey.userIDs
             while (userIds.hasNext()) {
                 val userId = userIds.next()
+                // There are potentially multiple certifications per user-ID
                 val userIdSigs = SignatureUtils.get3rdPartyCertificationsFor(userId, validatedTargetKeyRing)
                 userIdSigs.forEach {
                     processCertificationOnUserId(targetPrimaryKey, target, userId, it)
@@ -147,17 +164,27 @@ class WebOfTrust(private val certificateStore: PGPCertificateStore) {
             }
         }
 
+        /**
+         * Process a delegation signature (direct-key signature issued by a third-party certificate)
+         * and add it upon successful verification as an edge to the [Network.Builder].
+         *
+         * @param targetPrimaryKey public primary key of the target certificate
+         * @param target target certificate node
+         * @param delegation delegation signature
+         */
         private fun processDelegation(targetPrimaryKey: PGPPublicKey,
                                       target: CertSynopsis,
                                       delegation: PGPSignature) {
             // There might be more than one cert with a subkey of matching key-id
             val issuerCandidates = byKeyId[delegation.keyID]
                     ?: return // missing issuer cert
+
             for (candidate in issuerCandidates) {
                 val issuerKeyRing = KeyRingUtils.publicKeys(candidate.keys)
                 val issuerFingerprint = Fingerprint(OpenPgpFingerprint.of(issuerKeyRing))
                 val issuerSigningKey = issuerKeyRing.getPublicKey(delegation.keyID)!!
                 val issuer = nodeMap[issuerFingerprint]!!
+
                 try {
                     val valid = SignatureVerifier.verifyDirectKeySignature(delegation, issuerSigningKey,
                             targetPrimaryKey, policy, referenceTime.timestamp)
@@ -172,6 +199,15 @@ class WebOfTrust(private val certificateStore: PGPCertificateStore) {
             }
         }
 
+        /**
+         * Process a certification (third-party-issued certification over the given [userId])
+         * and add it upon successful verification as an edge to the [Network.Builder].
+         *
+         * @param targetPrimaryKey public primary key of the target certificate
+         * @param target target certificate node
+         * @param userId target user-id over which the [certification] is calculated
+         * @param certification certification signature
+         */
         private fun processCertificationOnUserId(targetPrimaryKey: PGPPublicKey,
                                                  target: CertSynopsis,
                                                  userId: String,
@@ -179,11 +215,13 @@ class WebOfTrust(private val certificateStore: PGPCertificateStore) {
             // There might be more than one cert with a subkey of matching key-id
             val issuerCandidates = byKeyId[certification.keyID]
                     ?: return // missing issuer cert
+
             for (candidate in issuerCandidates) {
                 val issuerKeyRing = KeyRingUtils.publicKeys(candidate.keys)
                 val issuerFingerprint = Fingerprint(OpenPgpFingerprint.of(issuerKeyRing))
                 val issuerSigningKey = issuerKeyRing.getPublicKey(certification.keyID)!!
                 val issuer = nodeMap[issuerFingerprint]!!
+
                 try {
                     val valid = SignatureVerifier.verifySignatureOverUserId(userId, certification,
                             issuerSigningKey, targetPrimaryKey, policy, referenceTime.timestamp)
@@ -198,8 +236,18 @@ class WebOfTrust(private val certificateStore: PGPCertificateStore) {
             }
         }
 
+        /**
+         * Map an [OpenPgpFingerprint] to a [Fingerprint].
+         *
+         * @param fingerprint [OpenPgpFingerprint]
+         */
         private fun Fingerprint(fingerprint: OpenPgpFingerprint) = Fingerprint(fingerprint.toString())
 
+        /**
+         * Map a [PGPSignature] to its [RevocationState].
+         *
+         * @param revocation optional revocation signature
+         */
         private fun RevocationState(revocation: PGPSignature?): RevocationState {
             if (revocation == null) {
                 return RevocationState.notRevoked()
@@ -221,10 +269,19 @@ class WebOfTrust(private val certificateStore: PGPCertificateStore) {
             return networkBuilder.build()
         }
 
+        // static factory methods
         companion object {
             @JvmStatic
             private val LOGGER = LoggerFactory.getLogger(PGPNetworkFactory::class.java)
 
+            /**
+             * Create a [PGPNetworkFactory] from a [Sequence] of [Certificates][Certificate].
+             * This method validates the certificates and then creates a [PGPNetworkFactory] from them.
+             *
+             * @param certificates certificates, e.g. acquired from a [PGPCertificateStore]
+             * @param policy policy for signature evaluation
+             * @param referenceTime reference time for network evaluation
+             */
             @JvmStatic
             fun fromCertificates(certificates: Sequence<Certificate>,
                                  policy: Policy,
@@ -236,6 +293,13 @@ class WebOfTrust(private val certificateStore: PGPCertificateStore) {
                 )
             }
 
+            /**
+             * Create a [PGPNetworkFactory] from a list of [validated certificates][KeyRingInfo].
+             *
+             * @param certificates already validated certificates
+             * @param policy policy for signature evaluation
+             * @param referenceTime reference time for network evaluation
+             */
             @JvmStatic
             fun fromValidCertificates(certificates: List<KeyRingInfo>,
                                       policy: Policy,
@@ -243,6 +307,14 @@ class WebOfTrust(private val certificateStore: PGPCertificateStore) {
                 return PGPNetworkFactory(certificates, policy, referenceTime)
             }
 
+            /**
+             * Evaluate the given [Sequence] of [Certificates][Certificate] and transform it into a
+             * [List] of [validated certificates][KeyRingInfo].
+             *
+             * @param certificates certificates
+             * @param policy policy for signature evaluation
+             * @param referenceTime reference time for signature evaluation
+             */
             @JvmStatic
             private fun parseValidCertificates(certificates: Sequence<Certificate>,
                                                policy: Policy,
@@ -255,6 +327,5 @@ class WebOfTrust(private val certificateStore: PGPCertificateStore) {
                         .toList()
             }
         }
-
     }
 }
