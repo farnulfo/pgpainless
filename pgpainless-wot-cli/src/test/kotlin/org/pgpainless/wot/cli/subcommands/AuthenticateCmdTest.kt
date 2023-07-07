@@ -1,7 +1,7 @@
 package org.pgpainless.wot.cli.subcommands
 
 import org.junit.jupiter.api.Test
-import org.pgpainless.wot.api.AuthenticateAPI
+import org.pgpainless.wot.dijkstra.sq.api.AuthenticateAPI
 import org.pgpainless.wot.dijkstra.sq.*
 import java.text.SimpleDateFormat
 import kotlin.test.assertEquals

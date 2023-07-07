@@ -43,14 +43,23 @@ class WebOfTrust(private val certificateStore: PGPCertificateStore) {
      *
      * @param certificateDirectory PGP-Certificate-Directory instance
      */
-    constructor(certificateDirectory: PGPCertificateDirectory): this(PGPCertificateStoreAdapter(certificateDirectory))
+    constructor(certificateDirectory: PGPCertificateDirectory):
+            this(PGPCertificateStoreAdapter(certificateDirectory))
 
-    fun buildNetwork(policy: Policy = PGPainless.getPolicy(), referenceTime: ReferenceTime = now()): Network {
+    /**
+     *
+     */
+    fun buildNetwork(policy: Policy = PGPainless.getPolicy(),
+                     referenceTime: ReferenceTime = now()): Network {
         val certificates = getAllCertificatesFromTheStore()
         val networkFactory = PGPNetworkFactory.fromCertificates(certificates, policy, referenceTime)
         return networkFactory.buildNetwork()
     }
 
+    /**
+     * Return a [Sequence] containing all [Certificates][Certificate] in the [PGPCertificateStore],
+     * with the specially named "trust-root" certificate optionally appended if present.
+     */
     private fun getAllCertificatesFromTheStore(): Sequence<Certificate> {
         var trustRoot: Certificate? = null
         try {
@@ -157,7 +166,8 @@ class WebOfTrust(private val certificateStore: PGPCertificateStore) {
             while (userIds.hasNext()) {
                 val userId = userIds.next()
                 // There are potentially multiple certifications per user-ID
-                val userIdSigs = SignatureUtils.get3rdPartyCertificationsFor(userId, validatedTargetKeyRing)
+                val userIdSigs = SignatureUtils.get3rdPartyCertificationsFor(
+                        userId, validatedTargetKeyRing)
                 userIdSigs.forEach {
                     processCertificationOnUserId(targetPrimaryKey, target, userId, it)
                 }
@@ -194,7 +204,8 @@ class WebOfTrust(private val certificateStore: PGPCertificateStore) {
                     }
                 } catch (e: SignatureValidationException) {
                     val targetFingerprint = OpenPgpFingerprint.of(targetPrimaryKey)
-                    LOGGER.warn("Cannot verify signature by $issuerFingerprint on cert of $targetFingerprint", e)
+                    LOGGER.warn("Cannot verify signature by $issuerFingerprint" +
+                            " on cert of $targetFingerprint", e)
                 }
             }
         }
@@ -321,7 +332,8 @@ class WebOfTrust(private val certificateStore: PGPCertificateStore) {
                                                referenceTime: ReferenceTime): List<KeyRingInfo> {
                 return certificates
                         .mapNotNull {
-                            try { PGPainless.readKeyRing().publicKeyRing(it.inputStream) } catch (e: IOException) { null }
+                            try { PGPainless.readKeyRing().publicKeyRing(it.inputStream) }
+                            catch (e: IOException) { null }
                         }
                         .map { KeyRingInfo(it, policy, referenceTime.timestamp) }
                         .toList()

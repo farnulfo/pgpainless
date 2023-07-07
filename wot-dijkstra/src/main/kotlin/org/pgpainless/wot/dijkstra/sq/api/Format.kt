@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package org.pgpainless.wot.cli.subcommands
+package org.pgpainless.wot.dijkstra.sq.api
 
 /**
  * Enum listing possible output formats.
