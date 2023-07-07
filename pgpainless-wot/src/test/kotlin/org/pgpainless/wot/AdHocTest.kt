@@ -8,7 +8,6 @@ class AdHocTest {
     @Test
     fun test() {
         val store = AdHocVectors.BestViaRoot().pgpCertificateStore
-        val wot = WebOfTrust(store).also { it.initialize() }
-        val network = wot.network
+        val network = WebOfTrust(store).buildNetwork()
     }
 }

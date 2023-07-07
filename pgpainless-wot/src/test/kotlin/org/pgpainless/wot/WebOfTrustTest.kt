@@ -33,9 +33,7 @@ class WebOfTrustTest {
     @Test
     fun testWithTwoNodesAndOneDelegation() {
         val certD = TestCertificateStores.oneDelegationGraph()
-        val wot = WebOfTrust(certD)
-        wot.initialize()
-        val network = wot.network
+        val network = WebOfTrust(certD).buildNetwork()
 
         assertEquals(2, network.nodes.size)
         assertHasEdge(network, fooBankAdmin, barBankCa)
@@ -48,9 +46,7 @@ class WebOfTrustTest {
     @Test
     fun testWithCrossSignedCertificates() {
         val certD = TestCertificateStores.disconnectedGraph()
-        val wot = WebOfTrust(certD)
-        wot.initialize()
-        val network = wot.network
+        val network = WebOfTrust(certD).buildNetwork()
 
         assertEquals(5, network.nodes.size)
         assertTrue {
@@ -81,9 +77,7 @@ class WebOfTrustTest {
     @Test
     fun testWotCreationOfEmptyCertificates() {
         val certD = TestCertificateStores.emptyGraph()
-        val wot = WebOfTrust(certD)
-        wot.initialize()
-        val network = wot.network
+        val network = WebOfTrust(certD).buildNetwork()
 
         assertTrue { network.nodes.isEmpty() }
         assertTrue { network.edges.isEmpty() }
@@ -93,9 +87,7 @@ class WebOfTrustTest {
     @Test
     fun testWotWithAnomaly() {
         val store = TestCertificateStores.anomalyGraph()
-        val wot = WebOfTrust(store)
-        wot.initialize()
-        val network = wot.network
+        val network = WebOfTrust(store).buildNetwork()
 
         assertEquals(1, network.nodes.size)
     }

@@ -9,14 +9,13 @@ import org.junit.jupiter.api.assertThrows
 import org.pgpainless.wot.dijkstra.sq.*
 import java.util.*
 import kotlin.test.assertEquals
-import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class CertificationSetTest {
 
-    private val alice = CertSynopsis(Fingerprint("0000000000000000000000000000000000000000"), null, RevocationState.notRevoked(), mapOf())
-    private val bob = CertSynopsis(Fingerprint("1111111111111111111111111111111111111111"), null, RevocationState.notRevoked(), mapOf())
-    private val charlie = CertSynopsis(Fingerprint("2222222222222222222222222222222222222222"), null, RevocationState.notRevoked(), mapOf())
+    private val alice = CertSynopsis(Fingerprint("A"), null, RevocationState.notRevoked(), mapOf())
+    private val bob = CertSynopsis(Fingerprint("B"), null, RevocationState.notRevoked(), mapOf())
+    private val charlie = CertSynopsis(Fingerprint("C"), null, RevocationState.notRevoked(), mapOf())
 
     private val aliceSignsBob = Certification(alice, null, bob, Date())
     private val aliceSignsBobUserId = Certification(alice, "Bob <bob@example.org>", bob, Date())
@@ -105,8 +104,8 @@ class CertificationSetTest {
         val twoCerts = CertificationSet.fromCertification(aliceSignsBob)
         twoCerts.add(aliceSignsBobUserId)
 
-        assertEquals("0000000000000000000000000000000000000000 delegates to 1111111111111111111111111111111111111111\n" +
-                "0000000000000000000000000000000000000000 certifies [Bob <bob@example.org>] 1111111111111111111111111111111111111111", twoCerts.toString())
+        assertEquals("A certifies binding: null <-> B [120]\n" +
+                "A certifies binding: Bob <bob@example.org> <-> B [120]", twoCerts.toString())
     }
     
     @Test
