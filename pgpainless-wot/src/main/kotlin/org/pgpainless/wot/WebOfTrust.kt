@@ -73,6 +73,153 @@ class WebOfTrust(private val certificateStore: PGPCertificateStore) {
     private class PGPNetworkFactory private constructor(validatedCertificates: List<KeyRingInfo>,
                                                         private val policy: Policy,
                                                         private val referenceTime: ReferenceTime) {
+        private val networkBuilder: Network.Builder = Network.builder()
+
+        // certificates keyed by fingerprint
+        private val byFingerprint: MutableMap<Fingerprint, KeyRingInfo> = HashMap()
+
+        // certificates keyed by (sub-) key-id
+        private val byKeyId: MutableMap<Long, MutableList<KeyRingInfo>> = HashMap()
+
+        // nodes keyed by fingerprint
+        private val nodeMap: MutableMap<Fingerprint, CertSynopsis> = HashMap()
+
+        init {
+            validatedCertificates.forEach { indexAsNode(it) }
+            validatedCertificates.forEach { findEdgesWithTarget(it) }
+        }
+
+        private fun indexAsNode(cert: KeyRingInfo) {
+
+            // certificate expiration date
+            val expirationDate: Date? = try {
+                cert.getExpirationDateForUse(KeyFlag.CERTIFY_OTHER)
+            } catch (e: NoSuchElementException) {
+                // Some keys are malformed and have no KeyFlags
+                return
+            }
+
+            // index by fingerprint
+            val certFingerprint = Fingerprint(cert.fingerprint)
+            byFingerprint.putIfAbsent(certFingerprint, cert)
+
+            // index by key-ID
+            cert.validSubkeys.forEach {
+                byKeyId.getOrPut(it.keyID) { mutableListOf() }.add(cert)
+            }
+
+            // map user-ids to revocation states
+            val userIds = buildMap<String, RevocationState> {
+                cert.userIds.forEach {
+                    put(it, RevocationState(cert.getUserIdRevocation(it)))
+                }
+            }
+
+            val node = CertSynopsis(certFingerprint,
+                    expirationDate,
+                    RevocationState(cert.revocationSelfSignature),
+                    userIds)
+
+            nodeMap[certFingerprint] = node
+            networkBuilder.addNode(node)
+        }
+
+        private fun findEdgesWithTarget(validatedTarget: KeyRingInfo) {
+            val validatedTargetKeyRing = KeyRingUtils.publicKeys(validatedTarget.keys)
+            val targetFingerprint = Fingerprint(OpenPgpFingerprint.of(validatedTargetKeyRing))
+            val targetPrimaryKey = validatedTargetKeyRing.publicKey!!
+            val target = nodeMap[targetFingerprint]!!
+
+            // Direct-Key Signatures (delegations) by X on Y
+            val delegations = SignatureUtils.getDelegations(validatedTargetKeyRing)
+            for (delegation in delegations) {
+                processDelegation(targetPrimaryKey, target, delegation)
+            }
+
+            // Certification Signatures by X on Y over user-ID U
+            val userIds = targetPrimaryKey.userIDs
+            while (userIds.hasNext()) {
+                val userId = userIds.next()
+                val userIdSigs = SignatureUtils.get3rdPartyCertificationsFor(userId, validatedTargetKeyRing)
+                userIdSigs.forEach {
+                    processCertificationOnUserId(targetPrimaryKey, target, userId, it)
+                }
+            }
+        }
+
+        private fun processDelegation(targetPrimaryKey: PGPPublicKey,
+                                      target: CertSynopsis,
+                                      delegation: PGPSignature) {
+            // There might be more than one cert with a subkey of matching key-id
+            val issuerCandidates = byKeyId[delegation.keyID]
+                    ?: return // missing issuer cert
+            for (candidate in issuerCandidates) {
+                val issuerKeyRing = KeyRingUtils.publicKeys(candidate.keys)
+                val issuerFingerprint = Fingerprint(OpenPgpFingerprint.of(issuerKeyRing))
+                val issuerSigningKey = issuerKeyRing.getPublicKey(delegation.keyID)!!
+                val issuer = nodeMap[issuerFingerprint]!!
+                try {
+                    val valid = SignatureVerifier.verifyDirectKeySignature(delegation, issuerSigningKey,
+                            targetPrimaryKey, policy, referenceTime.timestamp)
+                    if (valid) {
+                        networkBuilder.addEdge(fromDelegation(issuer, target, delegation))
+                        return // we're done
+                    }
+                } catch (e: SignatureValidationException) {
+                    val targetFingerprint = OpenPgpFingerprint.of(targetPrimaryKey)
+                    LOGGER.warn("Cannot verify signature by $issuerFingerprint on cert of $targetFingerprint", e)
+                }
+            }
+        }
+
+        private fun processCertificationOnUserId(targetPrimaryKey: PGPPublicKey,
+                                                 target: CertSynopsis,
+                                                 userId: String,
+                                                 certification: PGPSignature) {
+            // There might be more than one cert with a subkey of matching key-id
+            val issuerCandidates = byKeyId[certification.keyID]
+                    ?: return // missing issuer cert
+            for (candidate in issuerCandidates) {
+                val issuerKeyRing = KeyRingUtils.publicKeys(candidate.keys)
+                val issuerFingerprint = Fingerprint(OpenPgpFingerprint.of(issuerKeyRing))
+                val issuerSigningKey = issuerKeyRing.getPublicKey(certification.keyID)!!
+                val issuer = nodeMap[issuerFingerprint]!!
+                try {
+                    val valid = SignatureVerifier.verifySignatureOverUserId(userId, certification,
+                            issuerSigningKey, targetPrimaryKey, policy, referenceTime.timestamp)
+                    if (valid) {
+                        networkBuilder.addEdge(fromCertification(issuer, target, userId, certification))
+                        return // we're done
+                    }
+                } catch (e: SignatureValidationException) {
+                    LOGGER.warn("Cannot verify signature for '$userId' by $issuerFingerprint" +
+                            " on cert of ${target.fingerprint}", e)
+                }
+            }
+        }
+
+        private fun Fingerprint(fingerprint: OpenPgpFingerprint) = Fingerprint(fingerprint.toString())
+
+        private fun RevocationState(revocation: PGPSignature?): RevocationState {
+            if (revocation == null) {
+                return RevocationState.notRevoked()
+            }
+            val revocationReason = SignatureSubpacketsUtil.getRevocationReason(revocation)
+                    ?: return RevocationState.hardRevoked()
+            return if (RevocationAttributes.Reason.isHardRevocation(revocationReason.revocationReason))
+                RevocationState.hardRevoked()
+            else
+                RevocationState.softRevoked(revocation.creationTime)
+        }
+
+        /**
+         * Return the constructed, initialized [Network].
+         *
+         * @return finished network
+         */
+        fun buildNetwork(): Network {
+            return networkBuilder.build()
+        }
 
         companion object {
             @JvmStatic
@@ -109,157 +256,5 @@ class WebOfTrust(private val certificateStore: PGPCertificateStore) {
             }
         }
 
-        private val networkBuilder: Network.Builder = Network.builder()
-
-        // certificates keyed by fingerprint
-        private val byFingerprint: MutableMap<Fingerprint, KeyRingInfo> = HashMap()
-
-        // certificates keyed by (sub-) key-id
-        private val byKeyId: MutableMap<Long, MutableList<KeyRingInfo>> = HashMap()
-
-        // certificate synopses keyed by fingerprint
-        private val certSynopsisMap: MutableMap<Fingerprint, CertSynopsis> = HashMap()
-
-        init {
-            validatedCertificates.forEach { indexAsNode(it) }
-            validatedCertificates.forEach { findEdgesWithTarget(it) }
-        }
-
-        private fun indexAsNode(cert: KeyRingInfo) {
-
-            // index by fingerprint
-            val certFingerprint = Fingerprint(cert.fingerprint)
-            if (!byFingerprint.containsKey(certFingerprint)) {
-                byFingerprint[certFingerprint] = cert
-            }
-
-            // index by key-ID
-            var certsWithKey = byKeyId[cert.keyId]
-            // noinspection Java8MapApi
-            if (certsWithKey == null) {
-                certsWithKey = mutableListOf()
-                // TODO: Something is fishy here...
-                for (key in cert.validSubkeys) {
-                    byKeyId[key.keyID] = certsWithKey
-                }
-            }
-            certsWithKey.add(cert)
-            val userIds: MutableMap<String, RevocationState> = HashMap()
-            for (userId in cert.userIds) {
-                val state = RevocationState(cert.getUserIdRevocation(userId))
-                userIds[userId] = state
-            }
-
-            // index synopses
-            val expirationDate: Date? = try {
-                cert.getExpirationDateForUse(KeyFlag.CERTIFY_OTHER)
-            } catch (e: NoSuchElementException) {
-                // Some keys are malformed and have no KeyFlags
-                return
-            }
-            val node = CertSynopsis(certFingerprint,
-                    expirationDate,
-                    RevocationState(cert.revocationSelfSignature),
-                    userIds)
-            certSynopsisMap[certFingerprint] = node
-            networkBuilder.addNode(node)
-        }
-
-        private fun findEdgesWithTarget(validatedTarget: KeyRingInfo) {
-            val validatedTargetKeyRing = KeyRingUtils.publicKeys(validatedTarget.keys)
-            val targetFingerprint = Fingerprint(OpenPgpFingerprint.of(validatedTargetKeyRing))
-            val targetPrimaryKey = validatedTargetKeyRing.publicKey!!
-            val target = certSynopsisMap[targetFingerprint]!!
-
-            // Direct-Key Signatures (delegations) by X on Y
-            val delegations = SignatureUtils.getDelegations(validatedTargetKeyRing)
-            for (delegation in delegations) {
-                processDelegation(targetPrimaryKey, target, delegation)
-            }
-
-            // Certification Signatures by X on Y over user-ID U
-            val userIds = targetPrimaryKey.userIDs
-            while (userIds.hasNext()) {
-                val userId = userIds.next()
-                val userIdSigs = SignatureUtils.get3rdPartyCertificationsFor(userId, validatedTargetKeyRing)
-                userIdSigs.forEach {
-                    processCertificationOnUserId(targetPrimaryKey, target, userId, it)
-                }
-
-            }
-        }
-
-        private fun processDelegation(targetPrimaryKey: PGPPublicKey,
-                                      target: CertSynopsis,
-                                      delegation: PGPSignature) {
-            val issuerCandidates = byKeyId[delegation.keyID]
-                    ?: return
-            for (candidate in issuerCandidates) {
-                val issuerKeyRing = KeyRingUtils.publicKeys(candidate.keys)
-                val issuerFingerprint = Fingerprint(OpenPgpFingerprint.of(issuerKeyRing))
-                val issuerSigningKey = issuerKeyRing.getPublicKey(delegation.keyID)
-                val issuer = certSynopsisMap[issuerFingerprint]
-                        ?: continue
-                try {
-                    val valid = SignatureVerifier.verifyDirectKeySignature(delegation, issuerSigningKey,
-                            targetPrimaryKey, policy, referenceTime.timestamp)
-                    if (valid) {
-                        networkBuilder.addEdge(fromDelegation(issuer, target, delegation))
-                    }
-                } catch (e: SignatureValidationException) {
-                    val targetFingerprint = OpenPgpFingerprint.of(targetPrimaryKey)
-                    LOGGER.warn("Cannot verify signature by $issuerFingerprint on cert of $targetFingerprint", e)
-                }
-            }
-        }
-
-        private fun processCertificationOnUserId(targetPrimaryKey: PGPPublicKey,
-                                                 target: CertSynopsis,
-                                                 userId: String,
-                                                 certification: PGPSignature) {
-            val issuerCandidates = byKeyId[certification.keyID]
-                    ?: return
-            for (candidate in issuerCandidates) {
-                val issuerKeyRing = KeyRingUtils.publicKeys(candidate.keys)
-                val issuerFingerprint = Fingerprint(OpenPgpFingerprint.of(issuerKeyRing))
-                val issuerSigningKey = issuerKeyRing.getPublicKey(certification.keyID)
-                        ?: continue
-                val issuer = certSynopsisMap[issuerFingerprint]
-                        ?: continue
-                try {
-                    val valid = SignatureVerifier.verifySignatureOverUserId(userId, certification,
-                            issuerSigningKey, targetPrimaryKey, policy, referenceTime.timestamp)
-                    if (valid) {
-                        networkBuilder.addEdge(fromCertification(issuer, target, userId, certification))
-                    }
-                } catch (e: SignatureValidationException) {
-                    LOGGER.warn("Cannot verify signature for '$userId' by $issuerFingerprint" +
-                            " on cert of ${target.fingerprint}", e)
-                }
-            }
-        }
-
-        private fun Fingerprint(fingerprint: OpenPgpFingerprint) = Fingerprint(fingerprint.toString())
-
-        private fun RevocationState(revocation: PGPSignature?): RevocationState {
-            if (revocation == null) {
-                return RevocationState.notRevoked()
-            }
-            val revocationReason = SignatureSubpacketsUtil.getRevocationReason(revocation)
-                    ?: return RevocationState.hardRevoked()
-            return if (RevocationAttributes.Reason.isHardRevocation(revocationReason.revocationReason))
-                RevocationState.hardRevoked()
-            else
-                RevocationState.softRevoked(revocation.creationTime)
-        }
-
-        /**
-         * Return the constructed, initialized [Network].
-         *
-         * @return finished network
-         */
-        fun buildNetwork(): Network {
-            return networkBuilder.build()
-        }
     }
 }
