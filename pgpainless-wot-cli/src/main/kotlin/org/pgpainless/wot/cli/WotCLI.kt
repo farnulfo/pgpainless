@@ -4,8 +4,10 @@
 
 package org.pgpainless.wot.cli
 
+import org.pgpainless.PGPainless
 import org.pgpainless.certificate_store.PGPainlessCertD
 import org.pgpainless.util.DateUtil
+import org.pgpainless.util.NotationRegistry
 import org.pgpainless.wot.WebOfTrust
 import org.pgpainless.wot.cli.subcommands.*
 import org.pgpainless.wot.dijkstra.sq.Fingerprint
@@ -54,33 +56,70 @@ class WotCLI: Callable<Int> {
         var gpg = false
     }
 
-
     /*
     @Option(names = ["--network"], description = ["Look for missing certificates on a key server or the WKD."])
-    var keyServer = "hkps://keyserver.ubuntu.com"
+    var network: Boolean = false
+
+    @Option(names = ["--keyserver"], description=["Change the default keyserver"])
+    var keyServer: String = "hkps://keyserver.ubuntu.com"
+
+    @Option(names = ["--gpg-ownertrust"])
+    var gpgOwnertrust: Boolean = false
+     */
 
     @Option(names = ["--certification-network"], description = ["Treat the web of trust as a certification network instead of an authentication network."])
     var certificationNetwork = false
 
     @Option(names = ["--gossip"], description = ["Find arbitrary paths by treating all certificates as trust-roots with zero trust."])
     var gossip = false
-     */
 
-    @Option(names = ["--trust-amount", "-a"], description = ["The required amount of trust."])
-    var amount = 1200
+    @ArgGroup(exclusive = true, multiplicity = "1")
+    lateinit var trustAmount: TrustAmount
+
+    class TrustAmount {
+        @Option(names = ["--trust-amount", "-a"], description = ["The required amount of trust."])
+        var amount: Int? = null
+
+        @Option(names = ["--partial"])
+        var partial: Boolean = false
+            set(value) {
+                field = value
+                if (field) {
+                    amount = 40
+                }
+            }
+
+        @Option(names = ["--full"])
+        var full: Boolean = false
+            set(value) {
+                field = value
+                if (field) {
+                    amount = 120
+                }
+            }
+
+        @Option(names = ["--double"])
+        var double: Boolean = false
+            set(value) {
+                field = value
+                if (field) {
+                    amount = 240
+                }
+            }
+    }
+
 
     @Option(names = ["--time"], description = ["Reference time."])
     var time: String? = null
 
+    @Option(names = ["--known-notation"], description = ["Add a notation to the list of known notations."])
+    var knownNotations: Array<String> = arrayOf()
+
     private val referenceTime: ReferenceTime
         get() {
-            val cTime = time
-            return if (cTime == null) {
-                ReferenceTime.now()
-            } else {
-                val date = DateUtil.parseUTCDate(cTime)
-                ReferenceTime.timestamp(date)
-            }
+            return time?.let {
+                ReferenceTime.timestamp(DateUtil.parseUTCDate(time!!))
+            } ?: ReferenceTime.now()
         }
 
     private val certificateStore: PGPCertificateStore
@@ -100,6 +139,12 @@ class WotCLI: Callable<Int> {
             return trustRoot.map { Fingerprint(it) }
         }
 
+    val amount: Int
+        get() =
+            if (trustAmount.amount == null) {
+                if (certificationNetwork) 1200 else 120
+            } else trustAmount.amount!!
+
     /**
      * Execute the command.
      *
@@ -110,6 +155,9 @@ class WotCLI: Callable<Int> {
             "Expected at least one trust-root."
         }
 
+        for (notation in knownNotations) {
+            PGPainless.getPolicy().notationRegistry.addKnownNotation(notation)
+        }
 
         return 0
     }
