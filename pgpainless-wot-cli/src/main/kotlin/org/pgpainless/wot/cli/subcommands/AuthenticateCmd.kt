@@ -4,7 +4,7 @@
 
 package org.pgpainless.wot.cli.subcommands
 
-import org.pgpainless.wot.dijkstra.sq.api.AuthenticateAPI
+import org.pgpainless.wot.api.AuthenticateAPI
 import org.pgpainless.wot.cli.WotCLI
 import org.pgpainless.wot.dijkstra.sq.Fingerprint
 import org.pgpainless.wot.dijkstra.sq.Path
