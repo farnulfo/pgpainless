@@ -6,10 +6,11 @@ package org.pgpainless.wot.cli
 
 import org.pgpainless.certificate_store.PGPainlessCertD
 import org.pgpainless.util.DateUtil
-import org.pgpainless.wot.api.WoTAPI
+import org.pgpainless.wot.WebOfTrust
 import org.pgpainless.wot.cli.subcommands.*
 import org.pgpainless.wot.dijkstra.sq.Fingerprint
 import org.pgpainless.wot.dijkstra.sq.ReferenceTime
+import org.pgpainless.wot.dijkstra.sq.api.WoTAPI
 import pgp.cert_d.PGPCertificateStoreAdapter
 import pgp.cert_d.subkey_lookup.InMemorySubkeyLookupFactory
 import pgp.certificate_store.PGPCertificateStore
@@ -19,6 +20,11 @@ import java.io.File
 import java.util.concurrent.Callable
 import kotlin.system.exitProcess
 
+/**
+ * Command Line Interface for pgpainless-wot, modelled after the reference implementation "sq-wot".
+ *
+ * @see <a href="https://gitlab.com/sequoia-pgp/sequoia-wot/">Sequoia Web of Trust Reference Implementation</a>
+ */
 @Command(name = "pgpainless-wot",
         subcommands = [
             AuthenticateCmd::class,
@@ -110,8 +116,10 @@ class WotCLI: Callable<Int> {
 
     val api: WoTAPI
         get() {
+            val network = WebOfTrust(certificateStore)
+                    .buildNetwork(referenceTime = referenceTime)
             return WoTAPI(
-                    certStores = listOf(certificateStore),
+                    network = network,
                     trustRoots = trustRoots,
                     gossip = false,
                     certificationNetwork = false,

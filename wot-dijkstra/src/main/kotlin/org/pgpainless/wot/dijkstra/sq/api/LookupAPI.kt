@@ -2,13 +2,15 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package org.pgpainless.wot.api
+package org.pgpainless.wot.dijkstra.sq.api
 
 import org.pgpainless.wot.dijkstra.sq.Paths
 
-interface ListAPI {
+interface LookupAPI {
 
-    fun list(): Result
+    fun lookup(arguments: Arguments): Result
+
+    data class Arguments(val userId: String, val email: Boolean = false)
 
     data class Result(val paths: Paths)
 }

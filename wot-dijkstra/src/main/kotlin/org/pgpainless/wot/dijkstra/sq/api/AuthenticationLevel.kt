@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package org.pgpainless.wot.api
+package org.pgpainless.wot.dijkstra.sq.api
 
 /**
  * Enum for different levels of Trust.

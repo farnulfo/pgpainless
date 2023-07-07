@@ -8,6 +8,8 @@ SPDX-License-Identifier: Apache-2.0
 
 This module contains a command line interface application that acts as a front-end for
 [`pgpainless-wot`](../pgpainless-wot).
+The interface of the application is modelled after the [sq-wot](https://gitlab.com/sequoia-pgp/sequoia-wot/)
+reference implementation.
 
 ## Build
 
