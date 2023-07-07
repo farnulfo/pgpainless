@@ -32,7 +32,7 @@ class PathTest {
     // Alice -(255,255)-> Root
     private val alice_root = Certification(alice, root, 255, Depth.unconstrained())
     // Alice -(120, 1)-> Bob
-    private val alice_bob = Certification(alice, null, bob, Date())
+    private val alice_bob = Certification(alice, bob, null, Date())
     // Root -> Root
     private val root_root = Certification(root, root, 120, Depth.limited(1))
 
