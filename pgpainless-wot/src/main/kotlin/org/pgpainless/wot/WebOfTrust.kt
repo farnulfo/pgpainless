@@ -115,6 +115,7 @@ class WebOfTrust(private val certificateStore: PGPCertificateStore) {
                 cert.getExpirationDateForUse(KeyFlag.CERTIFY_OTHER)
             } catch (e: NoSuchElementException) {
                 // Some keys are malformed and have no KeyFlags
+                // TODO: We also end up here for expired keys unfortunately
                 return
             }
 
@@ -149,7 +150,7 @@ class WebOfTrust(private val certificateStore: PGPCertificateStore) {
             val validatedTargetKeyRing = KeyRingUtils.publicKeys(validatedTarget.keys)
             val targetFingerprint = Fingerprint(OpenPgpFingerprint.of(validatedTargetKeyRing))
             val targetPrimaryKey = validatedTargetKeyRing.publicKey!!
-            val target = nodeMap[targetFingerprint]!!
+            val target = nodeMap[targetFingerprint] ?: return // skip over expired keys for now :/
 
             // Direct-Key Signatures (delegations) by X on Y
             val delegations = SignatureUtils.getDelegations(validatedTargetKeyRing)
