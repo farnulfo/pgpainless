@@ -21,6 +21,9 @@ class Paths(private val _paths: MutableList<Item>) {
             return _paths.map { it.path }
         }
 
+    val items: List<Item>
+        get() = _paths.toList()
+
     /**
      * Add a [Path] to the list.
      *
