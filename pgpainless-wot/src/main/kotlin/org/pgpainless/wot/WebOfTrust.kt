@@ -86,7 +86,7 @@ class WebOfTrust(private val certificateStore: PGPCertificateStore) {
     private class PGPNetworkFactory private constructor(validatedCertificates: List<KeyRingInfo>,
                                                         private val policy: Policy,
                                                         private val referenceTime: ReferenceTime) {
-        private val networkBuilder: Network.Builder = Network.builder()
+        private val networkBuilder: Network.Builder = Network.builder().setReferenceTime(referenceTime)
 
         // certificates keyed by fingerprint
         private val byFingerprint: MutableMap<Fingerprint, KeyRingInfo> = HashMap()
