@@ -5,6 +5,7 @@
 package org.pgpainless.wot.network
 
 import org.junit.jupiter.api.Test
+import org.pgpainless.wot.dsl.NetworkDSL
 import org.pgpainless.wot.network.Network.Companion.empty
 import org.pgpainless.wot.network.ReferenceTime.Companion.now
 import kotlin.test.assertEquals
