@@ -4,7 +4,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.pgpainless.wot.network.Depth
 import org.pgpainless.wot.dsl.NetworkDSL
-import org.pgpainless.wot.query.Path
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
