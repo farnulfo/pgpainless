@@ -7,7 +7,7 @@ package org.pgpainless.wot.dijkstra.sq
 import kotlin.math.min
 
 /**
- * A [Path] comprises a root [CertSynopsis], a list of edges ([Certifications][Certification]), as well as a
+ * A [Path] comprises a root [Node], a list of edges ([EdgeComponents][EdgeComponent]), as well as a
  * residual depth.
  *
  * @param root root of the path
@@ -15,8 +15,8 @@ import kotlin.math.min
  * @param residualDepth residual depth that is decreased each time another edge is appended
  */
 class Path(
-        val root: CertSynopsis,
-        private val edges: MutableList<Certification>,
+        val root: Node,
+        private val edges: MutableList<EdgeComponent>,
         var residualDepth: Depth
 ) {
 
@@ -26,14 +26,14 @@ class Path(
      *
      * @param root trust root
      */
-    constructor(root: CertSynopsis) : this(
-            root, mutableListOf<Certification>(), Depth.unconstrained())
+    constructor(root: Node) : this(
+            root, mutableListOf<EdgeComponent>(), Depth.unconstrained())
 
     /**
      * Current target of the path.
      * This corresponds to the target of the last entry in the edge list.
      */
-    val target: CertSynopsis
+    val target: Node
         get() {
             return if (edges.isEmpty()) {
                 root
@@ -43,12 +43,12 @@ class Path(
         }
 
     /**
-     * List of [CertSynopses][CertSynopsis] (nodes) of the path.
+     * List of [Nodes][Node] (nodes) of the path.
      * The first entry is the [root]. The other entries are the targets of the edges.
      */
-    val certificates: List<CertSynopsis>
+    val certificates: List<Node>
         get() {
-            val certs: MutableList<CertSynopsis> = mutableListOf(root)
+            val certs: MutableList<Node> = mutableListOf(root)
             for (certification in edges) {
                 certs.add(certification.target)
             }
@@ -65,7 +65,7 @@ class Path(
     /**
      * List of edges.
      */
-    val certifications: List<Certification>
+    val certifications: List<EdgeComponent>
         get() = edges.toList()
 
     /**
@@ -88,37 +88,37 @@ class Path(
      *
      * @throws IllegalArgumentException if the target at the end of the path is not equal to the issuer of the edge.
      * @throws IllegalArgumentException if the path runs out of residual depth
-     * @throws IllegalArgumentException if the addition of the [Certification] would result in a cyclic path
+     * @throws IllegalArgumentException if the addition of the [EdgeComponent] would result in a cyclic path
      */
-    fun append(certification: Certification) {
-        require(target.fingerprint == certification.issuer.fingerprint) {
-            "Cannot append certification to path: Path's tail is not issuer of the certification."
+    fun append(nComponent: EdgeComponent) {
+        require(target.fingerprint == nComponent.issuer.fingerprint) {
+            "Cannot append edge to path: Path's tail is not issuer of the edge."
         }
         require(residualDepth.isUnconstrained() || residualDepth.limit!! > 0) {
             "Not enough depth."
         }
 
         // root is c's target -> illegal cycle
-        var cyclic = root.fingerprint == certification.target.fingerprint
-        for ((i, edge) in edges.withIndex()) {
+        var cyclic = root.fingerprint == nComponent.target.fingerprint
+        for ((i, component) in edges.withIndex()) {
             if (cyclic) {
                 break
             }
             // existing edge points to c's target -> illegal cycle
-            if (edge.target.fingerprint == certification.target.fingerprint) {
+            if (nComponent.target.fingerprint == component.target.fingerprint) {
                 cyclic = if (edges.lastIndex != i) {
                     // Cycle in the middle of the ~~street~~ path
                     true
                 } else {
                     // Not a cycle, if we point to a different user-id
-                    edge.userId == certification.userId
+                    nComponent.userId == component.userId
                 }
             }
         }
-        require(!cyclic) { "Adding the certification to the path would create a cycle." }
+        require(!cyclic) { "Adding the edge to the path would create a cycle." }
 
-        residualDepth = certification.trustDepth.min(residualDepth.decrease(1))
-        edges.add(certification)
+        residualDepth = nComponent.trustDepth.min(residualDepth.decrease(1))
+        edges.add(nComponent)
     }
 
     override fun toString(): String {

@@ -95,7 +95,7 @@ class WebOfTrust(private val certificateStore: PGPCertificateStore) {
         private val byKeyId: MutableMap<Long, MutableList<KeyRingInfo>> = HashMap()
 
         // nodes keyed by fingerprint
-        private val nodeMap: MutableMap<Fingerprint, CertSynopsis> = HashMap()
+        private val nodeMap: MutableMap<Fingerprint, Node> = HashMap()
 
         init {
             validatedCertificates.forEach { indexAsNode(it) }
@@ -131,7 +131,7 @@ class WebOfTrust(private val certificateStore: PGPCertificateStore) {
             // map user-ids to revocation states
             val userIds = cert.userIds.associateWith { RevocationState(cert.getUserIdRevocation(it)) }
 
-            val node = CertSynopsis(certFingerprint,
+            val node = Node(certFingerprint,
                     expirationDate,
                     RevocationState(cert.revocationSelfSignature),
                     userIds)
@@ -158,7 +158,7 @@ class WebOfTrust(private val certificateStore: PGPCertificateStore) {
                 processDelegation(targetPrimaryKey, target, delegation)
             }
 
-            // Certification Signatures by X on Y over user-ID U
+            // EdgeComponent Signatures by X on Y over user-ID U
             val userIds = targetPrimaryKey.userIDs
             while (userIds.hasNext()) {
                 val userId = userIds.next()
@@ -180,7 +180,7 @@ class WebOfTrust(private val certificateStore: PGPCertificateStore) {
          * @param delegation delegation signature
          */
         private fun processDelegation(targetPrimaryKey: PGPPublicKey,
-                                      target: CertSynopsis,
+                                      target: Node,
                                       delegation: PGPSignature) {
             // There might be more than one cert with a subkey of matching key-id
             val issuerCandidates = byKeyId[delegation.keyID]
@@ -217,7 +217,7 @@ class WebOfTrust(private val certificateStore: PGPCertificateStore) {
          * @param certification certification signature
          */
         private fun processCertificationOnUserId(targetPrimaryKey: PGPPublicKey,
-                                                 target: CertSynopsis,
+                                                 target: Node,
                                                  userId: String,
                                                  certification: PGPSignature) {
             // There might be more than one cert with a subkey of matching key-id
