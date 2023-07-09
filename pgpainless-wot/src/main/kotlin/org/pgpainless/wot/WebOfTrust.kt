@@ -8,6 +8,7 @@ import org.bouncycastle.openpgp.PGPPublicKey
 import org.bouncycastle.openpgp.PGPSignature
 import org.pgpainless.PGPainless
 import org.pgpainless.algorithm.KeyFlag
+import org.pgpainless.algorithm.SignatureType
 import org.pgpainless.exception.SignatureValidationException
 import org.pgpainless.key.OpenPgpFingerprint
 import org.pgpainless.key.info.KeyRingInfo
@@ -15,7 +16,7 @@ import org.pgpainless.key.util.KeyRingUtils
 import org.pgpainless.key.util.RevocationAttributes
 import org.pgpainless.policy.Policy
 import org.pgpainless.signature.SignatureUtils
-import org.pgpainless.signature.consumer.SignatureVerifier
+import org.pgpainless.signature.consumer.SignatureValidator
 import org.pgpainless.signature.subpackets.SignatureSubpacketsUtil
 import org.pgpainless.wot.network.*
 import org.pgpainless.wot.network.ReferenceTime.Companion.now
@@ -114,6 +115,8 @@ class WebOfTrust(private val certificateStore: PGPCertificateStore) {
             val expirationDate: Date? = try {
                 cert.getExpirationDateForUse(KeyFlag.CERTIFY_OTHER)
             } catch (e: NoSuchElementException) {
+                LOGGER.warn("Could not deduce expiration time of ${cert.fingerprint}. " +
+                        "Possibly hard revoked cert or illegal algorithms? Skip certificate.");
                 // Some keys are malformed and have no KeyFlags
                 // TODO: We also end up here for expired keys unfortunately
                 return
@@ -193,8 +196,7 @@ class WebOfTrust(private val certificateStore: PGPCertificateStore) {
                 val issuer = nodeMap[issuerFingerprint]!!
 
                 try {
-                    val valid = SignatureVerifier.verifyDirectKeySignature(delegation, issuerSigningKey,
-                            targetPrimaryKey, policy, referenceTime.timestamp)
+                    val valid = verifyDelegation(candidate, delegation, issuerSigningKey, targetPrimaryKey, policy)
                     if (valid) {
                         networkBuilder.addEdge(fromDelegation(issuer, target, delegation))
                         return // we're done
@@ -205,6 +207,23 @@ class WebOfTrust(private val certificateStore: PGPCertificateStore) {
                             " on cert of $targetFingerprint", e)
                 }
             }
+        }
+
+        /**
+         * Verify a delegation signature over a primary key.
+         * This method returns true, if the signature is correct and well-formed.
+         * It does not reject expired or revoked signatures.
+         */
+        fun verifyDelegation(issuer: KeyRingInfo, signature: PGPSignature, signingKey: PGPPublicKey, signedKey: PGPPublicKey, policy: Policy): Boolean {
+            // Check signature type
+            SignatureValidator.signatureIsOfType(SignatureType.KEY_REVOCATION, SignatureType.DIRECT_KEY).verify(signature)
+
+            // common verification steps that are shared by delegations and certifications
+            verifyCommonSignatureCriteria(issuer, signature, signingKey, signedKey, policy)
+
+            // check signature correctness
+            SignatureValidator.correctSignatureOverKey(signingKey, signedKey).verify(signature)
+            return true
         }
 
         /**
@@ -231,8 +250,7 @@ class WebOfTrust(private val certificateStore: PGPCertificateStore) {
                 val issuer = nodeMap[issuerFingerprint]!!
 
                 try {
-                    val valid = SignatureVerifier.verifySignatureOverUserId(userId, certification,
-                            issuerSigningKey, targetPrimaryKey, policy, referenceTime.timestamp)
+                    val valid = verifyCertification(candidate, certification, issuerSigningKey, targetPrimaryKey, userId, policy)
                     if (valid) {
                         networkBuilder.addEdge(fromCertification(issuer, target, userId, certification))
                         return // we're done
@@ -242,6 +260,61 @@ class WebOfTrust(private val certificateStore: PGPCertificateStore) {
                             " on cert of ${target.fingerprint}", e)
                 }
             }
+        }
+
+        /**
+         * Verify a certification over a user-ID.
+         * This method returns true, if the signature is correct and well-formed.
+         * It does not reject expired or revoked signatures.
+         */
+        fun verifyCertification(issuer: KeyRingInfo, signature: PGPSignature, signingKey: PGPPublicKey, signedKey: PGPPublicKey, userId: String, policy: Policy): Boolean {
+            // check signature type
+            SignatureValidator.signatureIsOfType(SignatureType.CERTIFICATION_REVOCATION, SignatureType.GENERIC_CERTIFICATION, SignatureType.NO_CERTIFICATION, SignatureType.CASUAL_CERTIFICATION, SignatureType.POSITIVE_CERTIFICATION).verify(signature)
+
+            // perform shared verification steps
+            verifyCommonSignatureCriteria(issuer, signature, signingKey, signedKey, policy)
+
+            // check correct signature
+            SignatureValidator.correctSignatureOverUserId(userId, signedKey, signingKey).verify(signature)
+            return true
+        }
+
+        fun verifyCommonSignatureCriteria(issuer: KeyRingInfo,
+                                          signature: PGPSignature,
+                                          signingKey: PGPPublicKey,
+                                          signedKey: PGPPublicKey,
+                                          policy: Policy): Boolean {
+            // Check for general "well-formed-ness" (has legal creation time)
+            SignatureValidator.signatureIsNotMalformed(signingKey).verify(signature)
+            // Check for unknown critical notations or subpackets
+            if (signature.version >= 4) {
+                SignatureValidator.signatureDoesNotHaveCriticalUnknownNotations(policy.notationRegistry).verify(signature)
+                SignatureValidator.signatureDoesNotHaveCriticalUnknownSubpackets().verify(signature)
+            }
+            // check for signature effectiveness at reference time (was created before reference time, is not expired)
+            SignatureValidator.signatureIsEffective(referenceTime.timestamp).verify(signature)
+            // check if signature is not invalidated by hard-revoked cert
+            if (issuer.revocationState == org.pgpainless.algorithm.RevocationState.hardRevoked()) {
+                // cert is hard revoked
+                throw SignatureValidationException("Signature is invalid because certificate ${issuer.fingerprint} is hard revoked.")
+            }
+            // check if signature is not invalidated by soft-revoked cert
+            if (issuer.revocationState.isSoftRevocation) {
+                SignatureValidator.signatureWasCreatedInBounds(issuer.creationDate, issuer.revocationDate).verify(signature)
+            }
+            // check if signature is not invalidated by expired primary key
+            val exp = issuer.primaryKeyExpirationDate
+            if (exp != null) {
+                SignatureValidator.signatureWasCreatedInBounds(issuer.creationDate, exp).verify(signature)
+            }
+            // check signature algorithms against our algorithm policy
+            SignatureValidator.signatureUsesAcceptableHashAlgorithm(policy).verify(signature)
+            SignatureValidator.signatureUsesAcceptablePublicKeyAlgorithm(policy, signingKey).verify(signature)
+
+            // check if signature is not created before the target key
+            SignatureValidator.signatureDoesNotPredateSignee(signedKey).verify(signature)
+
+            return true
         }
 
         /**
