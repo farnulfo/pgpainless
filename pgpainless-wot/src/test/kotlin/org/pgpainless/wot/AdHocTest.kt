@@ -1,9 +1,8 @@
 package org.pgpainless.wot
 
 import org.junit.jupiter.api.Test
+import org.pgpainless.wot.dsl.PGPDSL
 import org.pgpainless.wot.testfixtures.AdHocVectors
-import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
 class AdHocTest: PGPDSL {
 
