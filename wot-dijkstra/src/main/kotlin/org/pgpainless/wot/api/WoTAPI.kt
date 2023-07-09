@@ -4,9 +4,9 @@
 
 package org.pgpainless.wot.api
 
-import org.pgpainless.wot.dijkstra.sq.Fingerprint
-import org.pgpainless.wot.dijkstra.sq.Network
-import org.pgpainless.wot.dijkstra.sq.ReferenceTime
+import org.pgpainless.wot.network.Fingerprint
+import org.pgpainless.wot.network.Network
+import org.pgpainless.wot.network.ReferenceTime
 
 /**
  * Web of Trust API, offering different operations.

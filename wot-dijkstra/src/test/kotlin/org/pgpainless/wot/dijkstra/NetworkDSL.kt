@@ -4,7 +4,7 @@
 
 package org.pgpainless.wot.dijkstra
 
-import org.pgpainless.wot.dijkstra.sq.*
+import org.pgpainless.wot.network.*
 import java.util.*
 
 /**
@@ -126,7 +126,7 @@ interface NetworkDSL {
      * Set the reference time of the builder to now.
      */
     fun Network.Builder.now(): Network.Builder {
-        return setReferenceTime(ReferenceTime.now())
+        return setReferenceTime(org.pgpainless.wot.network.ReferenceTime.now())
     }
 
     fun Network.getEdgesFor(issuer: Fingerprint, target: Fingerprint): EdgeSet? {

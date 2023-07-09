@@ -2,7 +2,9 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package org.pgpainless.wot.dijkstra.sq
+package org.pgpainless.wot.query
+
+import org.pgpainless.wot.network.Fingerprint
 
 data class Root(val fingerprint: Fingerprint, val amount: Int) {
 

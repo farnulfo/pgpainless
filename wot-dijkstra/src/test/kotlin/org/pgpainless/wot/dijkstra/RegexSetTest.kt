@@ -1,7 +1,7 @@
 package org.pgpainless.wot.dijkstra
 
 import org.junit.jupiter.api.Test
-import org.pgpainless.wot.dijkstra.sq.RegexSet
+import org.pgpainless.wot.network.RegexSet
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 

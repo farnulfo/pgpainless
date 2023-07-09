@@ -5,10 +5,10 @@
 package org.pgpainless.wot.dijkstra
 
 import org.junit.jupiter.api.Test
-import org.pgpainless.wot.dijkstra.sq.Fingerprint
-import org.pgpainless.wot.dijkstra.sq.Network.Companion.empty
-import org.pgpainless.wot.dijkstra.sq.ReferenceTime.Companion.now
-import org.pgpainless.wot.dijkstra.sq.RegexSet
+import org.pgpainless.wot.network.Fingerprint
+import org.pgpainless.wot.network.Network.Companion.empty
+import org.pgpainless.wot.network.ReferenceTime.Companion.now
+import org.pgpainless.wot.network.RegexSet
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 

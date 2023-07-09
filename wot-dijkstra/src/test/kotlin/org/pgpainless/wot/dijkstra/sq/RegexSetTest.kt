@@ -1,5 +1,6 @@
 package org.pgpainless.wot.dijkstra.sq
 
+import org.pgpainless.wot.network.RegexSet
 import kotlin.test.Test
 
 class RegexSetTest {

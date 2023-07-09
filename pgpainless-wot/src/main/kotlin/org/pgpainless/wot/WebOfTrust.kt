@@ -17,8 +17,8 @@ import org.pgpainless.policy.Policy
 import org.pgpainless.signature.SignatureUtils
 import org.pgpainless.signature.consumer.SignatureVerifier
 import org.pgpainless.signature.subpackets.SignatureSubpacketsUtil
-import org.pgpainless.wot.dijkstra.sq.*
-import org.pgpainless.wot.dijkstra.sq.ReferenceTime.Companion.now
+import org.pgpainless.wot.network.*
+import org.pgpainless.wot.network.ReferenceTime.Companion.now
 import org.pgpainless.wot.util.CertificationFactory.Companion.fromCertification
 import org.pgpainless.wot.util.CertificationFactory.Companion.fromDelegation
 import org.slf4j.LoggerFactory

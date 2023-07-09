@@ -2,7 +2,9 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package org.pgpainless.wot.dijkstra.sq
+package org.pgpainless.wot.query
+
+import org.pgpainless.wot.network.Fingerprint
 
 /**
  * A set of `Root`s (that can be used as the basis for authentication lookups).

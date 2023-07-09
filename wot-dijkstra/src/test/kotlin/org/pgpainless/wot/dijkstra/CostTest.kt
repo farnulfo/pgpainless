@@ -4,6 +4,7 @@
 
 package org.pgpainless.wot.dijkstra
 
+import org.pgpainless.wot.query.Cost
 import kotlin.test.Test
 
 class CostTest {

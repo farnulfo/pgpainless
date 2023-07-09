@@ -2,10 +2,10 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package org.pgpainless.wot.dijkstra.filter
+package org.pgpainless.wot.query.filter
 
-import org.pgpainless.wot.dijkstra.sq.Edge
-import org.pgpainless.wot.dijkstra.sq.Depth
+import org.pgpainless.wot.network.Edge
+import org.pgpainless.wot.network.Depth
 
 /**
  * A filter that treats every certification as a trust signature with unconstrained depth,

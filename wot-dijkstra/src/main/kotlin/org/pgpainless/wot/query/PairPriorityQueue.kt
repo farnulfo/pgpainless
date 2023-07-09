@@ -1,4 +1,4 @@
-package org.pgpainless.wot.dijkstra
+package org.pgpainless.wot.query
 
 import java.util.PriorityQueue
 

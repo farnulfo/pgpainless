@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package org.pgpainless.wot.dijkstra.filter
+package org.pgpainless.wot.query.filter
 
 /**
  * A no-op filter.

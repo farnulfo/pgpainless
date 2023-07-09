@@ -2,11 +2,11 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package org.pgpainless.wot.dijkstra.filter
+package org.pgpainless.wot.query.filter
 
-import org.pgpainless.wot.dijkstra.sq.Edge
-import org.pgpainless.wot.dijkstra.sq.Fingerprint
-import org.pgpainless.wot.dijkstra.sq.Path
+import org.pgpainless.wot.network.Edge
+import org.pgpainless.wot.network.Fingerprint
+import org.pgpainless.wot.network.Path
 
 class SuppressCertificationFilter() : CertificationFilter {
     // A certification's trust amount will be suppressed by this amount.

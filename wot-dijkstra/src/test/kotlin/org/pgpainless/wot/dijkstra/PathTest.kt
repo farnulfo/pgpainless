@@ -2,8 +2,8 @@ package org.pgpainless.wot.dijkstra
 
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import org.pgpainless.wot.dijkstra.sq.*
-import java.util.*
+import org.pgpainless.wot.network.Depth
+import org.pgpainless.wot.network.Path
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 

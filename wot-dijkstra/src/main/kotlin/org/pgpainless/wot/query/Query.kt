@@ -2,10 +2,10 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package org.pgpainless.wot.dijkstra
+package org.pgpainless.wot.query
 
-import org.pgpainless.wot.dijkstra.filter.*
-import org.pgpainless.wot.dijkstra.sq.*
+import org.pgpainless.wot.network.*
+import org.pgpainless.wot.query.filter.*
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.util.Date

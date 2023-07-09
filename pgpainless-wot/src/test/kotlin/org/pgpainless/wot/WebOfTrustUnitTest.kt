@@ -2,13 +2,13 @@ package org.pgpainless.wot
 
 import org.junit.jupiter.api.Test
 import org.pgpainless.PGPainless
-import org.pgpainless.wot.dijkstra.Query
-import org.pgpainless.wot.dijkstra.sq.Roots
-import org.pgpainless.wot.dijkstra.filter.IdempotentCertificationFilter
-import org.pgpainless.wot.dijkstra.sq.Fingerprint
-import org.pgpainless.wot.dijkstra.sq.Network
-import org.pgpainless.wot.dijkstra.sq.Path
-import org.pgpainless.wot.dijkstra.sq.Root
+import org.pgpainless.wot.query.Query
+import org.pgpainless.wot.query.Roots
+import org.pgpainless.wot.query.filter.IdempotentCertificationFilter
+import org.pgpainless.wot.network.Fingerprint
+import org.pgpainless.wot.network.Network
+import org.pgpainless.wot.network.Path
+import org.pgpainless.wot.query.Root
 import java.io.File
 
 private const val DEPTH_UNCONSTRAINED = 255

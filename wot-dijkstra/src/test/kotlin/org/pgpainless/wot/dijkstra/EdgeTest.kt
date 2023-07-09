@@ -1,10 +1,10 @@
 package org.pgpainless.wot.dijkstra
 
 import org.junit.jupiter.api.Test
-import org.pgpainless.wot.dijkstra.sq.Node
-import org.pgpainless.wot.dijkstra.sq.Edge
-import org.pgpainless.wot.dijkstra.sq.Fingerprint
-import org.pgpainless.wot.dijkstra.sq.RevocationState
+import org.pgpainless.wot.network.Node
+import org.pgpainless.wot.network.Edge
+import org.pgpainless.wot.network.Fingerprint
+import org.pgpainless.wot.network.RevocationState
 import java.util.*
 import kotlin.test.assertEquals
 

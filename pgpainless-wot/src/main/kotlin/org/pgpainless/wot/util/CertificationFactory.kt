@@ -6,11 +6,11 @@ package org.pgpainless.wot.util
 
 import org.bouncycastle.openpgp.PGPSignature
 import org.pgpainless.signature.subpackets.SignatureSubpacketsUtil
-import org.pgpainless.wot.dijkstra.sq.Node
-import org.pgpainless.wot.dijkstra.sq.Edge
-import org.pgpainless.wot.dijkstra.sq.Depth
-import org.pgpainless.wot.dijkstra.sq.RegexSet
-import org.pgpainless.wot.dijkstra.sq.RegexSet.Companion.fromExpressionList
+import org.pgpainless.wot.network.Node
+import org.pgpainless.wot.network.Edge
+import org.pgpainless.wot.network.Depth
+import org.pgpainless.wot.network.RegexSet
+import org.pgpainless.wot.network.RegexSet.Companion.fromExpressionList
 
 class CertificationFactory {
 

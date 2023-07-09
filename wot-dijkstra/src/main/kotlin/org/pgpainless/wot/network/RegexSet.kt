@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package org.pgpainless.wot.dijkstra.sq
+package org.pgpainless.wot.network
 
 import java.util.regex.Pattern
 
