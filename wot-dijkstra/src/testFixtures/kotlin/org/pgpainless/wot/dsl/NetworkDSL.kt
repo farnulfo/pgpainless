@@ -13,13 +13,13 @@ import java.util.*
 interface NetworkDSL {
 
     /**
-     * Create [Node] from [String] fingerprint.
+     * Create a [Node] from a [String] fingerprint.
      */
     fun Node(fingerprint: String): Node =
             Node(Fingerprint(fingerprint), null, RevocationState.notRevoked(), mapOf())
 
     /**
-     * Create [Node] from [String] fingerprint and non-revoked [userId].
+     * Create a [Node] from a [String] fingerprint and non-revoked [userId].
      */
     fun Node(fingerprint: String, userId: String): Node = Node(
             Fingerprint(fingerprint), null, RevocationState.notRevoked(), mapOf(userId to RevocationState.notRevoked()))
@@ -29,18 +29,18 @@ interface NetworkDSL {
     )
 
     /**
-     * Create [EdgeComponent] from two [Node] nodes.
+     * Create an [EdgeComponent] from two [Node] nodes.
      */
-    fun Edge(issuer: Node, target: Node): EdgeComponent =
+    fun EdgeComponent(issuer: Node, target: Node): EdgeComponent =
             EdgeComponent(issuer, target, null, Date())
 
     /**
-     * Create [EdgeComponent] from two [Node] nodes and a target [userId].
+     * Create an [EdgeComponent] from two [Node] nodes and a target [userId].
      */
-    fun Edge(issuer: Node, target: Node, userId: String): EdgeComponent =
+    fun EdgeComponent(issuer: Node, target: Node, userId: String): EdgeComponent =
             EdgeComponent(issuer, target, userId, Date())
 
-    fun Edge(issuer: Node, target: Node, amount: Int, depth: Depth): EdgeComponent =
+    fun EdgeComponent(issuer: Node, target: Node, amount: Int, depth: Depth): EdgeComponent =
             EdgeComponent(issuer, target, null, Date(), null, true, amount, depth, RegexSet.wildcard())
 
     /**
@@ -74,7 +74,7 @@ interface NetworkDSL {
     fun Network.Builder.addEdge(issuer: String, target: String): Network.Builder {
         val issuerNode = nodes[Fingerprint(issuer)]!!
         val targetNode = nodes[Fingerprint(target)]!!
-        return addEdge(Edge(issuerNode, targetNode))
+        return addEdge(EdgeComponent(issuerNode, targetNode))
     }
 
     /**
@@ -85,7 +85,7 @@ interface NetworkDSL {
     fun Network.Builder.addEdge(issuer: String, target: String, userId: String): Network.Builder {
         val issuerNode = nodes[Fingerprint(issuer)]!!
         val targetNode = nodes[Fingerprint(target)]!!
-        return addEdge(Edge(issuerNode, targetNode, userId))
+        return addEdge(EdgeComponent(issuerNode, targetNode, userId))
     }
 
     /**
@@ -95,7 +95,7 @@ interface NetworkDSL {
     fun Network.Builder.buildEdge(issuer: String, target: String): Network.Builder {
         val issuerNode = nodes.getOrPut(Fingerprint(issuer)) { Node(issuer) }
         val targetNode = nodes.getOrPut(Fingerprint(target)) { Node(target) }
-        return addEdge(Edge(issuerNode, targetNode))
+        return addEdge(EdgeComponent(issuerNode, targetNode))
     }
 
     /**
@@ -107,7 +107,7 @@ interface NetworkDSL {
     fun Network.Builder.buildEdge(issuer: String, target: String, userId: String): Network.Builder {
         val issuerNode = nodes.getOrPut(Fingerprint(issuer)) { Node(issuer)}
         val targetNode = Node(nodes.getOrPut(Fingerprint(target)) { Node(target, userId) }, userId)
-        return addEdge(Edge(issuerNode, targetNode, userId))
+        return addEdge(EdgeComponent(issuerNode, targetNode, userId))
     }
 
     fun Network.Builder.buildEdge(issuer: String, target: String, amount: Int, depth: Int): Network.Builder {

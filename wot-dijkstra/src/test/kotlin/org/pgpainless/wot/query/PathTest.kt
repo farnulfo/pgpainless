@@ -14,15 +14,15 @@ class PathTest: NetworkDSL {
     private val bob = Node("1111111111111111111111111111111111111111")
 
     // Root -(255, 255)-> Alice
-    private val root_alice__fully_trusted = Edge(root, alice, 255, Depth.unconstrained())
+    private val root_alice__fully_trusted = EdgeComponent(root, alice, 255, Depth.unconstrained())
     // Root -(60,0)-> Alice
-    private val root_alice__marginally_trusted = Edge(root, alice, 60, Depth.limited(0))
+    private val root_alice__marginally_trusted = EdgeComponent(root, alice, 60, Depth.limited(0))
     // Alice -(255,255)-> Root
-    private val alice_root = Edge(alice, root, 255, Depth.unconstrained())
+    private val alice_root = EdgeComponent(alice, root, 255, Depth.unconstrained())
     // Alice -(120, 1)-> Bob
-    private val alice_bob = Edge(alice, bob)
+    private val alice_bob = EdgeComponent(alice, bob)
     // Root -> Root
-    private val root_root = Edge(root, root, 120, Depth.limited(1))
+    private val root_root = EdgeComponent(root, root, 120, Depth.limited(1))
 
     @Test
     fun `verify that an empty Path is properly initialized`() {
