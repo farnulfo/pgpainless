@@ -1,8 +1,8 @@
-package org.pgpainless.wot.dijkstra
+package org.pgpainless.wot.network
 
 import org.junit.jupiter.api.Test
-import org.pgpainless.wot.dijkstra.sq.ReferenceTime
-import org.pgpainless.wot.dijkstra.sq.RevocationState
+import org.pgpainless.wot.network.ReferenceTime
+import org.pgpainless.wot.network.RevocationState
 import java.util.*
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue

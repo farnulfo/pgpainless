@@ -7,9 +7,9 @@ package org.pgpainless.wot
 import org.bouncycastle.openpgp.PGPPublicKeyRing
 
 import org.pgpainless.key.OpenPgpFingerprint
-import org.pgpainless.wot.dijkstra.sq.Edge
-import org.pgpainless.wot.dijkstra.sq.Fingerprint
-import org.pgpainless.wot.dijkstra.sq.Network
+import org.pgpainless.wot.network.Edge
+import org.pgpainless.wot.network.Fingerprint
+import org.pgpainless.wot.network.Network
 import org.pgpainless.wot.testfixtures.TestCertificateStores
 import org.pgpainless.wot.testfixtures.WotTestVectors
 import kotlin.test.assertEquals

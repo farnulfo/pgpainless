@@ -1,8 +1,10 @@
-package org.pgpainless.wot.dijkstra
+package org.pgpainless.wot.query
 
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import org.pgpainless.wot.dijkstra.sq.*
+import org.pgpainless.wot.network.Depth
+import org.pgpainless.wot.network.NetworkDSL
+import org.pgpainless.wot.query.Path
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 

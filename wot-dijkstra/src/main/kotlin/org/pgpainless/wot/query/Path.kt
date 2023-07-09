@@ -2,8 +2,11 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package org.pgpainless.wot.dijkstra.sq
+package org.pgpainless.wot.query
 
+import org.pgpainless.wot.network.Depth
+import org.pgpainless.wot.network.EdgeComponent
+import org.pgpainless.wot.network.Node
 import kotlin.math.min
 
 /**

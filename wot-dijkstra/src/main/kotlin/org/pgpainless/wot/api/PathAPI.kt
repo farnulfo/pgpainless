@@ -4,7 +4,7 @@
 
 package org.pgpainless.wot.api
 
-import org.pgpainless.wot.dijkstra.sq.Fingerprint
+import org.pgpainless.wot.network.Fingerprint
 
 interface PathAPI {
 

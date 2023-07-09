@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package org.pgpainless.wot.dijkstra
+package org.pgpainless.wot.network
 
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals

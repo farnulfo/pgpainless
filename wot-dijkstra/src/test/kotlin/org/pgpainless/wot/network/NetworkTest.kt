@@ -2,13 +2,11 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package org.pgpainless.wot.dijkstra
+package org.pgpainless.wot.network
 
 import org.junit.jupiter.api.Test
-import org.pgpainless.wot.dijkstra.sq.Fingerprint
-import org.pgpainless.wot.dijkstra.sq.Network.Companion.empty
-import org.pgpainless.wot.dijkstra.sq.ReferenceTime.Companion.now
-import org.pgpainless.wot.dijkstra.sq.RegexSet
+import org.pgpainless.wot.network.Network.Companion.empty
+import org.pgpainless.wot.network.ReferenceTime.Companion.now
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 

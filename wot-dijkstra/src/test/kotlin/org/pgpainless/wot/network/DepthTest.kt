@@ -2,14 +2,13 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package org.pgpainless.wot.dijkstra
+package org.pgpainless.wot.network
 
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import org.pgpainless.wot.dijkstra.sq.Depth
-import org.pgpainless.wot.dijkstra.sq.Depth.Companion.auto
-import org.pgpainless.wot.dijkstra.sq.Depth.Companion.limited
-import org.pgpainless.wot.dijkstra.sq.Depth.Companion.unconstrained
+import org.pgpainless.wot.network.Depth.Companion.auto
+import org.pgpainless.wot.network.Depth.Companion.limited
+import org.pgpainless.wot.network.Depth.Companion.unconstrained
 import kotlin.test.*
 
 class DepthTest {
