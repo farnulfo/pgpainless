@@ -11,7 +11,7 @@ import org.pgpainless.key.protection.SecretKeyRingProtector
 import org.pgpainless.signature.subpackets.CertificationSubpackets
 import org.pgpainless.signature.subpackets.CertificationSubpackets.Callback
 import org.pgpainless.wot.KeyRingCertificateStore
-import org.pgpainless.wot.dijkstra.sq.Fingerprint
+import org.pgpainless.wot.network.Fingerprint
 import pgp.certificate_store.PGPCertificateStore
 
 interface AdHocVectors {

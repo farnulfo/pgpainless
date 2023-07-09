@@ -4,7 +4,7 @@
 
 package org.pgpainless.wot.api
 
-import org.pgpainless.wot.dijkstra.sq.Paths
+import org.pgpainless.wot.query.Paths
 
 interface ListAPI {
 

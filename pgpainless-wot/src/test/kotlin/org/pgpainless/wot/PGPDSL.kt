@@ -5,9 +5,9 @@ import org.bouncycastle.openpgp.PGPSignature
 import org.pgpainless.algorithm.RevocationStateType
 import org.pgpainless.key.OpenPgpFingerprint
 import org.pgpainless.key.info.KeyRingInfo
-import org.pgpainless.wot.dijkstra.sq.Node
-import org.pgpainless.wot.dijkstra.sq.Fingerprint
-import org.pgpainless.wot.dijkstra.sq.RevocationState
+import org.pgpainless.wot.network.Node
+import org.pgpainless.wot.network.Fingerprint
+import org.pgpainless.wot.network.RevocationState
 
 interface PGPDSL {
 
