@@ -4,56 +4,110 @@
 
 package org.pgpainless.wot.network
 
-import java.util.*
-
 /**
- * A [Edge] is a signature issued by one certificate over a datum on another target certificate.
- * Such a datum could be either a user-id, or the primary key of the target certificate.
+ * An [Edge] comprises a set of signatures ([EdgeComponent]) made by the same issuer, on the same target certificate.
  *
- * @param issuer synopsis of the certificate that issued the [Edge]
- * @param target synopsis of the certificate that is target of this [Edge]
- * @param userId optional user-id. If this is null, the [Edge] is made over the primary key of the target.
- * @param creationTime creation time of the [Edge]
- * @param expirationTime optional expiration time of the [Edge]
- * @param exportable if false, the certification is marked as "not exportable"
- * @param trustAmount amount of trust the issuer places in the binding
- * @param trustDepth degree to which the issuer trusts the target as trusted introducer
- * @param regexes regular expressions for user-ids which the target is allowed to introduce
+ * @param issuer synopsis of the certificate that issued the [Certifications][EdgeComponent]
+ * @param target synopsis of the certificate that is targeted by the [Certifications][EdgeComponent]
+ * @param components [Map] keyed by user-ids, whose values are [Lists][List] of
+ * [EdgeComponents][EdgeComponent] that are calculated over the key user-id. Note, that the key can also be null for
+ * [EdgeComponents][EdgeComponent] over the targets primary key.
  */
-data class Edge(
+class Edge(
         val issuer: Node,
         val target: Node,
-        val userId: String?,
-        val creationTime: Date,
-        val expirationTime: Date?,
-        val exportable: Boolean,
-        val trustAmount: Int,
-        val trustDepth: Depth,
-        val regexes: RegexSet
-) {
+        components: Map<String?, List<EdgeComponent>>) {
+
+    init {
+        components.forEach { (_, certifications) ->
+            certifications.forEach {
+                add(it)
+            }
+        }
+    }
+
+    private val _certifications: MutableMap<String?, MutableList<EdgeComponent>> = mutableMapOf()
+    val components: Map<String?, List<EdgeComponent>>
+        get() = _certifications.toMutableMap()
+
+    companion object {
+
+        /**
+         * Create an empty [Edge].
+         *
+         * @param issuer origin of the [Edge].
+         * @param target targeted of the [Edge].
+         */
+        @JvmStatic
+        fun empty(issuer: Node, target: Node): Edge {
+            return Edge(issuer, target, HashMap())
+        }
+
+        /**
+         * Create a [Edge] from a single [EdgeComponent].
+         *
+         * @param edgeComponent edgeComponent
+         */
+        @JvmStatic
+        fun fromCertification(edgeComponent: EdgeComponent): Edge {
+            val set = empty(edgeComponent.issuer, edgeComponent.target)
+            set.add(edgeComponent)
+            return set
+        }
+    }
 
     /**
-     * Construct a [Edge] with default values. The result is non-expiring, will be exportable and has a
-     * trust amount of 120, a depth of 0 and a wildcard regex.
+     * Merge the given [Edge] into this.
+     * This method copies all [EdgeComponents][EdgeComponent] from the other [Edge] into [components].
      *
-     * @param issuer synopsis of the certificate that issued the [Edge]
-     * @param target synopsis of the certificate that is target of this [Edge]
-     * @param targetUserId optional user-id. If this is null, the [Edge] is made over the primary key of the target.
-     * @param creationTime creation time of the [Edge]
+     * @param other [Edge] with the same issuer and target as this object.
      */
-    constructor(
-            issuer: Node,
-            target: Node,
-            targetUserId: String? = null,
-            creationTime: Date) :
-            this(issuer, target, targetUserId, creationTime, null, true, 120, Depth.limited(0), RegexSet.wildcard())
+    fun merge(other: Edge) {
+        if (other == this) {
+            return
+        }
+
+        require(issuer.fingerprint == other.issuer.fingerprint) { "Issuer fingerprint mismatch." }
+        require(target.fingerprint == other.target.fingerprint) { "Target fingerprint mismatch." }
+
+        for (userId in other.components.keys) {
+            for (certification in other.components[userId]!!) {
+                add(certification)
+            }
+        }
+    }
+
+    /**
+     * Add a single [EdgeComponent] into this objects [components].
+     * Adding multiple [EdgeComponents][EdgeComponent] for the same datum, but with different creation times results in
+     * only the most recent [EdgeComponent(s)][EdgeComponent] to be preserved.
+     *
+     * @param edgeComponent [EdgeComponent] with the same issuer fingerprint and target fingerprint as this object.
+     */
+    fun add(edgeComponent: EdgeComponent) {
+        require(issuer.fingerprint == edgeComponent.issuer.fingerprint) { "Issuer fingerprint mismatch." }
+        require(target.fingerprint == edgeComponent.target.fingerprint) { "Target fingerprint mismatch." }
+
+        val certificationsForUserId = _certifications.getOrPut(edgeComponent.userId) { mutableListOf() }
+        if (certificationsForUserId.isEmpty()) {
+            certificationsForUserId.add(edgeComponent)
+            return
+        }
+
+        val existing = certificationsForUserId[0]
+        // if existing is older than this edgeComponent
+        if (existing.creationTime.before(edgeComponent.creationTime)) {
+            // throw away older certifications
+            certificationsForUserId.clear()
+        }
+        // If this edgeComponent is newest (or equally old!)
+        if (!existing.creationTime.after(edgeComponent.creationTime)) {
+            certificationsForUserId.add(edgeComponent)
+        }
+        // else this edgeComponent is older, so don't add it
+    }
 
     override fun toString(): String {
-        return if (trustDepth.limit == 0)
-            "${issuer.fingerprint} certifies binding: $userId <-> ${target.fingerprint} [$trustAmount]"
-        else {
-            val scope = if (regexes.regexStrings.isEmpty()) "" else ", scope: $regexes"
-            "${issuer.fingerprint} delegates to ${target.fingerprint} [$trustAmount, depth $trustDepth$scope]"
-        }
+        return components.map { it.value }.flatten().joinToString("\n")
     }
 }

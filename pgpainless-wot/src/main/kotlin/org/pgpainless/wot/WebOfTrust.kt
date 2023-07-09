@@ -158,7 +158,7 @@ class WebOfTrust(private val certificateStore: PGPCertificateStore) {
                 processDelegation(targetPrimaryKey, target, delegation)
             }
 
-            // Edge Signatures by X on Y over user-ID U
+            // EdgeComponent Signatures by X on Y over user-ID U
             val userIds = targetPrimaryKey.userIDs
             while (userIds.hasNext()) {
                 val userId = userIds.next()

@@ -4,7 +4,7 @@
 
 package org.pgpainless.wot.query.filter
 
-import org.pgpainless.wot.network.Edge
+import org.pgpainless.wot.network.EdgeComponent
 import org.pgpainless.wot.network.Depth
 
 /**
@@ -16,7 +16,7 @@ import org.pgpainless.wot.network.Depth
  * This filter can be used to view a network as a 'certification network'.
  */
 class TrustedIntroducerFilter : CertificationFilter {
-    override fun cost(c: Edge, values: FilterValues, ignoreRegexps: Boolean): Boolean {
+    override fun cost(c: EdgeComponent, values: FilterValues, ignoreRegexps: Boolean): Boolean {
         values.depth = Depth.unconstrained()
         if (!ignoreRegexps) {
             values.regexps = null

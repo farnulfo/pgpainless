@@ -4,7 +4,7 @@
 
 package org.pgpainless.wot.query.filter
 
-import org.pgpainless.wot.network.Edge
+import org.pgpainless.wot.network.EdgeComponent
 import org.pgpainless.wot.network.Fingerprint
 
 class CapCertificateFilter() : CertificationFilter {
@@ -12,7 +12,7 @@ class CapCertificateFilter() : CertificationFilter {
     // A certificate's trust amount will be limited to this amount.
     private val caps: HashMap<Fingerprint, Int> = hashMapOf()
 
-    override fun cost(c: Edge, values: FilterValues, ignoreRegexps: Boolean): Boolean {
+    override fun cost(c: EdgeComponent, values: FilterValues, ignoreRegexps: Boolean): Boolean {
         caps[c.issuer.fingerprint]?.let {
             if (it < values.amount) {
                 values.amount = it

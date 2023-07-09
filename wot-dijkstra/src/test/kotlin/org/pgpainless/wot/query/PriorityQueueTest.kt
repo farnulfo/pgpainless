@@ -1,6 +1,5 @@
-package org.pgpainless.wot.dijkstra
+package org.pgpainless.wot.query
 
-import org.pgpainless.wot.query.PairPriorityQueue
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

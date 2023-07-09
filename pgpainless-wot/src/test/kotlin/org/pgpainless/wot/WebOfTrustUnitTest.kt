@@ -7,7 +7,7 @@ import org.pgpainless.wot.query.Roots
 import org.pgpainless.wot.query.filter.IdempotentCertificationFilter
 import org.pgpainless.wot.network.Fingerprint
 import org.pgpainless.wot.network.Network
-import org.pgpainless.wot.network.Path
+import org.pgpainless.wot.query.Path
 import org.pgpainless.wot.query.Root
 import java.io.File
 

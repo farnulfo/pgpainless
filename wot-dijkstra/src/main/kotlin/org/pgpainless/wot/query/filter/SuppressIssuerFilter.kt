@@ -4,7 +4,7 @@
 
 package org.pgpainless.wot.query.filter
 
-import org.pgpainless.wot.network.Edge
+import org.pgpainless.wot.network.EdgeComponent
 import org.pgpainless.wot.network.Fingerprint
 
 /**
@@ -14,7 +14,7 @@ class SuppressIssuerFilter() : CertificationFilter {
     // A certification's trust amount will be suppressed by this amount.
     private val amount: HashMap<Fingerprint, Int> = hashMapOf()
 
-    override fun cost(c: Edge, values: FilterValues, ignoreRegexps: Boolean): Boolean {
+    override fun cost(c: EdgeComponent, values: FilterValues, ignoreRegexps: Boolean): Boolean {
         amount[c.issuer.fingerprint]?.let { suppress ->
             values.amount = if (values.amount > suppress) {
                 values.amount - suppress

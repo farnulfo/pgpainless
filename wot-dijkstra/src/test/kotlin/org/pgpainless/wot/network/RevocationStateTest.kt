@@ -1,4 +1,4 @@
-package org.pgpainless.wot.dijkstra
+package org.pgpainless.wot.network
 
 import org.junit.jupiter.api.Test
 import org.pgpainless.wot.network.ReferenceTime

@@ -1,19 +1,18 @@
-package org.pgpainless.wot.dijkstra
+package org.pgpainless.wot.query
 
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.pgpainless.wot.network.Depth
-import org.pgpainless.wot.network.Path
-import org.pgpainless.wot.network.Paths
+import org.pgpainless.wot.network.NetworkDSL
 import kotlin.test.assertEquals
 
 class PathsTest: NetworkDSL {
 
-    private val alice = CertSynopsis("0000000000000000000000000000000000000000")
-    private val bob = CertSynopsis("1111111111111111111111111111111111111111")
+    private val alice = Node("0000000000000000000000000000000000000000")
+    private val bob = Node("1111111111111111111111111111111111111111")
 
-    private val alice_bob_1 = Certification(alice, bob, 140, Depth.unconstrained())
-    private val alice_bob_2 = Certification(alice, bob, 160, Depth.limited(1))
+    private val alice_bob_1 = Edge(alice, bob, 140, Depth.unconstrained())
+    private val alice_bob_2 = Edge(alice, bob, 160, Depth.limited(1))
 
     @Test
     fun `verify that an empty Paths object has an amount of zero`() {

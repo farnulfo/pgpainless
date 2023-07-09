@@ -2,13 +2,11 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package org.pgpainless.wot.dijkstra
+package org.pgpainless.wot.network
 
 import org.junit.jupiter.api.Test
-import org.pgpainless.wot.network.Fingerprint
 import org.pgpainless.wot.network.Network.Companion.empty
 import org.pgpainless.wot.network.ReferenceTime.Companion.now
-import org.pgpainless.wot.network.RegexSet
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
@@ -19,8 +17,8 @@ class NetworkTest: NetworkDSL {
         val referenceTime = now()
         val network = empty(referenceTime)
         assert(network.nodes.isEmpty())
-        assert(network.edgeSet.isEmpty())
-        assert(network.reverseEdgeSet.isEmpty())
+        assert(network.edges.isEmpty())
+        assert(network.reverseEdges.isEmpty())
         assertEquals(referenceTime, network.referenceTime)
         assertEquals(0, network.numberOfEdges)
         assertEquals(0, network.numberOfSignatures)
@@ -57,7 +55,7 @@ class NetworkTest: NetworkDSL {
             buildEdge("A", "C", "Charlie <charlie@example.org>")
         }
 
-        assertEquals("Network with 3 nodes, 2 edgeSet:\n" +
+        assertEquals("Network with 3 nodes, 2 edges:\n" +
                 "A certifies binding: null <-> B [120]\n" +
                 "A certifies binding: Charlie <charlie@example.org> <-> C [120]\n",
                 network.toString())

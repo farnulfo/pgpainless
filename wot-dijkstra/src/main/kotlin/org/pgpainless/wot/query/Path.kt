@@ -2,21 +2,24 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package org.pgpainless.wot.network
+package org.pgpainless.wot.query
 
+import org.pgpainless.wot.network.Depth
+import org.pgpainless.wot.network.EdgeComponent
+import org.pgpainless.wot.network.Node
 import kotlin.math.min
 
 /**
- * A [Path] comprises a root [Node], a list of edgeSet ([Certifications][Edge]), as well as a
+ * A [Path] comprises a root [Node], a list of edges (selected [EdgeComponents][EdgeComponent]), as well as a
  * residual depth.
  *
  * @param root root of the path
- * @param edges list of edgeSet from the root to the target
+ * @param edges list of edges from the root to the target
  * @param residualDepth residual depth that is decreased each time another edge is appended
  */
 class Path(
         val root: Node,
-        private val edges: MutableList<Edge>,
+        private val edges: MutableList<EdgeComponent>,
         var residualDepth: Depth
 ) {
 
@@ -27,7 +30,7 @@ class Path(
      * @param root trust root
      */
     constructor(root: Node) : this(
-            root, mutableListOf<Edge>(), Depth.unconstrained())
+            root, mutableListOf<EdgeComponent>(), Depth.unconstrained())
 
     /**
      * Current target of the path.
@@ -43,14 +46,14 @@ class Path(
         }
 
     /**
-     * List of [CertSynopses][Node] (nodes) of the path.
-     * The first entry is the [root]. The other entries are the targets of the edgeSet.
+     * List of [Nodes][Node] on the path.
+     * The first entry is the [root]. The other entries are the targets of the edges.
      */
     val certificates: List<Node>
         get() {
             val certs: MutableList<Node> = mutableListOf(root)
-            for (certification in edges) {
-                certs.add(certification.target)
+            for (edge in edges) {
+                certs.add(edge.target)
             }
             return certs
         }
@@ -63,9 +66,9 @@ class Path(
         get() = edges.size + 1
 
     /**
-     * List of edgeSet.
+     * List of edge components.
      */
-    val certifications: List<Edge>
+    val certifications: List<EdgeComponent>
         get() = edges.toList()
 
     /**
@@ -88,10 +91,10 @@ class Path(
      *
      * @throws IllegalArgumentException if the target at the end of the path is not equal to the issuer of the edge.
      * @throws IllegalArgumentException if the path runs out of residual depth
-     * @throws IllegalArgumentException if the addition of the [Edge] would result in a cyclic path
+     * @throws IllegalArgumentException if the addition of the [EdgeComponent] would result in a cyclic path
      */
-    fun append(aEdge: Edge) {
-        require(target.fingerprint == aEdge.issuer.fingerprint) {
+    fun append(component: EdgeComponent) {
+        require(target.fingerprint == component.issuer.fingerprint) {
             "Cannot append edge to path: Path's tail is not issuer of the edge."
         }
         require(residualDepth.isUnconstrained() || residualDepth.limit!! > 0) {
@@ -99,26 +102,26 @@ class Path(
         }
 
         // root is c's target -> illegal cycle
-        var cyclic = root.fingerprint == aEdge.target.fingerprint
+        var cyclic = root.fingerprint == component.target.fingerprint
         for ((i, edge) in edges.withIndex()) {
             if (cyclic) {
                 break
             }
             // existing edge points to c's target -> illegal cycle
-            if (aEdge.target.fingerprint == edge.target.fingerprint) {
+            if (component.target.fingerprint == edge.target.fingerprint) {
                 cyclic = if (edges.lastIndex != i) {
                     // Cycle in the middle of the ~~street~~ path
                     true
                 } else {
                     // Not a cycle, if we point to a different user-id
-                    aEdge.userId == edge.userId
+                    component.userId == edge.userId
                 }
             }
         }
         require(!cyclic) { "Adding the edge to the path would create a cycle." }
 
-        residualDepth = aEdge.trustDepth.min(residualDepth.decrease(1))
-        edges.add(aEdge)
+        residualDepth = component.trustDepth.min(residualDepth.decrease(1))
+        edges.add(component)
     }
 
     override fun toString(): String {

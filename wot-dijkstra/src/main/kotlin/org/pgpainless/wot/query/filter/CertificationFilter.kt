@@ -4,7 +4,7 @@
 
 package org.pgpainless.wot.query.filter
 
-import org.pgpainless.wot.network.Edge
+import org.pgpainless.wot.network.EdgeComponent
 import org.pgpainless.wot.network.Depth
 import org.pgpainless.wot.network.RegexSet
 
@@ -33,7 +33,7 @@ interface CertificationFilter {
      *
      * If the function returns `false`, the certification should be skipped.
      */
-    fun cost(c: Edge, values: FilterValues, ignoreRegexps: Boolean): Boolean {
+    fun cost(c: EdgeComponent, values: FilterValues, ignoreRegexps: Boolean): Boolean {
         return true
     }
 

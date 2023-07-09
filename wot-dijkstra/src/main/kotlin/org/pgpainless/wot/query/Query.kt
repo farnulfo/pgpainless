@@ -48,7 +48,7 @@ internal class Cost(
 // We perform a Dijkstra in reserve from the target towards the roots.
 internal data class ForwardPointer(
         // If null, then the target.
-        val next: Edge?
+        val next: EdgeComponent?
 )
 
 class Query(
@@ -174,7 +174,7 @@ class Query(
     ///
     /// # Algorithm
     ///
-    /// This algorithm reverses the edgeSet in the network and then
+    /// This algorithm reverses the edges in the network and then
     /// executes a variant of [Dijkstra's shortest path algorithm].
     /// The algorithm sets the initial node to be the target and works
     /// outwards.  Consider the following network:
@@ -362,7 +362,7 @@ class Query(
             var depth: Int = if (selfSigned) 1 else 0
 
             while (fp.next != null) {
-                val c: Edge = fp.next!! // FIXME
+                val c: EdgeComponent = fp.next!! // FIXME
 
                 val a = c.trustAmount
                 val d = c.trustDepth
@@ -430,8 +430,8 @@ class Query(
             // Get signeeFp
 
             // Not limiting by required_depth, because 'network' doesn't expose an interface for this
-            val edges: List<EdgeSet> =
-                    network.reverseEdgeSet[signeeFpr].orEmpty() // "certifications_of"
+            val edges: List<Edge> =
+                    network.reverseEdges[signeeFpr].orEmpty() // "certifications_of"
 
             if (edges.isEmpty()) {
                 // Nothing certified it.  The path is a dead end.
@@ -446,7 +446,7 @@ class Query(
 
             for (certification in edges
                     .map { cs ->
-                        cs.certifications
+                        cs.components
                                 .map { it.value }.flatten()
                     }.flatten()) {
 
@@ -472,7 +472,7 @@ class Query(
 
 
                 if (fv.amount == 0) {
-                    logger.debug("    Edge amount is 0, skipping")
+                    logger.debug("    EdgeComponent amount is 0, skipping")
                     continue;
                 }
 
@@ -481,20 +481,20 @@ class Query(
                         && certification.userId != targetUserid) {
                     assert(signeeFp.next == null)
 
-                    logger.debug("    Edge certifies target, but for the wrong user id (want: {}, got: {})",
+                    logger.debug("    EdgeComponent certifies target, but for the wrong user id (want: {}, got: {})",
                             targetUserid, certification.userId)
 
                     continue;
                 }
 
                 if (fv.depth < Depth.auto(signeeFpCost.depth)) {
-                    logger.debug("    Edge does not have enough depth ({}, needed: {}), skipping", fv.depth, signeeFpCost.depth)
+                    logger.debug("    EdgeComponent does not have enough depth ({}, needed: {}), skipping", fv.depth, signeeFpCost.depth)
                     continue;
                 }
 
                 val re = fv.regexps
                 if ((re != null) && !re.matches(targetUserid)) {
-                    logger.debug("  Edge's re does not match target User ID, skipping.")
+                    logger.debug("  EdgeComponent's re does not match target User ID, skipping.")
                     continue;
                 }
 
@@ -538,7 +538,7 @@ class Query(
                                 cn?.target ?: "target", currentFpCost.amount, currentFpCost.depth)
 
                         // We prefer a shorter path (in terms of
-                        // edgeSet) as this allows us to reach more of
+                        // edges) as this allows us to reach more of
                         // the graph.
                         //
                         // If the path length is equal, we prefer the
@@ -615,7 +615,7 @@ class Query(
                         //
                         // XXX: Self-signatures should be first class and not
                         // synthesized like this on the fly.
-                        val selfsig = Edge(
+                        val selfsig = EdgeComponent(
                                 target, target, targetUserid,
 
                                 // FIXME! Use userid binding signature by default, reference time only as fallback:
@@ -651,7 +651,7 @@ class Query(
             var amount = 120;
 
             // nodes[0] is the root; nodes[nodes.len() - 1] is the target.
-            val nodes: MutableList<Edge> = mutableListOf();
+            val nodes: MutableList<EdgeComponent> = mutableListOf();
             while (true) {
                 val c = fp.next ?: break
 
@@ -673,7 +673,7 @@ class Query(
             if (selfSigned) {
                 val tail = nodes.last()
                 if (tail.userId != targetUserid) {
-                    val selfsig = Edge(target, target, targetUserid, Date());
+                    val selfsig = EdgeComponent(target, target, targetUserid, Date());
                     nodes.add(selfsig);
                 }
             }
@@ -725,7 +725,7 @@ class Query(
         //            .unwrap_or("<missing User ID>".into());
         //            t!("  <{}, {}>: {}",
         //            fpr, userid,
-        //            format!("{} trust amount (max: {}), {} edgeSet",
+        //            format!("{} trust amount (max: {}), {} edges",
         //            amount, path.amount(),
         //            path.len() - 1));
         //        }

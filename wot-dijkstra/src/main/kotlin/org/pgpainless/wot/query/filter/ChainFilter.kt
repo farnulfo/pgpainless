@@ -4,7 +4,7 @@
 
 package org.pgpainless.wot.query.filter
 
-import org.pgpainless.wot.network.Edge
+import org.pgpainless.wot.network.EdgeComponent
 
 /**
  * A filter that chains multiple filters together.
@@ -15,7 +15,7 @@ import org.pgpainless.wot.network.Edge
  */
 class ChainFilter(val filters: MutableList<CertificationFilter>) : CertificationFilter {
 
-    override fun cost(c: Edge, values: FilterValues, ignoreRegexps: Boolean): Boolean {
+    override fun cost(c: EdgeComponent, values: FilterValues, ignoreRegexps: Boolean): Boolean {
 
         // If any inner filter returns `false`, immediately return false
         return !this.filters.any { !it.cost(c, values, ignoreRegexps) }

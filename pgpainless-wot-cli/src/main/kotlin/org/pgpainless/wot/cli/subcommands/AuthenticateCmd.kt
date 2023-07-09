@@ -7,7 +7,7 @@ package org.pgpainless.wot.cli.subcommands
 import org.pgpainless.wot.api.AuthenticateAPI
 import org.pgpainless.wot.cli.WotCLI
 import org.pgpainless.wot.network.Fingerprint
-import org.pgpainless.wot.network.Path
+import org.pgpainless.wot.query.Path
 import picocli.CommandLine
 import picocli.CommandLine.Command
 import picocli.CommandLine.Parameters

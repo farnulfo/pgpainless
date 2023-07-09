@@ -1,28 +1,29 @@
-package org.pgpainless.wot.dijkstra
+package org.pgpainless.wot.query
 
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.pgpainless.wot.network.Depth
-import org.pgpainless.wot.network.Path
+import org.pgpainless.wot.network.NetworkDSL
+import org.pgpainless.wot.query.Path
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class PathTest: NetworkDSL {
 
-    private val root = CertSynopsis("aabbccddeeAABBCCDDEEaabbccddeeAABBCCDDEE")
-    private val alice = CertSynopsis("0000000000000000000000000000000000000000")
-    private val bob = CertSynopsis("1111111111111111111111111111111111111111")
+    private val root = Node("aabbccddeeAABBCCDDEEaabbccddeeAABBCCDDEE")
+    private val alice = Node("0000000000000000000000000000000000000000")
+    private val bob = Node("1111111111111111111111111111111111111111")
 
     // Root -(255, 255)-> Alice
-    private val root_alice__fully_trusted = Certification(root, alice, 255, Depth.unconstrained())
+    private val root_alice__fully_trusted = Edge(root, alice, 255, Depth.unconstrained())
     // Root -(60,0)-> Alice
-    private val root_alice__marginally_trusted = Certification(root, alice, 60, Depth.limited(0))
+    private val root_alice__marginally_trusted = Edge(root, alice, 60, Depth.limited(0))
     // Alice -(255,255)-> Root
-    private val alice_root = Certification(alice, root, 255, Depth.unconstrained())
+    private val alice_root = Edge(alice, root, 255, Depth.unconstrained())
     // Alice -(120, 1)-> Bob
-    private val alice_bob = Certification(alice, bob)
+    private val alice_bob = Edge(alice, bob)
     // Root -> Root
-    private val root_root = Certification(root, root, 120, Depth.limited(1))
+    private val root_root = Edge(root, root, 120, Depth.limited(1))
 
     @Test
     fun `verify that an empty Path is properly initialized`() {

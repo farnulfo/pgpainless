@@ -3,6 +3,8 @@ package org.pgpainless.wot.cli.subcommands
 import org.junit.jupiter.api.Test
 import org.pgpainless.wot.api.AuthenticateAPI
 import org.pgpainless.wot.network.*
+import org.pgpainless.wot.query.Path
+import org.pgpainless.wot.query.Paths
 import java.text.SimpleDateFormat
 import kotlin.test.assertEquals
 
@@ -29,7 +31,7 @@ class AuthenticateCmdTest {
                         Pair("Justus Winter <justus@sequoia-pgp.org>", RevocationState.notRevoked())
                 )
         )
-        val edge = Edge(
+        val edgeComponent = EdgeComponent(
                 neal,
                 justus,
                 "Justus Winter <justus@sequoia-pgp.org>",
@@ -39,7 +41,7 @@ class AuthenticateCmdTest {
                 120,
                 Depth.limited(0),
                 RegexSet.wildcard())
-        paths.add(Path(neal, mutableListOf(edge), Depth.auto(0)), 120)
+        paths.add(Path(neal, mutableListOf(edgeComponent), Depth.auto(0)), 120)
         val testResult = AuthenticateAPI.Result(
                 Fingerprint("CBCD8F030588653EEDD7E2659B7DD433F254904A"),
                 "Justus Winter <justus@sequoia-pgp.org>",

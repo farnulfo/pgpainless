@@ -1,6 +1,7 @@
-package org.pgpainless.wot.dijkstra
+package org.pgpainless.wot.network
 
 import org.junit.jupiter.api.Test
+import org.pgpainless.wot.network.NetworkDSL
 import org.pgpainless.wot.network.RegexSet
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
@@ -9,6 +10,26 @@ class RegexSetTest: NetworkDSL {
 
     private val exampleComRegex = "<[^>]+[@.]example\\.com>\$"
     private val pgpainlessOrgRegex = "<[^>]+[@.]pgpainless\\.org>\$"
+
+
+    @Test
+    fun simpleMatch() {
+        val stringList: List<String> = listOf("<[^>]+[@.]foobank\\.com>$")
+        val rs = RegexSet.fromExpressionList(stringList);
+
+        assert(rs.matches("Foo Bank Employee <employee@foobank.com>"))
+        assert(rs.matches("<employee@foobank.com>"))
+    }
+
+    @Test
+    fun simpleNonMatch() {
+        val stringList: List<String> = listOf("<[^>]+[@.]foobank\\.com>$")
+        val rs = RegexSet.fromExpressionList(stringList);
+
+        assert(!rs.matches("Bar Bank Employee <employee@barbank.com>"))
+        assert(!rs.matches("<employee@barbank.com>"))
+    }
+
 
     @Test
     fun `verify that the wildcard RegexSet matches anything`() {

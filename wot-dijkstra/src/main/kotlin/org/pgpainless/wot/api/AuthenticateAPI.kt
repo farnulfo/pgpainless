@@ -5,7 +5,7 @@
 package org.pgpainless.wot.api
 
 import org.pgpainless.wot.network.Fingerprint
-import org.pgpainless.wot.network.Paths
+import org.pgpainless.wot.query.Paths
 
 /**
  * Authenticate a binding.

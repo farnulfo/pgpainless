@@ -1,14 +1,10 @@
-package org.pgpainless.wot.dijkstra
+package org.pgpainless.wot.network
 
 import org.junit.jupiter.api.Test
-import org.pgpainless.wot.network.Node
-import org.pgpainless.wot.network.Edge
-import org.pgpainless.wot.network.Fingerprint
-import org.pgpainless.wot.network.RevocationState
 import java.util.*
 import kotlin.test.assertEquals
 
-class EdgeTest {
+class EdgeComponentTest {
 
     private val alice = Node(
             Fingerprint("A"),
@@ -28,21 +24,21 @@ class EdgeTest {
 
     @Test
     fun `verify result of toString() on certification`() {
-        val edge = Edge(alice, bob, "Bob <bob@example.org>", Date())
+        val edgeComponent = EdgeComponent(alice, bob, "Bob <bob@example.org>", Date())
         assertEquals("A certifies binding: Bob <bob@example.org> <-> B [120]",
-                edge.toString())
+                edgeComponent.toString())
     }
 
     @Test
     fun `verify result of toString() on delegation`() {
-        val delegation = Edge(alice, bob, null, Date())
+        val delegation = EdgeComponent(alice, bob, null, Date())
         assertEquals("A certifies binding: null <-> B [120]",
                 delegation.toString())
     }
 
     @Test
     fun `verify result of toString() on delegation with userId-less issuer`() {
-        val delegation = Edge(charlie, bob, null, Date())
+        val delegation = EdgeComponent(charlie, bob, null, Date())
         assertEquals("C certifies binding: null <-> B [120]",
                 delegation.toString())
     }

@@ -7,7 +7,7 @@ package org.pgpainless.wot
 import org.bouncycastle.openpgp.PGPPublicKeyRing
 
 import org.pgpainless.key.OpenPgpFingerprint
-import org.pgpainless.wot.network.EdgeSet
+import org.pgpainless.wot.network.Edge
 import org.pgpainless.wot.network.Fingerprint
 import org.pgpainless.wot.network.Network
 import org.pgpainless.wot.testfixtures.TestCertificateStores
@@ -55,7 +55,7 @@ class WebOfTrustTest {
             }
         }
 
-        val fooBankCaEdges = network.edgeSet[fooBankCa]!!
+        val fooBankCaEdges = network.edges[fooBankCa]!!
         assertEquals(2, fooBankCaEdges.size)
 
         val fbc2fbe = getEdgeFromTo(network, fooBankCa, fooBankEmployee)
@@ -80,8 +80,8 @@ class WebOfTrustTest {
         val network = WebOfTrust(certD).buildNetwork()
 
         assertTrue { network.nodes.isEmpty() }
-        assertTrue { network.edgeSet.isEmpty() }
-        assertTrue { network.reverseEdgeSet.isEmpty() }
+        assertTrue { network.edges.isEmpty() }
+        assertTrue { network.reverseEdges.isEmpty() }
     }
 
     @Test
@@ -94,7 +94,7 @@ class WebOfTrustTest {
 
 
     private fun assertHasIssuerAndTarget(
-            certifications: EdgeSet,
+            certifications: Edge,
             issuer: Fingerprint,
             target: Fingerprint) {
         assertEquals(issuer, certifications.issuer.fingerprint)
@@ -119,13 +119,13 @@ class WebOfTrustTest {
         assertNull(reverseEdge, "Expected no reverse edge on $target from $issuer but got $reverseEdge")
     }
 
-    private fun getEdgeFromTo(network: Network, issuer: Fingerprint, target: Fingerprint): EdgeSet? {
-        val edges = network.edgeSet[issuer] ?: return null
+    private fun getEdgeFromTo(network: Network, issuer: Fingerprint, target: Fingerprint): Edge? {
+        val edges = network.edges[issuer] ?: return null
         return edges.find { target == it.target.fingerprint }
     }
 
-    private fun getReverseEdgeFromTo(network: Network, issuer: Fingerprint, target: Fingerprint): EdgeSet? {
-        val revEdges = network.reverseEdgeSet[target] ?: return null
+    private fun getReverseEdgeFromTo(network: Network, issuer: Fingerprint, target: Fingerprint): Edge? {
+        val revEdges = network.reverseEdges[target] ?: return null
         return revEdges.find { issuer == it.issuer.fingerprint }
     }
 }
