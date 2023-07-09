@@ -30,6 +30,9 @@ class BackPropagationTest {
         assert(gotCerts.size == expectedPath.size)
         assert(gotCerts.zip(expectedPath).none { it.first != it.second }) // FIXME: debug output?
 
+        println("got $gotPath")
+        println("expected $expectedPath")
+
         assert(gotAmount == amount) { "Amount mismatch, got $gotAmount, expected $amount" }
         assert(gotPath.residualDepth.value() == residualDepth
         ) { "Residual depth mismatch, got " + gotPath.residualDepth.value() + ", expected " + residualDepth }
@@ -82,13 +85,13 @@ class BackPropagationTest {
         val q = Query(network, Roots(), false)
 
 
-        val a1 = q.backwardPropagate(ellenFpr, ellenUid, false, IdempotentCertificationFilter())
+        val a1 = q.backwardPropagate(ellenFpr, ellenUid, IdempotentCertificationFilter())
 
         checkResult(a1[daveFpr]!!, 1, 100, listOf(daveFpr, ellenFpr));
         checkResult(a1[carolFpr]!!, 0, 100, listOf(carolFpr, daveFpr, ellenFpr));
 
 
-        val a2 = q.backwardPropagate(daveFpr, daveUid, false, IdempotentCertificationFilter());
+        val a2 = q.backwardPropagate(daveFpr, daveUid, IdempotentCertificationFilter());
 
         assert(a2[ellenFpr] == null);
         checkResult(a2[carolFpr]!!, 1, 100, listOf(carolFpr, daveFpr));
@@ -96,7 +99,7 @@ class BackPropagationTest {
         checkResult(a2[aliceFpr]!!, 0, 100, listOf(aliceFpr, bobFpr, carolFpr, daveFpr));
 
 
-        val a3 = q.backwardPropagate(daveFpr, daveUid, false, IdempotentCertificationFilter());
+        val a3 = q.backwardPropagate(daveFpr, daveUid, IdempotentCertificationFilter());
 
         assert(a3[ellenFpr] == null);
         checkResult(a3[carolFpr]!!, 1, 100, listOf(carolFpr, daveFpr));
@@ -105,7 +108,7 @@ class BackPropagationTest {
         // This should work even though Bob is the root and the path is via Bob.
         checkResult(a3[aliceFpr]!!, 0, 100, listOf(aliceFpr, bobFpr, carolFpr, daveFpr));
 
-        val a4 = q.backwardPropagate(daveFpr, daveUid, false, IdempotentCertificationFilter());
+        val a4 = q.backwardPropagate(daveFpr, daveUid, IdempotentCertificationFilter());
 
         assert(a4[ellenFpr] == null)
         checkResult(a4[carolFpr]!!, 1, 100, listOf(carolFpr, daveFpr));
@@ -115,7 +118,7 @@ class BackPropagationTest {
         checkResult(a4[aliceFpr]!!, 0, 100, listOf(aliceFpr, bobFpr, carolFpr, daveFpr));
 
         // Try to authenticate dave's key for an User ID that no one has certified.
-        val a5 = q.backwardPropagate(daveFpr, ellenUid, false, IdempotentCertificationFilter());
+        val a5 = q.backwardPropagate(daveFpr, ellenUid, IdempotentCertificationFilter());
 
         assert(a5[ellenFpr] == null);
         assert(a5[daveFpr] == null);
@@ -125,7 +128,7 @@ class BackPropagationTest {
 
         // A target that is not in the network.
         val fpr = Fingerprint("0123456789ABCDEF0123456789ABCDEF01234567")
-        val a6 = q.backwardPropagate(fpr, ellenUid, false, IdempotentCertificationFilter());
+        val a6 = q.backwardPropagate(fpr, ellenUid, IdempotentCertificationFilter());
 
         assert(a6[ellenFpr] == null);
         assert(a6[daveFpr] == null);
@@ -165,7 +168,7 @@ class BackPropagationTest {
         println("Network contains " + network.nodes.size + " nodes with " + network.numberOfEdges + " edges built from " + network.numberOfSignatures + " signatures.")
         val q = Query(network, Roots(), false)
 
-        val a1 = q.backwardPropagate(frankFpr, frankUid, false, IdempotentCertificationFilter());
+        val a1 = q.backwardPropagate(frankFpr, frankUid, IdempotentCertificationFilter());
 
         checkResult(a1[edFpr]!!, 0, 120, listOf(edFpr, frankFpr));
         checkResult(a1[daveFpr]!!, 0, 30, listOf(daveFpr, edFpr, frankFpr));
@@ -173,7 +176,7 @@ class BackPropagationTest {
         checkResult(a1[bobFpr]!!, 0, 30, listOf(bobFpr, carolFpr, daveFpr, edFpr, frankFpr));
         assert(a1[aliceFpr] == null)
 
-        val a2 = q.backwardPropagate(frankFpr, frankUid, false, IdempotentCertificationFilter());
+        val a2 = q.backwardPropagate(frankFpr, frankUid, IdempotentCertificationFilter());
 
         checkResult(a2[edFpr]!!, 0, 120, listOf(edFpr, frankFpr));
         checkResult(a2[daveFpr]!!, 0, 30, listOf(daveFpr, edFpr, frankFpr));
@@ -181,7 +184,7 @@ class BackPropagationTest {
         checkResult(a2[bobFpr]!!, 0, 30, listOf(bobFpr, carolFpr, daveFpr, edFpr, frankFpr));
         assert(a2[aliceFpr] == null)
 
-        val a3 = q.backwardPropagate(edFpr, edUid, false, IdempotentCertificationFilter());
+        val a3 = q.backwardPropagate(edFpr, edUid, IdempotentCertificationFilter());
 
         assert(a3[frankFpr] == null)
         checkResult(a3[daveFpr]!!, 1, 30, listOf(daveFpr, edFpr));
@@ -189,7 +192,7 @@ class BackPropagationTest {
         checkResult(a3[bobFpr]!!, 1, 30, listOf(bobFpr, carolFpr, daveFpr, edFpr));
         checkResult(a3[aliceFpr]!!, 0, 30, listOf(aliceFpr, bobFpr, carolFpr, daveFpr, edFpr));
 
-        val a4 = q.backwardPropagate(carolFpr, carolUid, false, IdempotentCertificationFilter());
+        val a4 = q.backwardPropagate(carolFpr, carolUid, IdempotentCertificationFilter());
 
         assert(a4[frankFpr] == null);
         assert(a4[edFpr] == null);
@@ -243,7 +246,7 @@ class BackPropagationTest {
         val n1 = getNetwork("/home/heiko/src/sequoia-wot/tests/data/cliques.pgp")
         val q1 = Query(n1, Roots(), false)
 
-        val a1 = q1.backwardPropagate(target_fpr, target_uid, false, IdempotentCertificationFilter());
+        val a1 = q1.backwardPropagate(target_fpr, target_uid, IdempotentCertificationFilter());
 
         // root -> a-0 -> b-0 -> ... -> f-0 -> target
         checkResult(a1[root_fpr]!!, 90, 120,
@@ -264,7 +267,7 @@ class BackPropagationTest {
         val n2 = getNetwork("/home/heiko/src/sequoia-wot/tests/data/cliques-local-optima.pgp")
         val q2 = Query(n2, Roots(), false)
 
-        val a2 = q2.backwardPropagate(target_fpr, target_uid, false, IdempotentCertificationFilter());
+        val a2 = q2.backwardPropagate(target_fpr, target_uid, IdempotentCertificationFilter());
 
         // root -> a-0 -> b-0 -> ... -> f-0 -> target
         checkResult(a2[root_fpr]!!,
@@ -283,7 +286,7 @@ class BackPropagationTest {
         val n3 = getNetwork("/home/heiko/src/sequoia-wot/tests/data/cliques-local-optima-2.pgp")
         val q3 = Query(n3, Roots(), false)
 
-        val a3 = q3.backwardPropagate(target_fpr, target_uid, false, IdempotentCertificationFilter());
+        val a3 = q3.backwardPropagate(target_fpr, target_uid, IdempotentCertificationFilter());
 
         // root -> a-0 -> b-0 -> ... -> f-0 -> target
         checkResult(a3[root_fpr]!!, 94, 30,
@@ -347,14 +350,14 @@ class BackPropagationTest {
         val q1 = Query(n1, Roots(), false)
 
 
-        val a1 = q1.backwardPropagate(isaacFpr, isaacUid, false, IdempotentCertificationFilter());
+        val a1 = q1.backwardPropagate(isaacFpr, isaacUid, IdempotentCertificationFilter());
 
         checkResult(a1[aliceFpr]!!, 0, 60, listOf(aliceFpr, bobFpr, georgeFpr, henryFpr, isaacFpr));
         assert(a1[carolFpr] == null)
         assert(a1[jennyFpr] == null)
 
 
-        val a2 = q1.backwardPropagate(henryFpr, henryUid, false, IdempotentCertificationFilter());
+        val a2 = q1.backwardPropagate(henryFpr, henryUid, IdempotentCertificationFilter());
 
         // The backward propagation algorithm doesn't know that jenny
         // is not reachable from the root (alice).
@@ -404,7 +407,7 @@ class BackPropagationTest {
         val n1 = getNetwork("/home/heiko/src/sequoia-wot/tests/data/local-optima.pgp")
         val q = Query(n1, Roots(), false)
 
-        val a1 = q.backwardPropagate(henry_fpr, henry_uid, false, IdempotentCertificationFilter());
+        val a1 = q.backwardPropagate(henry_fpr, henry_uid, IdempotentCertificationFilter());
 
         checkResult(a1[alice_fpr]!!, 0, 100, listOf(alice_fpr, bob_fpr, carol_fpr, ellen_fpr, henry_fpr));
         checkResult(a1[bob_fpr]!!, 0, 100, listOf(bob_fpr, carol_fpr, ellen_fpr, henry_fpr));
@@ -414,7 +417,7 @@ class BackPropagationTest {
         assert(a1[francis_fpr] == null)
         assert(a1[georgina_fpr] == null)
 
-        val a2 = q.backwardPropagate(francis_fpr, francis_uid, false, IdempotentCertificationFilter());
+        val a2 = q.backwardPropagate(francis_fpr, francis_uid, IdempotentCertificationFilter());
 
         // Recall: given a choice, we prefer the forward pointer that
         // has the least depth.
@@ -457,13 +460,13 @@ class BackPropagationTest {
         val n1 = getNetwork("/home/heiko/src/sequoia-wot/tests/data/best-via-root.pgp")
         val q1 = Query(n1, Roots(), false)
 
-        val a1 = q1.backwardPropagate(target_fpr, target_uid, false, IdempotentCertificationFilter());
+        val a1 = q1.backwardPropagate(target_fpr, target_uid, IdempotentCertificationFilter());
 
         checkResult(a1[bob_fpr]!!, 9, 120, listOf(bob_fpr, carol_fpr, target_fpr));
         checkResult(a1[carol_fpr]!!, 10, 120, listOf(carol_fpr, target_fpr));
         checkResult(a1[alice_fpr]!!, 8, 120, listOf(alice_fpr, bob_fpr, carol_fpr, target_fpr));
 
-        val a2 = q1.backwardPropagate(target_fpr, target_uid, false, IdempotentCertificationFilter());
+        val a2 = q1.backwardPropagate(target_fpr, target_uid, IdempotentCertificationFilter());
 
         checkResult(a2[alice_fpr]!!, 8, 120, listOf(alice_fpr, bob_fpr, carol_fpr, target_fpr));
         checkResult(a2[bob_fpr]!!, 9, 120, listOf(bob_fpr, carol_fpr, target_fpr));
@@ -472,7 +475,7 @@ class BackPropagationTest {
 
         // Again, but this time we specify the roots.
         val q2 = Query(n1, Roots(listOf(Root(alice_fpr, 120))), false)
-        val a3 = q2.backwardPropagate(target_fpr, target_uid, false, IdempotentCertificationFilter());
+        val a3 = q2.backwardPropagate(target_fpr, target_uid, IdempotentCertificationFilter());
 
         checkResult(a3[alice_fpr]!!, 8, 120, listOf(alice_fpr, bob_fpr, carol_fpr, target_fpr));
 
@@ -484,7 +487,7 @@ class BackPropagationTest {
                 Root(alice_fpr, 120),
                 Root(bob_fpr, 120))),
                 false)
-        val a4 = q3.backwardPropagate(target_fpr, target_uid, false, IdempotentCertificationFilter());
+        val a4 = q3.backwardPropagate(target_fpr, target_uid, IdempotentCertificationFilter());
 
         checkResult(a4[bob_fpr]!!, 9, 120, listOf(bob_fpr, carol_fpr, target_fpr));
         checkResult(a4[alice_fpr]!!, 8, 50, listOf(alice_fpr, yellow_fpr, zebra_fpr, target_fpr));
@@ -520,23 +523,23 @@ class BackPropagationTest {
         val q1 = Query(n1, Roots(), false)
 
         // alice as root.
-        val a1 = q1.backwardPropagate(bob_fpr, bob_uid, false, IdempotentCertificationFilter());
+        val a1 = q1.backwardPropagate(bob_fpr, bob_uid, IdempotentCertificationFilter());
         checkResult(a1[alice_fpr]!!, 3, 100, listOf(alice_fpr, bob_fpr));
 
-        val a2 = q1.backwardPropagate(carol_fpr, carol_uid, false, IdempotentCertificationFilter());
+        val a2 = q1.backwardPropagate(carol_fpr, carol_uid, IdempotentCertificationFilter());
         checkResult(a2[alice_fpr]!!, 1, 100, listOf(alice_fpr, bob_fpr, carol_fpr));
 
-        val a3 = q1.backwardPropagate(dave_fpr, dave_uid, false, IdempotentCertificationFilter());
+        val a3 = q1.backwardPropagate(dave_fpr, dave_uid, IdempotentCertificationFilter());
         // There is no path, because dave@example.org does not match
         // the constraint on bob (domain: example.org).
         assert(a3[alice_fpr] == null)
 
-        val a4 = q1.backwardPropagate(ed_fpr, ed_uid, false, IdempotentCertificationFilter())
+        val a4 = q1.backwardPropagate(ed_fpr, ed_uid, IdempotentCertificationFilter())
         // There is no path, because ed@example.org does not match
         // the constraint on dave (domain: other.org).
         assert(a4[alice_fpr] == null)
 
-        val a5 = q1.backwardPropagate(frank_fpr, frank_uid, false, IdempotentCertificationFilter())
+        val a5 = q1.backwardPropagate(frank_fpr, frank_uid, IdempotentCertificationFilter())
 
         // There is no path, because frank@other.org does not match
         // the constraint on bob (domain: example.org).
@@ -544,27 +547,27 @@ class BackPropagationTest {
 
 
         // bob as root.
-        val a6 = q1.backwardPropagate(carol_fpr, carol_uid, false, IdempotentCertificationFilter())
+        val a6 = q1.backwardPropagate(carol_fpr, carol_uid, IdempotentCertificationFilter())
         checkResult(a6[bob_fpr]!!, 1, 100, listOf(bob_fpr, carol_fpr))
 
-        val a7 = q1.backwardPropagate(dave_fpr, dave_uid, false, IdempotentCertificationFilter())
+        val a7 = q1.backwardPropagate(dave_fpr, dave_uid, IdempotentCertificationFilter())
         checkResult(a7[bob_fpr]!!, 1, 100, listOf(bob_fpr, dave_fpr))
 
-        val a8 = q1.backwardPropagate(ed_fpr, ed_uid, false, IdempotentCertificationFilter())
+        val a8 = q1.backwardPropagate(ed_fpr, ed_uid, IdempotentCertificationFilter())
 
         // There is no path, because ed@example.org does not match
         // the constraint on dave (domain: other.org).
         assert(a8[bob_fpr] == null)
 
-        val a9 = q1.backwardPropagate(frank_fpr, frank_uid, false, IdempotentCertificationFilter())
+        val a9 = q1.backwardPropagate(frank_fpr, frank_uid, IdempotentCertificationFilter())
         checkResult(a9[bob_fpr]!!, 0, 100, listOf(bob_fpr, dave_fpr, frank_fpr))
 
 
         // dave as root.
-        val a10 = q1.backwardPropagate(ed_fpr, ed_uid, false, IdempotentCertificationFilter())
+        val a10 = q1.backwardPropagate(ed_fpr, ed_uid, IdempotentCertificationFilter())
         checkResult(a10[dave_fpr]!!, 1, 100, listOf(dave_fpr, ed_fpr));
 
-        val a11 = q1.backwardPropagate(frank_fpr, frank_uid, false, IdempotentCertificationFilter())
+        val a11 = q1.backwardPropagate(frank_fpr, frank_uid, IdempotentCertificationFilter())
         checkResult(a11[dave_fpr]!!, 1, 100, listOf(dave_fpr, frank_fpr))
     }
 
@@ -594,40 +597,40 @@ class BackPropagationTest {
         val q1 = Query(n1, Roots(), false)
 
 
-        val a1 = q1.backwardPropagate(bob_fpr, bob_uid, false, IdempotentCertificationFilter())
+        val a1 = q1.backwardPropagate(bob_fpr, bob_uid, IdempotentCertificationFilter())
         checkResult(a1[alice_fpr]!!, 7, 100, listOf(alice_fpr, bob_fpr))
 
-        val a2 = q1.backwardPropagate(carol_fpr, carol_uid, false, IdempotentCertificationFilter())
+        val a2 = q1.backwardPropagate(carol_fpr, carol_uid, IdempotentCertificationFilter())
         // There is no path, because carol@other.org does not match
         // the constraint on carol (domain: example.org).
         assert(a2[alice_fpr] == null)
 
-        val a3 = q1.backwardPropagate(dave_fpr, dave_uid, false, IdempotentCertificationFilter())
+        val a3 = q1.backwardPropagate(dave_fpr, dave_uid, IdempotentCertificationFilter())
         // There is no path, because dave@their.org does not match
         // the constraint on carol (domain: example.org).
         assert(a3[alice_fpr] == null)
 
-        val a4 = q1.backwardPropagate(ed_fpr, ed_uid, false, IdempotentCertificationFilter())
+        val a4 = q1.backwardPropagate(ed_fpr, ed_uid, IdempotentCertificationFilter())
         checkResult(a4[alice_fpr]!!, 4, 100, listOf(alice_fpr, bob_fpr, carol_fpr, dave_fpr, ed_fpr))
 
 
-        val a5 = q1.backwardPropagate(carol_fpr, carol_uid, false, IdempotentCertificationFilter());
+        val a5 = q1.backwardPropagate(carol_fpr, carol_uid, IdempotentCertificationFilter());
         // There is no path, because carol@other.org does not match
         // the constraint on carol (domain: example.org).
         assert(a5[bob_fpr] == null)
 
-        val a6 = q1.backwardPropagate(dave_fpr, dave_uid, false, IdempotentCertificationFilter())
+        val a6 = q1.backwardPropagate(dave_fpr, dave_uid, IdempotentCertificationFilter())
         // There is no path, because dave@their.org does not match
         // the constraint on carol (domain: example.org).
         assert(a6[bob_fpr] == null)
 
-        val a7 = q1.backwardPropagate(ed_fpr, ed_uid, false, IdempotentCertificationFilter())
+        val a7 = q1.backwardPropagate(ed_fpr, ed_uid, IdempotentCertificationFilter())
         checkResult(a7[bob_fpr]!!, 5, 100, listOf(bob_fpr, carol_fpr, dave_fpr, ed_fpr))
 
-        val a8 = q1.backwardPropagate(dave_fpr, dave_uid, false, IdempotentCertificationFilter())
+        val a8 = q1.backwardPropagate(dave_fpr, dave_uid, IdempotentCertificationFilter())
         checkResult(a8[carol_fpr]!!, 7, 100, listOf(carol_fpr, dave_fpr));
 
-        val a9 = q1.backwardPropagate(ed_fpr, ed_uid, false, IdempotentCertificationFilter())
+        val a9 = q1.backwardPropagate(ed_fpr, ed_uid, IdempotentCertificationFilter())
         checkResult(a9[carol_fpr]!!, 6, 100, listOf(carol_fpr, dave_fpr, ed_fpr))
     }
 
@@ -670,60 +673,60 @@ class BackPropagationTest {
 
 
         // alice as root.
-        val a1 = q1.backwardPropagate(bob_fpr, bob_uid, false, IdempotentCertificationFilter())
+        val a1 = q1.backwardPropagate(bob_fpr, bob_uid, IdempotentCertificationFilter())
         checkResult(a1[alice_fpr]!!, 3, 100, listOf(alice_fpr, bob_fpr))
 
-        val a2 = q1.backwardPropagate(carol_fpr, carol_uid, false, IdempotentCertificationFilter())
+        val a2 = q1.backwardPropagate(carol_fpr, carol_uid, IdempotentCertificationFilter())
         checkResult(a2[alice_fpr]!!, 1, 100, listOf(alice_fpr, bob_fpr, carol_fpr))
 
-        val a3 = q1.backwardPropagate(dave_fpr, dave_uid, false, IdempotentCertificationFilter())
+        val a3 = q1.backwardPropagate(dave_fpr, dave_uid, IdempotentCertificationFilter())
         checkResult(a3[alice_fpr]!!, 1, 100, listOf(alice_fpr, bob_fpr, dave_fpr))
 
-        val a4 = q1.backwardPropagate(ed_fpr, ed_uid, false, IdempotentCertificationFilter())
+        val a4 = q1.backwardPropagate(ed_fpr, ed_uid, IdempotentCertificationFilter())
         // There is no path, because ed@example.org does not match
         // the constraint on dave (domain: other.org).
         assert(a4[alice_fpr] == null)
 
-        val a5 = q1.backwardPropagate(frank_fpr, frank_uid, false, IdempotentCertificationFilter())
+        val a5 = q1.backwardPropagate(frank_fpr, frank_uid, IdempotentCertificationFilter())
         checkResult(a5[alice_fpr]!!, 0, 100, listOf(alice_fpr, bob_fpr, dave_fpr, frank_fpr))
 
-        val a6 = q1.backwardPropagate(george_fpr, george_uid, false, IdempotentCertificationFilter())
+        val a6 = q1.backwardPropagate(george_fpr, george_uid, IdempotentCertificationFilter())
         assert(a6[alice_fpr] == null)
 
-        val a7 = q1.backwardPropagate(henry_fpr, henry_uid, false, IdempotentCertificationFilter())
+        val a7 = q1.backwardPropagate(henry_fpr, henry_uid, IdempotentCertificationFilter())
         assert(a7[alice_fpr] == null)
 
 
         // bob as root.
-        val a8 = q1.backwardPropagate(carol_fpr, carol_uid, false, IdempotentCertificationFilter())
+        val a8 = q1.backwardPropagate(carol_fpr, carol_uid, IdempotentCertificationFilter())
         checkResult(a8[bob_fpr]!!, 1, 100, listOf(bob_fpr, carol_fpr))
 
-        val a9 = q1.backwardPropagate(dave_fpr, dave_uid, false, IdempotentCertificationFilter())
+        val a9 = q1.backwardPropagate(dave_fpr, dave_uid, IdempotentCertificationFilter())
         checkResult(a9[bob_fpr]!!, 1, 100, listOf(bob_fpr, dave_fpr))
 
-        val a10 = q1.backwardPropagate(ed_fpr, ed_uid, false, IdempotentCertificationFilter())
+        val a10 = q1.backwardPropagate(ed_fpr, ed_uid, IdempotentCertificationFilter())
         // There is no path, because ed@example.org does not match
         // the constraint on dave (domain: other.org).
         assert(a10[bob_fpr] == null)
 
-        val a11 = q1.backwardPropagate(frank_fpr, frank_uid, false, IdempotentCertificationFilter())
+        val a11 = q1.backwardPropagate(frank_fpr, frank_uid, IdempotentCertificationFilter())
         checkResult(a11[bob_fpr]!!, 0, 100, listOf(bob_fpr, dave_fpr, frank_fpr))
 
-        val a12 = q1.backwardPropagate(george_fpr, george_uid, false, IdempotentCertificationFilter())
+        val a12 = q1.backwardPropagate(george_fpr, george_uid, IdempotentCertificationFilter())
         checkResult(a12[bob_fpr]!!, 0, 100, listOf(bob_fpr, dave_fpr, george_fpr))
 
-        val a13 = q1.backwardPropagate(henry_fpr, henry_uid, false, IdempotentCertificationFilter())
+        val a13 = q1.backwardPropagate(henry_fpr, henry_uid, IdempotentCertificationFilter())
         checkResult(a13[bob_fpr]!!, 1, 100, listOf(bob_fpr, henry_fpr))
 
 
         // dave as root.
-        val a14 = q1.backwardPropagate(ed_fpr, ed_uid, false, IdempotentCertificationFilter())
+        val a14 = q1.backwardPropagate(ed_fpr, ed_uid, IdempotentCertificationFilter())
         checkResult(a14[dave_fpr]!!, 1, 100, listOf(dave_fpr, ed_fpr))
 
-        val a15 = q1.backwardPropagate(frank_fpr, frank_uid, false, IdempotentCertificationFilter())
+        val a15 = q1.backwardPropagate(frank_fpr, frank_uid, IdempotentCertificationFilter())
         checkResult(a15[dave_fpr]!!, 1, 100, listOf(dave_fpr, frank_fpr))
 
-        val a16 = q1.backwardPropagate(george_fpr, george_uid, false, IdempotentCertificationFilter())
+        val a16 = q1.backwardPropagate(george_fpr, george_uid, IdempotentCertificationFilter())
         checkResult(a16[dave_fpr]!!, 1, 100, listOf(dave_fpr, george_fpr))
     }
 
@@ -753,10 +756,10 @@ class BackPropagationTest {
         val q1 = Query(n1, Roots(), false)
 
 
-        val a1 = q1.backwardPropagate(carol_fpr, carol_uid, false, IdempotentCertificationFilter())
+        val a1 = q1.backwardPropagate(carol_fpr, carol_uid, IdempotentCertificationFilter())
         checkResult(a1[alice_fpr]!!, 0, 70, listOf(alice_fpr, bob_fpr, carol_fpr))
 
-        val a2 = q1.backwardPropagate(dave_fpr, dave_uid, false, IdempotentCertificationFilter())
+        val a2 = q1.backwardPropagate(dave_fpr, dave_uid, IdempotentCertificationFilter())
         checkResult(a2[alice_fpr]!!, 0, 50, listOf(alice_fpr, bob_fpr, carol_fpr, dave_fpr))
     }
 
@@ -792,22 +795,22 @@ class BackPropagationTest {
         val q1 = Query(n1, Roots(), false)
 
 
-        val a1 = q1.backwardPropagate(bob_fpr, bob_uid, false, IdempotentCertificationFilter())
+        val a1 = q1.backwardPropagate(bob_fpr, bob_uid, IdempotentCertificationFilter())
         checkResult(a1[alice_fpr]!!, DEPTH_UNCONSTRAINED, 70, listOf(alice_fpr, bob_fpr))
 
-        val a2 = q1.backwardPropagate(bob_fpr, bob_some_org_uid, false, IdempotentCertificationFilter())
+        val a2 = q1.backwardPropagate(bob_fpr, bob_some_org_uid, IdempotentCertificationFilter())
         checkResult(a2[alice_fpr]!!, 1, 50, listOf(alice_fpr, bob_fpr))
 
-        val a3 = q1.backwardPropagate(carol_fpr, carol_uid, false, IdempotentCertificationFilter())
+        val a3 = q1.backwardPropagate(carol_fpr, carol_uid, IdempotentCertificationFilter())
         checkResult(a3[alice_fpr]!!, 0, 50, listOf(alice_fpr, bob_fpr, carol_fpr))
 
-        val a4 = q1.backwardPropagate(dave_fpr, dave_uid, false, IdempotentCertificationFilter())
+        val a4 = q1.backwardPropagate(dave_fpr, dave_uid, IdempotentCertificationFilter())
         checkResult(a4[alice_fpr]!!, 0, 70, listOf(alice_fpr, bob_fpr, carol_fpr, dave_fpr))
 
-        val a5 = q1.backwardPropagate(ed_fpr, ed_uid, false, IdempotentCertificationFilter())
+        val a5 = q1.backwardPropagate(ed_fpr, ed_uid, IdempotentCertificationFilter())
         assert(a5[alice_fpr] == null)
 
-        val a6 = q1.backwardPropagate(frank_fpr, frank_uid, false, IdempotentCertificationFilter())
+        val a6 = q1.backwardPropagate(frank_fpr, frank_uid, IdempotentCertificationFilter())
         checkResult(a6[alice_fpr]!!, 0, 70, listOf(alice_fpr, bob_fpr, frank_fpr))
     }
 
@@ -837,10 +840,10 @@ class BackPropagationTest {
         val q1 = Query(n1, Roots(), false)
 
 
-        val a1 = q1.backwardPropagate(carol_fpr, carol_uid, false, IdempotentCertificationFilter())
+        val a1 = q1.backwardPropagate(carol_fpr, carol_uid, IdempotentCertificationFilter())
         checkResult(a1[alice_fpr]!!, 0, 70, listOf(alice_fpr, bob_fpr, carol_fpr))
 
-        val a2 = q1.backwardPropagate(dave_fpr, dave_uid, false, IdempotentCertificationFilter())
+        val a2 = q1.backwardPropagate(dave_fpr, dave_uid, IdempotentCertificationFilter())
         checkResult(a2[alice_fpr]!!, 0, 50, listOf(alice_fpr, bob_fpr, carol_fpr, dave_fpr))
     }
 
@@ -878,7 +881,7 @@ class BackPropagationTest {
         val q1 = Query(n1, Roots(), false)
 
 
-        val auth = q1.backwardPropagate(frank_fpr, frank_uid, false, IdempotentCertificationFilter())
+        val auth = q1.backwardPropagate(frank_fpr, frank_uid, IdempotentCertificationFilter())
         checkResult(auth[alice_fpr]!!, 0, 20, listOf(alice_fpr, bob_fpr, carol_fpr, frank_fpr))
     }
 

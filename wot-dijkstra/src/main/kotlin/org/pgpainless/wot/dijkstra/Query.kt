@@ -114,10 +114,7 @@ class Query(
         // remain)
 
 
-        var progress = true
-
-        // On this iteration approach
-        // [https://gitlab.com/sequoia-pgp/sequoia-wot/-/commit/ff006688155aaa3ee0c14b88bef1a143b0ecae23]
+        // On iteration/looping:
         //
         // "Better mimic GnuPG's trust root semantics
         //
@@ -127,59 +124,56 @@ class Query(
         //  considered a trust root, because he is certified by Alice.
         //
         //  In other words, we need to iterate."
-        nextPath@ while (progress && paths.amount < targetTrustAmount) {
+        //
+        // https://gitlab.com/sequoia-pgp/sequoia-wot/-/commit/ff006688155aaa3ee0c14b88bef1a143b0ecae23
+        var progress = true
+        while (progress && paths.amount < targetTrustAmount) {
             progress = false
 
-            for (selfSigned in listOf(true, false)) {
-                val authPaths = backwardPropagate(targetFpr, targetUserid, selfSigned, filters)
+            val authPaths = backwardPropagate(targetFpr, targetUserid, filters)
 
-                // The paths returned by backward_propagate may overlap.
-                // So we only use one (picking one of the best, by trust and length).
-                //
-                // Then we subtract the path from the network and run backward_propagate
-                // again, if we haven't yet reached 'targetTrustAmount'.
-                val bestPath = roots.fingerprints()
-                        .mapNotNull { authPaths[it] } // Only consider paths that start at a root.
-                        .maxWithOrNull(compareBy(
-                                // We want the *most* amount of trust,
-                                { it.second }, // path amount
-                                // but the *shortest* path.
-                                { -it.first.length }, // -path.len
-                                // Be predictable.  Break ties based on the fingerprint of the root.
-                                { it.first.root.fingerprint })
-                        )
+            // The paths returned by backward_propagate may overlap.
+            // So we only use one (picking one of the best, by trust and length).
+            //
+            // Then we subtract the path from the network and run backward_propagate
+            // again, if we haven't yet reached 'targetTrustAmount'.
+            val bestPath = roots.fingerprints()
+                    .mapNotNull { authPaths[it] } // Only consider paths that start at a root.
+                    .maxWithOrNull(compareBy(
+                            // We want the *most* amount of trust,
+                            { it.second }, // path amount
+                            // but the *shortest* path.
+                            { -it.first.length }, // -path.len
+                            // Be predictable.  Break ties based on the fingerprint of the root.
+                            { it.first.root.fingerprint })
+                    )
 
-                if (bestPath != null) {
-                    val (path, amount) = bestPath
+            if (bestPath != null) {
+                val (path, amount) = bestPath
 
-                    if (path.length == 1) {
-                        // This path is a root.
-                        //
-                        // We've used 'amount' of trust from this root, so we'll detract that amount
-                        // from that root, with a filter.
-                        val suppress = SuppressIssuerFilter()
-                        suppress.suppressIssuer(path.root.fingerprint, amount)
-                        filters.add(suppress)
-                    } else {
-                        // Add the path to the filter to create a residual
-                        // network without this path.
-                        val suppress = SuppressCertificationFilter()
-
-                        suppress.suppressPath(path, amount)
-                        filters.add(suppress)
-                    }
-
-                    paths.add(path, amount)
-                    progress = true
-
-                    // Prefer paths where the target User ID is self-signed as long as possible.
-                    continue@nextPath
+                if (path.length == 1) {
+                    // This path is a root.
+                    //
+                    // We've used 'amount' of trust from this root, so we'll suppress
+                    // that amount from it.
+                    val suppress = SuppressIssuerFilter()
+                    suppress.suppressIssuer(path.root.fingerprint, amount)
+                    filters.add(suppress)
+                } else {
+                    // We create a residual network by suppressing this path.
+                    val suppress = SuppressCertificationFilter()
+                    suppress.suppressPath(path, amount)
+                    filters.add(suppress)
                 }
+
+                paths.add(path, amount)
+                progress = true
             }
         }
 
         return paths
     }
+
 
     /**
      * Finds a path in the network from one or multiple `roots` that
@@ -188,13 +182,29 @@ class Query(
      * If `roots` is empty, authenticated paths starting from any node
      * are returned.
      *
+     *
+     * Does one backwards propagation run. By default, always with self-sig 'true'.
+     * Repeats the call with 'false', if 'true' returns no results.
+     *
+     * Note: the algorithm in backwardPropagateInternal() prefers shorter paths
+     * to longer paths. So the returned path(s) may not be optimal in terms of the amount of trust.
+     * To compensate for this, the caller should run the algorithm again on
+     * a residual network.
+     */
+    private fun backwardPropagate(targetFpr: Fingerprint, targetUserid: String, filter: CertificationFilter): HashMap<Fingerprint, Pair<Path, Int>> {
+
+        // Prefer paths where the target User ID is self-signed as long as possible. (But .. Why?)
+        val authPaths = backwardPropagateInternal(targetFpr, targetUserid, true, filter)
+        if (authPaths.isNotEmpty()) return authPaths
+
+        // If we find no "self-signed" paths, return any others
+        return backwardPropagateInternal(targetFpr, targetUserid, false, filter)
+    }
+
+    /**
      * Implements the algorithm outlined in:
      * https://gitlab.com/sequoia-pgp/sequoia-wot/-/blob/main/spec/sequoia-wot.md#implementation-strategy
      *
-     * Note: the algorithm prefers shorter paths to longer paths. So the
-     * returned path(s) may not be optimal in terms of the amount of trust.
-     * To compensate for this, the caller should run the algorithm again on
-     * a residual network.
      *
      * `selfSigned` picks between two variants of this algorithm. Each of the
      * modes finds a distinct subset of authenticated paths:
@@ -206,10 +216,10 @@ class Query(
      * - If `false`, this function only finds paths that don't use
      * a self-certification as the last edge.
      */
-    private fun backwardPropagate(targetFpr: Fingerprint,
-                                  targetUserid: String,
-                                  selfSigned: Boolean,
-                                  filter: CertificationFilter)
+    private fun backwardPropagateInternal(targetFpr: Fingerprint,
+                                          targetUserid: String,
+                                          selfSigned: Boolean,
+                                          filter: CertificationFilter)
             : HashMap<Fingerprint, Pair<Path, Int>> {
 
         logger.debug("Query.backward_propagate")
