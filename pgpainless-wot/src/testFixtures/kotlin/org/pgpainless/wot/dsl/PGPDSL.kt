@@ -1,21 +1,22 @@
-package org.pgpainless.wot
+package org.pgpainless.wot.dsl
 
 import org.bouncycastle.openpgp.PGPPublicKeyRing
 import org.bouncycastle.openpgp.PGPSignature
 import org.pgpainless.algorithm.RevocationStateType
 import org.pgpainless.key.OpenPgpFingerprint
 import org.pgpainless.key.info.KeyRingInfo
+import org.pgpainless.wot.WebOfTrust
 import org.pgpainless.wot.network.Node
 import org.pgpainless.wot.network.Fingerprint
 import org.pgpainless.wot.network.RevocationState
 
 interface PGPDSL {
 
-    fun CertSynopsis(certificate: PGPPublicKeyRing): Node {
+    fun Node(certificate: PGPPublicKeyRing): Node {
         return Node(Fingerprint(certificate), )
     }
 
-    fun CertSynopsis(validatedCert: KeyRingInfo): Node {
+    fun Node(validatedCert: KeyRingInfo): Node {
         return Node(
                 Fingerprint(validatedCert.fingerprint),
                 validatedCert.primaryKeyExpirationDate,
