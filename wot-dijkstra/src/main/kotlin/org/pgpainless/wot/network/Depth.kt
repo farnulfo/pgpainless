@@ -34,7 +34,7 @@ class Depth private constructor(val limit: Int?) : Comparable<Depth> {
          */
         @JvmStatic
         fun auto(limit: Int): Depth {
-            return if (limit == 255) {
+            return if (limit >= 255) {
                 unconstrained()
             } else {
                 limited(limit)
