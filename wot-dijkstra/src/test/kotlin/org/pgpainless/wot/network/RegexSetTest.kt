@@ -1,8 +1,7 @@
 package org.pgpainless.wot.network
 
 import org.junit.jupiter.api.Test
-import org.pgpainless.wot.network.NetworkDSL
-import org.pgpainless.wot.network.RegexSet
+import org.pgpainless.wot.dsl.NetworkDSL
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
