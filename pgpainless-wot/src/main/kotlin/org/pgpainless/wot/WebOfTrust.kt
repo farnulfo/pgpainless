@@ -8,6 +8,7 @@ import org.bouncycastle.openpgp.PGPPublicKey
 import org.bouncycastle.openpgp.PGPSignature
 import org.pgpainless.PGPainless
 import org.pgpainless.algorithm.KeyFlag
+import org.pgpainless.algorithm.SignatureType
 import org.pgpainless.exception.SignatureValidationException
 import org.pgpainless.key.OpenPgpFingerprint
 import org.pgpainless.key.info.KeyRingInfo
@@ -15,6 +16,7 @@ import org.pgpainless.key.util.KeyRingUtils
 import org.pgpainless.key.util.RevocationAttributes
 import org.pgpainless.policy.Policy
 import org.pgpainless.signature.SignatureUtils
+import org.pgpainless.signature.consumer.SignatureValidator
 import org.pgpainless.signature.consumer.SignatureVerifier
 import org.pgpainless.signature.subpackets.SignatureSubpacketsUtil
 import org.pgpainless.wot.network.*
@@ -193,8 +195,7 @@ class WebOfTrust(private val certificateStore: PGPCertificateStore) {
                 val issuer = nodeMap[issuerFingerprint]!!
 
                 try {
-                    val valid = SignatureVerifier.verifyDirectKeySignature(delegation, issuerSigningKey,
-                            targetPrimaryKey, policy, referenceTime.timestamp)
+                    val valid = verifyDelegation(delegation, issuerSigningKey, targetPrimaryKey, policy)
                     if (valid) {
                         networkBuilder.addEdge(fromDelegation(issuer, target, delegation))
                         return // we're done
@@ -205,6 +206,27 @@ class WebOfTrust(private val certificateStore: PGPCertificateStore) {
                             " on cert of $targetFingerprint", e)
                 }
             }
+        }
+
+        /**
+         * Verify a delegation signature over a primary key.
+         * This method returns true, if the signature is correct and well-formed.
+         * It does not reject expired or revoked signatures.
+         */
+        fun verifyDelegation(signature: PGPSignature, signingKey: PGPPublicKey, signedKey: PGPPublicKey, policy: Policy): Boolean {
+            SignatureValidator.signatureIsOfType(SignatureType.KEY_REVOCATION, SignatureType.DIRECT_KEY).verify(signature)
+            SignatureValidator.signatureIsNotMalformed(signingKey).verify(signature)
+            if (signature.version >= 4) {
+                SignatureValidator.signatureDoesNotHaveCriticalUnknownNotations(policy.notationRegistry).verify(signature)
+                SignatureValidator.signatureDoesNotHaveCriticalUnknownSubpackets().verify(signature)
+            }
+            SignatureValidator.signatureUsesAcceptableHashAlgorithm(policy).verify(signature)
+            SignatureValidator.signatureUsesAcceptablePublicKeyAlgorithm(policy, signingKey).verify(signature)
+
+            SignatureValidator.signatureDoesNotPredateSignee(signedKey).verify(signature)
+            SignatureValidator.correctSignatureOverKey(signingKey, signedKey).verify(signature)
+
+            return true
         }
 
         /**
@@ -231,8 +253,7 @@ class WebOfTrust(private val certificateStore: PGPCertificateStore) {
                 val issuer = nodeMap[issuerFingerprint]!!
 
                 try {
-                    val valid = SignatureVerifier.verifySignatureOverUserId(userId, certification,
-                            issuerSigningKey, targetPrimaryKey, policy, referenceTime.timestamp)
+                    val valid = verifyCertification(certification, issuerSigningKey, targetPrimaryKey, userId, policy)
                     if (valid) {
                         networkBuilder.addEdge(fromCertification(issuer, target, userId, certification))
                         return // we're done
@@ -242,6 +263,27 @@ class WebOfTrust(private val certificateStore: PGPCertificateStore) {
                             " on cert of ${target.fingerprint}", e)
                 }
             }
+        }
+
+        /**
+         * Verify a certification over a user-ID.
+         * This method returns true, if the signature is correct and well-formed.
+         * It does not reject expired or revoked signatures.
+         */
+        fun verifyCertification(signature: PGPSignature, signingKey: PGPPublicKey, signedKey: PGPPublicKey, userId: String, policy: Policy): Boolean {
+            SignatureValidator.signatureIsOfType(SignatureType.CERTIFICATION_REVOCATION, SignatureType.GENERIC_CERTIFICATION, SignatureType.NO_CERTIFICATION, SignatureType.CASUAL_CERTIFICATION, SignatureType.POSITIVE_CERTIFICATION).verify(signature)
+            SignatureValidator.signatureIsNotMalformed(signingKey).verify(signature)
+            if (signature.version >= 4) {
+                SignatureValidator.signatureDoesNotHaveCriticalUnknownNotations(policy.notationRegistry).verify(signature)
+                SignatureValidator.signatureDoesNotHaveCriticalUnknownSubpackets().verify(signature)
+            }
+            SignatureValidator.signatureUsesAcceptableHashAlgorithm(policy).verify(signature)
+            SignatureValidator.signatureUsesAcceptablePublicKeyAlgorithm(policy, signingKey).verify(signature)
+
+            SignatureValidator.signatureDoesNotPredateSignee(signedKey).verify(signature)
+            SignatureValidator.correctSignatureOverUserId(userId, signedKey, signingKey).verify(signature)
+
+            return true
         }
 
         /**
