@@ -1,6 +1,7 @@
 package org.pgpainless.wot.network
 
 import org.junit.jupiter.api.Test
+import org.pgpainless.wot.dsl.NetworkDSL
 import org.pgpainless.wot.network.Node
 import org.pgpainless.wot.network.EdgeComponent
 import org.pgpainless.wot.network.Fingerprint
@@ -8,7 +9,7 @@ import org.pgpainless.wot.network.RevocationState
 import java.util.*
 import kotlin.test.assertEquals
 
-class EdgeComponentTest {
+class EdgeComponentTest: NetworkDSL {
 
     private val alice = Node(
             Fingerprint("A"),

@@ -6,11 +6,12 @@ package org.pgpainless.wot.network
 
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.pgpainless.wot.dsl.NetworkDSL
 import java.util.*
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-class EdgeTest {
+class EdgeTest: NetworkDSL {
 
     private val alice = Node(Fingerprint("A"), null, RevocationState.notRevoked(), mapOf())
     private val bob = Node(Fingerprint("B"), null, RevocationState.notRevoked(), mapOf())
