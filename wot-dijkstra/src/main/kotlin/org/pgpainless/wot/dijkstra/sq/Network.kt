@@ -6,19 +6,19 @@ package org.pgpainless.wot.dijkstra.sq
 
 /**
  * A network consists of nodes, and edges between them.
- * For the Web of Trust, nodes consist of [CertSynopses][CertSynopsis], while the edges between the nodes are
- * [CertificationSets][CertificationSet].
+ * For the Web of Trust, a [Node] is a certificate, while the [Edges][Edge] between them are sets of signatures
+ * ([EdgeComponent]).
  *
  * @constructor creates a new network
- * @param nodes contains a [Map] of [CertSynopsis] keyed by their [Fingerprint]
- * @param edges [Map] keyed by the [fingerprint][Fingerprint] of an issuer, whose values are [Lists][List] containing all edges originating from the issuer.
- * @param reverseEdges [Map] keyed by the [fingerprint][Fingerprint] of a target, whose values are [Lists][List] containing all edges pointing to the target
+ * @param nodes contains a [Map] of [Node] keyed by their [Fingerprint]
+ * @param edges [Edges][Edges] keyed by origin
+ * @param reverseEdges [Edges][Edge] keyed by target
  * @param referenceTime reference time at which the [Network] was built
  */
 class Network(
-        val nodes: Map<Fingerprint, CertSynopsis>,
-        val edges: Map<Fingerprint, List<CertificationSet>>,
-        val reverseEdges: Map<Fingerprint, List<CertificationSet>>,
+        val nodes: Map<Fingerprint, Node>,
+        val edges: Map<Fingerprint, List<Edge>>,
+        val reverseEdges: Map<Fingerprint, List<Edge>>,
         val referenceTime: ReferenceTime) {
 
     companion object {
@@ -34,7 +34,7 @@ class Network(
     }
 
     /**
-     * The total number of edges on the network.
+     * The total number of [Edges][Edge] on the network.
      *
      * @return number of edges
      */
@@ -44,13 +44,13 @@ class Network(
         }
 
     /**
-     * The total number of signatures the network comprises.
+     * The total number of signatures ([EdgeComponents][EdgeComponent]) the network comprises.
      */
     val numberOfSignatures: Int
         get() {
             return edges.values
                     .flatten()
-                    .flatMap { it.certifications.values }
+                    .flatMap { it.components.values }
                     .sumOf { it.size }
         }
 
@@ -67,22 +67,22 @@ class Network(
     }
 
     class Builder internal constructor() {
-        val nodes: MutableMap<Fingerprint, CertSynopsis> = mutableMapOf()
-        private val protoEdges: MutableMap<Pair<Fingerprint, Fingerprint>, CertificationSet> = mutableMapOf()
+        val nodes: MutableMap<Fingerprint, Node> = mutableMapOf()
+        private val protoEdges: MutableMap<Pair<Fingerprint, Fingerprint>, Edge> = mutableMapOf()
         private var referenceTime: ReferenceTime = ReferenceTime.now()
 
-        fun addNode(node: CertSynopsis): Builder {
+        fun addNode(node: Node): Builder {
             nodes[node.fingerprint] = node
             return this
         }
 
-        fun getNode(fingerprint: Fingerprint): CertSynopsis? {
+        fun getNode(fingerprint: Fingerprint): Node? {
             return nodes[fingerprint]
         }
 
-        fun addEdge(edge: Certification): Builder {
+        fun addEdge(edge: EdgeComponent): Builder {
             protoEdges.getOrPut(Pair(edge.issuer.fingerprint, edge.target.fingerprint)) {
-                CertificationSet.empty(edge.issuer, edge.target)
+                Edge.empty(edge.issuer, edge.target)
             }.add(edge)
             return this
         }
@@ -93,8 +93,8 @@ class Network(
         }
 
         fun build(): Network {
-            val edges = mutableMapOf<Fingerprint, MutableList<CertificationSet>>()
-            val revEdges = mutableMapOf<Fingerprint, MutableList<CertificationSet>>()
+            val edges = mutableMapOf<Fingerprint, MutableList<Edge>>()
+            val revEdges = mutableMapOf<Fingerprint, MutableList<Edge>>()
 
             protoEdges.forEach { (pair, certificationSet) ->
                 edges.getOrPut(pair.first) {

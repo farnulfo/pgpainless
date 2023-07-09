@@ -3,26 +3,25 @@ package org.pgpainless.wot.dijkstra
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.pgpainless.wot.dijkstra.sq.*
-import java.util.*
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class PathTest: NetworkDSL {
 
-    private val root = CertSynopsis("aabbccddeeAABBCCDDEEaabbccddeeAABBCCDDEE")
-    private val alice = CertSynopsis("0000000000000000000000000000000000000000")
-    private val bob = CertSynopsis("1111111111111111111111111111111111111111")
+    private val root = Node("aabbccddeeAABBCCDDEEaabbccddeeAABBCCDDEE")
+    private val alice = Node("0000000000000000000000000000000000000000")
+    private val bob = Node("1111111111111111111111111111111111111111")
 
     // Root -(255, 255)-> Alice
-    private val root_alice__fully_trusted = Certification(root, alice, 255, Depth.unconstrained())
+    private val root_alice__fully_trusted = EdgeComponent(root, alice, 255, Depth.unconstrained())
     // Root -(60,0)-> Alice
-    private val root_alice__marginally_trusted = Certification(root, alice, 60, Depth.limited(0))
+    private val root_alice__marginally_trusted = EdgeComponent(root, alice, 60, Depth.limited(0))
     // Alice -(255,255)-> Root
-    private val alice_root = Certification(alice, root, 255, Depth.unconstrained())
+    private val alice_root = EdgeComponent(alice, root, 255, Depth.unconstrained())
     // Alice -(120, 1)-> Bob
-    private val alice_bob = Certification(alice, bob)
+    private val alice_bob = EdgeComponent(alice, bob)
     // Root -> Root
-    private val root_root = Certification(root, root, 120, Depth.limited(1))
+    private val root_root = EdgeComponent(root, root, 120, Depth.limited(1))
 
     @Test
     fun `verify that an empty Path is properly initialized`() {
@@ -35,7 +34,7 @@ class PathTest: NetworkDSL {
     }
 
     @Test
-    fun `verify that append()ing multiple Certifications properly changes the trust amount of the Path`() {
+    fun `verify that append()ing multiple components properly changes the trust amount of the Path`() {
         val path = Path(root)
         assertEquals(1, path.length)
         assertEquals(120, path.amount) // default amount of an empty path
@@ -56,7 +55,7 @@ class PathTest: NetworkDSL {
     }
 
     @Test
-    fun `verify that append()ing a Certification whose issuer mismatches the target of the Path fails`() {
+    fun `verify that append()ing a component whose issuer mismatches the target of the Path fails`() {
         val path = Path(root)
         assertEquals(listOf(root), path.certificates)
         assertEquals(1, path.length)
@@ -64,7 +63,7 @@ class PathTest: NetworkDSL {
     }
 
     @Test
-    fun `verify that append()ing a Certification fails if it exceeds the Path's depth`() {
+    fun `verify that append()ing a component fails if it exceeds the Path's depth`() {
         val path = Path(root)
         path.append(root_alice__marginally_trusted)
         assertEquals(60, path.amount)
@@ -76,7 +75,7 @@ class PathTest: NetworkDSL {
     }
 
     @Test
-    fun `verify that append()ing a Certification fails of the result would contain cycles`() {
+    fun `verify that append()ing a component fails of the result would contain cycles`() {
         val path = Path(root)
         path.append(root_alice__fully_trusted)
         assertThrows<IllegalArgumentException> {

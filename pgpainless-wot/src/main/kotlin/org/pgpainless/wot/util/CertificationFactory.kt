@@ -6,8 +6,8 @@ package org.pgpainless.wot.util
 
 import org.bouncycastle.openpgp.PGPSignature
 import org.pgpainless.signature.subpackets.SignatureSubpacketsUtil
-import org.pgpainless.wot.dijkstra.sq.CertSynopsis
-import org.pgpainless.wot.dijkstra.sq.Certification
+import org.pgpainless.wot.dijkstra.sq.Node
+import org.pgpainless.wot.dijkstra.sq.EdgeComponent
 import org.pgpainless.wot.dijkstra.sq.Depth
 import org.pgpainless.wot.dijkstra.sq.RegexSet
 import org.pgpainless.wot.dijkstra.sq.RegexSet.Companion.fromExpressionList
@@ -16,26 +16,26 @@ class CertificationFactory {
 
     companion object {
         @JvmStatic
-        fun fromDelegation(issuer: CertSynopsis,
-                           target: CertSynopsis,
-                           signature: PGPSignature): Certification {
+        fun fromDelegation(issuer: Node,
+                           target: Node,
+                           signature: PGPSignature): EdgeComponent {
             return fromSignature(issuer, target, null, signature)
         }
 
         @JvmStatic
-        fun fromCertification(issuer: CertSynopsis,
-                              target: CertSynopsis,
+        fun fromCertification(issuer: Node,
+                              target: Node,
                               targetUserId: String,
-                              signature: PGPSignature): Certification {
+                              signature: PGPSignature): EdgeComponent {
             return fromSignature(issuer, target, targetUserId, signature)
         }
 
         @JvmStatic
-        fun fromSignature(issuer: CertSynopsis,
-                          target: CertSynopsis,
+        fun fromSignature(issuer: Node,
+                          target: Node,
                           targetUserId: String?,
-                          signature: PGPSignature): Certification {
-            return Certification(
+                          signature: PGPSignature): EdgeComponent {
+            return EdgeComponent(
                     issuer,
                     target,
                     targetUserId,

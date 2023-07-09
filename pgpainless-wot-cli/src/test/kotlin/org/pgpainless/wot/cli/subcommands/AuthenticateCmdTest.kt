@@ -13,7 +13,7 @@ class AuthenticateCmdTest {
         val dateFormat = SimpleDateFormat("yyyy-MM-dd")
         val cmd = AuthenticateCmd()
         val paths = Paths()
-        val neal = CertSynopsis(
+        val neal = Node(
                 Fingerprint("F7173B3C7C685CD9ECC4191B74E445BA0E15C957"),
                 null,
                 RevocationState.notRevoked(),
@@ -21,7 +21,7 @@ class AuthenticateCmdTest {
                         Pair("Neal H. Walfield (Code Signing Key) <neal@pep.foundation>", RevocationState.notRevoked())
                 )
         )
-        val justus = CertSynopsis(
+        val justus = Node(
                 Fingerprint("CBCD8F030588653EEDD7E2659B7DD433F254904A"),
                 null,
                 RevocationState.notRevoked(),
@@ -29,7 +29,7 @@ class AuthenticateCmdTest {
                         Pair("Justus Winter <justus@sequoia-pgp.org>", RevocationState.notRevoked())
                 )
         )
-        val certification = Certification(
+        val edgeComponent = EdgeComponent(
                 neal,
                 justus,
                 "Justus Winter <justus@sequoia-pgp.org>",
@@ -39,7 +39,7 @@ class AuthenticateCmdTest {
                 120,
                 Depth.limited(0),
                 RegexSet.wildcard())
-        paths.add(Path(neal, mutableListOf(certification), Depth.auto(0)), 120)
+        paths.add(Path(neal, mutableListOf(edgeComponent), Depth.auto(0)), 120)
         val testResult = AuthenticateAPI.Result(
                 Fingerprint("CBCD8F030588653EEDD7E2659B7DD433F254904A"),
                 "Justus Winter <justus@sequoia-pgp.org>",

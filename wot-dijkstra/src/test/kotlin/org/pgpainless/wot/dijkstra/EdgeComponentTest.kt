@@ -1,48 +1,48 @@
 package org.pgpainless.wot.dijkstra
 
 import org.junit.jupiter.api.Test
-import org.pgpainless.wot.dijkstra.sq.CertSynopsis
-import org.pgpainless.wot.dijkstra.sq.Certification
+import org.pgpainless.wot.dijkstra.sq.Node
+import org.pgpainless.wot.dijkstra.sq.EdgeComponent
 import org.pgpainless.wot.dijkstra.sq.Fingerprint
 import org.pgpainless.wot.dijkstra.sq.RevocationState
 import java.util.*
 import kotlin.test.assertEquals
 
-class CertificationTest {
+class EdgeComponentTest {
 
-    private val alice = CertSynopsis(
+    private val alice = Node(
             Fingerprint("A"),
             null,
             RevocationState.notRevoked(),
             mapOf(Pair("Alice <alice@pgpainless.org>", RevocationState.notRevoked())))
-    private val bob = CertSynopsis(
+    private val bob = Node(
             Fingerprint("B"),
             null,
             RevocationState.notRevoked(),
             mapOf(Pair("Bob <bob@example.org>", RevocationState.notRevoked())))
-    private val charlie = CertSynopsis(
+    private val charlie = Node(
             Fingerprint("C"),
             null,
             RevocationState.notRevoked(),
             mapOf())
 
     @Test
-    fun `verify result of toString() on certification`() {
-        val certification = Certification(alice, bob, "Bob <bob@example.org>", Date())
+    fun `verify result of toString() on certification signature`() {
+        val edgeComponent = EdgeComponent(alice, bob, "Bob <bob@example.org>", Date())
         assertEquals("A certifies binding: Bob <bob@example.org> <-> B [120]",
-                certification.toString())
+                edgeComponent.toString())
     }
 
     @Test
-    fun `verify result of toString() on delegation`() {
-        val delegation = Certification(alice, bob, null, Date())
+    fun `verify result of toString() on delegation signature`() {
+        val delegation = EdgeComponent(alice, bob, null, Date())
         assertEquals("A certifies binding: null <-> B [120]",
                 delegation.toString())
     }
 
     @Test
-    fun `verify result of toString() on delegation with userId-less issuer`() {
-        val delegation = Certification(charlie, bob, null, Date())
+    fun `verify result of toString() on delegation signature with userId-less issuer`() {
+        val delegation = EdgeComponent(charlie, bob, null, Date())
         assertEquals("C certifies binding: null <-> B [120]",
                 delegation.toString())
     }

@@ -3,16 +3,15 @@ package org.pgpainless.wot.dijkstra
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.pgpainless.wot.dijkstra.sq.*
-import java.util.*
 import kotlin.test.assertEquals
 
 class PathsTest: NetworkDSL {
 
-    private val alice = CertSynopsis("0000000000000000000000000000000000000000")
-    private val bob = CertSynopsis("1111111111111111111111111111111111111111")
+    private val alice = Node("0000000000000000000000000000000000000000")
+    private val bob = Node("1111111111111111111111111111111111111111")
 
-    private val alice_bob_1 = Certification(alice, bob, 140, Depth.unconstrained())
-    private val alice_bob_2 = Certification(alice, bob, 160, Depth.limited(1))
+    private val alice_bob_1 = EdgeComponent(alice, bob, 140, Depth.unconstrained())
+    private val alice_bob_2 = EdgeComponent(alice, bob, 160, Depth.limited(1))
 
     @Test
     fun `verify that an empty Paths object has an amount of zero`() {

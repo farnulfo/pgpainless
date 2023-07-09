@@ -7,7 +7,7 @@ package org.pgpainless.wot
 import org.bouncycastle.openpgp.PGPPublicKeyRing
 
 import org.pgpainless.key.OpenPgpFingerprint
-import org.pgpainless.wot.dijkstra.sq.CertificationSet
+import org.pgpainless.wot.dijkstra.sq.Edge
 import org.pgpainless.wot.dijkstra.sq.Fingerprint
 import org.pgpainless.wot.dijkstra.sq.Network
 import org.pgpainless.wot.testfixtures.TestCertificateStores
@@ -94,7 +94,7 @@ class WebOfTrustTest {
 
 
     private fun assertHasIssuerAndTarget(
-            certifications: CertificationSet,
+            certifications: Edge,
             issuer: Fingerprint,
             target: Fingerprint) {
         assertEquals(issuer, certifications.issuer.fingerprint)
@@ -119,12 +119,12 @@ class WebOfTrustTest {
         assertNull(reverseEdge, "Expected no reverse edge on $target from $issuer but got $reverseEdge")
     }
 
-    private fun getEdgeFromTo(network: Network, issuer: Fingerprint, target: Fingerprint): CertificationSet? {
+    private fun getEdgeFromTo(network: Network, issuer: Fingerprint, target: Fingerprint): Edge? {
         val edges = network.edges[issuer] ?: return null
         return edges.find { target == it.target.fingerprint }
     }
 
-    private fun getReverseEdgeFromTo(network: Network, issuer: Fingerprint, target: Fingerprint): CertificationSet? {
+    private fun getReverseEdgeFromTo(network: Network, issuer: Fingerprint, target: Fingerprint): Edge? {
         val revEdges = network.reverseEdges[target] ?: return null
         return revEdges.find { issuer == it.issuer.fingerprint }
     }
