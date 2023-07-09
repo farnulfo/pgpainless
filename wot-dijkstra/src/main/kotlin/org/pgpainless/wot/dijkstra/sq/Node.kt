@@ -7,14 +7,14 @@ package org.pgpainless.wot.dijkstra.sq
 import java.util.*
 
 /**
- * A [CertSynopsis] is a proxy object containing information about a certificate.
+ * A [Node] is a proxy object containing information about a certificate.
  *
  * @param fingerprint [Fingerprint] of the certificate
  * @param expirationTime optional expiration time of the certificate
  * @param revocationState [RevocationState] denoting whether the certificate is revoked or not
  * @param userIds [Map] of user-ids on the certificate, along with their revocation states
  */
-data class CertSynopsis(
+data class Node(
         val fingerprint: Fingerprint,
         val expirationTime: Date? = null,
         val revocationState: RevocationState = RevocationState.notRevoked(),

@@ -7,7 +7,7 @@ package org.pgpainless.wot.dijkstra
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 
-class CertSynopsisTest: NetworkDSL {
+class NodeTest: NetworkDSL {
 
     @Test
     fun `Fingerprint 'A' toString`() {

@@ -11,7 +11,7 @@ import org.pgpainless.wot.dijkstra.sq.ReferenceTime
 /**
  * Web of Trust API, offering different operations.
  *
- * @param network initialized [Network] containing certificates as nodes and certifications as edges.
+ * @param network initialized [Network] containing certificates as nodes and certifications as edgeSet.
  * @param trustRoots one or more [Fingerprints][Fingerprint] of trust-roots.
  * @param gossip if true, consider all certificates as weakly trusted trust-roots
  * @param certificationNetwork if true, all certifications are treated as delegations with infinite trust depth and no regular expressions

@@ -5,18 +5,18 @@ import org.bouncycastle.openpgp.PGPSignature
 import org.pgpainless.algorithm.RevocationStateType
 import org.pgpainless.key.OpenPgpFingerprint
 import org.pgpainless.key.info.KeyRingInfo
-import org.pgpainless.wot.dijkstra.sq.CertSynopsis
+import org.pgpainless.wot.dijkstra.sq.Node
 import org.pgpainless.wot.dijkstra.sq.Fingerprint
 import org.pgpainless.wot.dijkstra.sq.RevocationState
 
 interface PGPDSL {
 
-    fun CertSynopsis(certificate: PGPPublicKeyRing): CertSynopsis {
-        return CertSynopsis(Fingerprint(certificate), )
+    fun CertSynopsis(certificate: PGPPublicKeyRing): Node {
+        return Node(Fingerprint(certificate), )
     }
 
-    fun CertSynopsis(validatedCert: KeyRingInfo): CertSynopsis {
-        return CertSynopsis(
+    fun CertSynopsis(validatedCert: KeyRingInfo): Node {
+        return Node(
                 Fingerprint(validatedCert.fingerprint),
                 validatedCert.primaryKeyExpirationDate,
                 RevocationState(validatedCert.revocationState),

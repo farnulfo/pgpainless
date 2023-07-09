@@ -4,7 +4,7 @@
 
 package org.pgpainless.wot.dijkstra.filter
 
-import org.pgpainless.wot.dijkstra.sq.Certification
+import org.pgpainless.wot.dijkstra.sq.Edge
 import org.pgpainless.wot.dijkstra.sq.Fingerprint
 import org.pgpainless.wot.dijkstra.sq.Path
 
@@ -12,7 +12,7 @@ class SuppressCertificationFilter() : CertificationFilter {
     // A certification's trust amount will be suppressed by this amount.
     private val amount: HashMap<Pair<Fingerprint, Fingerprint>, Int> = hashMapOf()
 
-    override fun cost(c: Certification, values: FilterValues, ignoreRegexps: Boolean): Boolean {
+    override fun cost(c: Edge, values: FilterValues, ignoreRegexps: Boolean): Boolean {
         amount[Pair(c.issuer.fingerprint, c.issuer.fingerprint)]?.let { suppress ->
             values.amount = if (values.amount > suppress) {
                 values.amount - suppress

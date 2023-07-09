@@ -19,8 +19,8 @@ class NetworkTest: NetworkDSL {
         val referenceTime = now()
         val network = empty(referenceTime)
         assert(network.nodes.isEmpty())
-        assert(network.edges.isEmpty())
-        assert(network.reverseEdges.isEmpty())
+        assert(network.edgeSet.isEmpty())
+        assert(network.reverseEdgeSet.isEmpty())
         assertEquals(referenceTime, network.referenceTime)
         assertEquals(0, network.numberOfEdges)
         assertEquals(0, network.numberOfSignatures)
@@ -57,7 +57,7 @@ class NetworkTest: NetworkDSL {
             buildEdge("A", "C", "Charlie <charlie@example.org>")
         }
 
-        assertEquals("Network with 3 nodes, 2 edges:\n" +
+        assertEquals("Network with 3 nodes, 2 edgeSet:\n" +
                 "A certifies binding: null <-> B [120]\n" +
                 "A certifies binding: Charlie <charlie@example.org> <-> C [120]\n",
                 network.toString())

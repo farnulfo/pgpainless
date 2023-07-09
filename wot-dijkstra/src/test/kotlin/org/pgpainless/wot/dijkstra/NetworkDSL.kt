@@ -13,52 +13,52 @@ import java.util.*
 interface NetworkDSL {
 
     /**
-     * Create [CertSynopsis] from [String] fingerprint.
+     * Create [Node] from [String] fingerprint.
      */
-    fun CertSynopsis(fingerprint: String): CertSynopsis =
-            CertSynopsis(Fingerprint(fingerprint), null, RevocationState.notRevoked(), mapOf())
+    fun CertSynopsis(fingerprint: String): Node =
+            Node(Fingerprint(fingerprint), null, RevocationState.notRevoked(), mapOf())
 
     /**
-     * Create [CertSynopsis] from [String] fingerprint and non-revoked [userId].
+     * Create [Node] from [String] fingerprint and non-revoked [userId].
      */
-    fun CertSynopsis(fingerprint: String, userId: String): CertSynopsis = CertSynopsis(
+    fun CertSynopsis(fingerprint: String, userId: String): Node = Node(
             Fingerprint(fingerprint), null, RevocationState.notRevoked(), mapOf(userId to RevocationState.notRevoked()))
 
-    fun CertSynopsis(original: CertSynopsis, userId: String): CertSynopsis = CertSynopsis(
+    fun CertSynopsis(original: Node, userId: String): Node = Node(
             original.fingerprint, original.expirationTime, original.revocationState, original.userIds.plus(userId to RevocationState.notRevoked())
     )
 
     /**
-     * Create [Certification] from two [CertSynopsis] nodes.
+     * Create [Edge] from two [Node] nodes.
      */
-    fun Certification(issuer: CertSynopsis, target: CertSynopsis): Certification =
-            Certification(issuer, target, null, Date())
+    fun Certification(issuer: Node, target: Node): Edge =
+            Edge(issuer, target, null, Date())
 
     /**
-     * Create [Certification] from two [CertSynopsis] nodes and a target [userId].
+     * Create [Edge] from two [Node] nodes and a target [userId].
      */
-    fun Certification(issuer: CertSynopsis, target: CertSynopsis, userId: String): Certification =
-            Certification(issuer, target, userId, Date())
+    fun Certification(issuer: Node, target: Node, userId: String): Edge =
+            Edge(issuer, target, userId, Date())
 
-    fun Certification(issuer: CertSynopsis, target: CertSynopsis, amount: Int, depth: Depth): Certification =
-            Certification(issuer, target, null, Date(), null, true, amount, depth, RegexSet.wildcard())
+    fun Certification(issuer: Node, target: Node, amount: Int, depth: Depth): Edge =
+            Edge(issuer, target, null, Date(), null, true, amount, depth, RegexSet.wildcard())
 
     /**
-     * Add a single [CertSynopsis] built from a [String] fingerprint to the builder.
+     * Add a single [Node] built from a [String] fingerprint to the builder.
      */
     fun Network.Builder.addNode(fingerprint: String): Network.Builder {
         return addNode(CertSynopsis(fingerprint))
     }
 
     /**
-     * Add a single [CertSynopsis] built from a [String] fingerprint and [userId] to the builder.
+     * Add a single [Node] built from a [String] fingerprint and [userId] to the builder.
      */
     fun Network.Builder.addNode(fingerprint: String, userId: String): Network.Builder {
         return addNode(CertSynopsis(fingerprint, userId))
     }
 
     /**
-     * Add multiple [CertSynopsis] nodes built from [String] fingerprints to the builder.
+     * Add multiple [Node] nodes built from [String] fingerprints to the builder.
      */
     fun Network.Builder.addNodes(vararg fingerprints: String) {
         for (fingerprint in fingerprints) {
@@ -67,8 +67,8 @@ interface NetworkDSL {
     }
 
     /**
-     * Add an edge between the [CertSynopsis] with fingerprint [issuer] and
-     * the [CertSynopsis] with fingerprint [target].
+     * Add an edge between the [Node] with fingerprint [issuer] and
+     * the [Node] with fingerprint [target].
      * If either the issuer or target node doesn't exist, throw an [IllegalArgumentException].
      */
     fun Network.Builder.addEdge(issuer: String, target: String): Network.Builder {
@@ -78,8 +78,8 @@ interface NetworkDSL {
     }
 
     /**
-     * Add an edge for [userId] between the [CertSynopsis] with fingerprint [issuer] and
-     * the [CertSynopsis] with fingerprint [target].
+     * Add an edge for [userId] between the [Node] with fingerprint [issuer] and
+     * the [Node] with fingerprint [target].
      * If either the issuer or target node doesn't exist, throw an [IllegalArgumentException].
      */
     fun Network.Builder.addEdge(issuer: String, target: String, userId: String): Network.Builder {
@@ -113,13 +113,13 @@ interface NetworkDSL {
     fun Network.Builder.buildEdge(issuer: String, target: String, amount: Int, depth: Int): Network.Builder {
         val issuerNode = nodes.getOrPut(Fingerprint(issuer)) { CertSynopsis(issuer) }
         val targetNode = nodes.getOrPut(Fingerprint(target)) { CertSynopsis(target) }
-        return addEdge(Certification(issuerNode, targetNode, null, Date(), null, true, amount, Depth.auto(depth), RegexSet.wildcard()))
+        return addEdge(Edge(issuerNode, targetNode, null, Date(), null, true, amount, Depth.auto(depth), RegexSet.wildcard()))
     }
 
     fun Network.Builder.buildEdge(issuer: String, target: String, amount: Int, depth: Int, regexSet: RegexSet): Network.Builder {
         val issuerNode = nodes.getOrPut(Fingerprint(issuer)) { CertSynopsis(issuer) }
         val targetNode = nodes.getOrPut(Fingerprint(target)) { CertSynopsis(target) }
-        return addEdge(Certification(issuerNode, targetNode, null, Date(), null, true, amount, Depth.auto(depth), regexSet))
+        return addEdge(Edge(issuerNode, targetNode, null, Date(), null, true, amount, Depth.auto(depth), regexSet))
     }
 
     /**
@@ -129,27 +129,27 @@ interface NetworkDSL {
         return setReferenceTime(ReferenceTime.now())
     }
 
-    fun Network.getEdgesFor(issuer: Fingerprint, target: Fingerprint): CertificationSet? {
-        return edges[issuer]?.find { it.target.fingerprint == target }
+    fun Network.getEdgesFor(issuer: Fingerprint, target: Fingerprint): EdgeSet? {
+        return edgeSet[issuer]?.find { it.target.fingerprint == target }
     }
 
-    fun Network.getEdgesFor(issuer: String, target: String): CertificationSet? {
+    fun Network.getEdgesFor(issuer: String, target: String): EdgeSet? {
         return getEdgesFor(Fingerprint(issuer), Fingerprint(target))
     }
 
-    fun Network.getEdgeFor(issuer: Fingerprint, target: Fingerprint): List<Certification>? {
+    fun Network.getEdgeFor(issuer: Fingerprint, target: Fingerprint): List<Edge>? {
         return getEdgeFor(issuer, target, null)
     }
 
-    fun Network.getEdgeFor(issuer: Fingerprint, target: Fingerprint, userId: String?): List<Certification>? {
+    fun Network.getEdgeFor(issuer: Fingerprint, target: Fingerprint, userId: String?): List<Edge>? {
         return getEdgesFor(issuer, target)?.certifications?.get(userId)
     }
 
-    fun Network.getEdgeFor(issuer: String, target: String): List<Certification>? {
+    fun Network.getEdgeFor(issuer: String, target: String): List<Edge>? {
         return getEdgeFor(issuer, target, null)
     }
 
-    fun Network.getEdgeFor(issuer: String, target: String, userId: String?): List<Certification>? {
+    fun Network.getEdgeFor(issuer: String, target: String, userId: String?): List<Edge>? {
         return getEdgeFor(Fingerprint(issuer), Fingerprint(target), userId)
     }
 

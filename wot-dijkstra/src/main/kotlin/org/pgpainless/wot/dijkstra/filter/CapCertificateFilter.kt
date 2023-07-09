@@ -4,7 +4,7 @@
 
 package org.pgpainless.wot.dijkstra.filter
 
-import org.pgpainless.wot.dijkstra.sq.Certification
+import org.pgpainless.wot.dijkstra.sq.Edge
 import org.pgpainless.wot.dijkstra.sq.Fingerprint
 
 class CapCertificateFilter() : CertificationFilter {
@@ -12,7 +12,7 @@ class CapCertificateFilter() : CertificationFilter {
     // A certificate's trust amount will be limited to this amount.
     private val caps: HashMap<Fingerprint, Int> = hashMapOf()
 
-    override fun cost(c: Certification, values: FilterValues, ignoreRegexps: Boolean): Boolean {
+    override fun cost(c: Edge, values: FilterValues, ignoreRegexps: Boolean): Boolean {
         caps[c.issuer.fingerprint]?.let {
             if (it < values.amount) {
                 values.amount = it

@@ -4,7 +4,7 @@
 
 package org.pgpainless.wot.dijkstra.filter
 
-import org.pgpainless.wot.dijkstra.sq.Certification
+import org.pgpainless.wot.dijkstra.sq.Edge
 import org.pgpainless.wot.dijkstra.sq.Depth
 import org.pgpainless.wot.dijkstra.sq.RegexSet
 
@@ -33,7 +33,7 @@ interface CertificationFilter {
      *
      * If the function returns `false`, the certification should be skipped.
      */
-    fun cost(c: Certification, values: FilterValues, ignoreRegexps: Boolean): Boolean {
+    fun cost(c: Edge, values: FilterValues, ignoreRegexps: Boolean): Boolean {
         return true
     }
 

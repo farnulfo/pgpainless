@@ -51,7 +51,7 @@ class WebOfTrustUnitTest {
     @Test
     fun simple() {
         val network = getNetwork("/home/heiko/src/sequoia-wot/tests/data/simple.pgp")
-        println("Network contains " + network.nodes.size + " nodes with " + network.numberOfEdges + " edges built from " + network.numberOfSignatures + " signatures.")
+        println("Network contains " + network.nodes.size + " nodes with " + network.numberOfEdges + " edgeSet built from " + network.numberOfSignatures + " signatures.")
 
         // --
 
@@ -162,7 +162,7 @@ class WebOfTrustUnitTest {
         // Certified by: 78C3814EFD16E68F4F1AB4B874E30AE11FFCFB1B
 
         val network = getNetwork("/home/heiko/src/sequoia-wot/tests/data/cycle.pgp")
-        println("Network contains " + network.nodes.size + " nodes with " + network.numberOfEdges + " edges built from " + network.numberOfSignatures + " signatures.")
+        println("Network contains " + network.nodes.size + " nodes with " + network.numberOfEdges + " edgeSet built from " + network.numberOfSignatures + " signatures.")
         val q = Query(network, Roots(), false)
 
         val a1 = q.backwardPropagate(frankFpr, frankUid, false, IdempotentCertificationFilter());
