@@ -43,6 +43,20 @@ interface NetworkDSL {
     fun EdgeComponent(issuer: Node, target: Node, amount: Int, depth: Depth): EdgeComponent =
             EdgeComponent(issuer, target, null, Date(), null, true, amount, depth, RegexSet.wildcard())
 
+
+    /**
+     * Construct a [EdgeComponent] with default values. The result is non-expiring, will be exportable and has a
+     * trust amount of 120, a depth of 0 and a wildcard regex.
+     *
+     * @param issuer synopsis of the certificate that issued the [EdgeComponent]
+     * @param target synopsis of the certificate that is target of this [EdgeComponent]
+     * @param targetUserId optional user-id. If this is null, the [EdgeComponent] is made over the primary key of the target.
+     * @param creationTime creation time of the [EdgeComponent]
+     */
+    fun EdgeComponent(issuer: Node, target: Node, targetUserId: String? = null, creationTime: Date): EdgeComponent =
+            EdgeComponent(issuer, target, targetUserId, creationTime, null, true, 120, Depth.limited(0), RegexSet.wildcard())
+
+
     /**
      * Add a single [Node] built from a [String] fingerprint to the builder.
      */
