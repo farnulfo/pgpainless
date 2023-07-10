@@ -618,39 +618,6 @@ class Query(
             authRpaths[issuerFpr] = Pair(p, amount)
         }
 
-        //        if TRACE {
-        //            t!("auth_rpaths:")
-        //            let mut v: Vec<_> = auth_rpaths.iter().collect()
-        //            v.sort_by(|(fpr_a, _), (fpr_b, _)| {
-        //            let userid_a = self.network()
-        //                    .lookup_synopsis_by_fpr(*fpr_a).expect("already looked up")
-        //                    .primary_userid().map(|userid| {
-        //                String::from_utf8_lossy(userid.value()).into_owned()
-        //            }).unwrap_or("".into())
-        //            let userid_b = self.network()
-        //                    .lookup_synopsis_by_fpr(*fpr_b).expect("already looked up")
-        //                    .primary_userid().map(|userid| {
-        //                String::from_utf8_lossy(userid.value()).into_owned()
-        //            }).unwrap_or("".into())
-        //
-        //            userid_a.cmp(&userid_b).
-        //            then(fpr_a.cmp(&fpr_b))
-        //        })
-        //            for (fpr, (path, amount)) in v {
-        //            let userid = self.network()
-        //                    .lookup_synopsis_by_fpr(fpr).expect("already looked up")
-        //                    .primary_userid().map(|userid| {
-        //                String::from_utf8_lossy(userid.value()).into_owned()
-        //            })
-        //            .unwrap_or("<missing User ID>".into())
-        //            t!("  <{}, {}>: {}",
-        //            fpr, userid,
-        //            format!("{} trust amount (max: {}), {} edges",
-        //            amount, path.amount(),
-        //            path.len() - 1))
-        //        }
-        //        }
-
         return authRpaths
     }
 }
