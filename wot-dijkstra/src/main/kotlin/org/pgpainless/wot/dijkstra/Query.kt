@@ -508,8 +508,6 @@ class Query(
         val authRpaths: HashMap<Fingerprint, Pair<Path, Int>> = hashMapOf()
 
         for ((issuerFpr, fp) in bestNextNode.entries) {
-            var fp = fp // Shadow for write access
-
             // If roots were specified, then only return the optimal
             // paths from the roots.
             if (roots.size() > 0 && !roots.isRoot(issuerFpr)) {
@@ -565,59 +563,65 @@ class Query(
                     }
 
             logger.debug("Recovering path starting at {}", network.nodeByFpr(issuerFpr))
+            val path = assemblePath(target, targetFpr, targetUserid, issuer, fp, bestNextNode, filter, selfSigned)
+            logger.debug("Authenticated <{}, {}>:\n{}", targetFpr, targetUserid, path)
 
-            var amount = 120
-
-            // nodes[0] is the root; nodes[nodes.len() - 1] is the target.
-            val nodes: MutableList<EdgeComponent> = mutableListOf()
-            while (true) {
-                val ec = fp.next ?: break
-
-                logger.debug("  {}", fp)
-
-                val fv = FilterValues(ec.trustDepth, ec.trustAmount, null)
-
-                val r = filter.cost(ec, fv, true)
-
-                assert(r) {
-                    "cost function returned different result, but must be constant !"
-                }
-                amount = min(fv.amount, amount)
-
-                nodes.add(ec)
-                fp = bestNextNode[ec.target.fingerprint]!! // FIXME !!
-            }
-
-            if (selfSigned) {
-                val tail = nodes.last()
-                if (tail.userId != targetUserid) {
-                    /// XXX: don't synthesize selfsigs
-                    val selfsig = EdgeComponent(target, target, targetUserid, Date(),
-                            null, true, 120, Depth.limited(0), RegexSet.wildcard())
-                    nodes.add(selfsig)
-                }
-            }
-
-            logger.debug("  {}", fp)
-
-            logger.debug("\nShortest path from {} to <{} <-> {}>:\n  {}",
-                    issuer.fingerprint,
-                    targetUserid, targetFpr,
-                    nodes.withIndex().joinToString("\n  ") { (i, certification) ->
-                        "$i: $certification"
-                    })
-
-            assert(nodes.size > 0)
-
-            val p = Path(issuer)
-            for (n in nodes.iterator()) {
-                p.append(n)
-            }
-            logger.debug("Authenticated <{}, {}>:\n{}", targetFpr, targetUserid, p)
-
-            authRpaths[issuerFpr] = Pair(p, amount)
+            authRpaths[issuerFpr] = path
         }
 
         return authRpaths
+    }
+
+    private fun assemblePath(target: Node, targetFpr: Fingerprint, targetUserid: String, issuer: Node, fp: ForwardPointer, bestNextNode: HashMap<Fingerprint, ForwardPointer>, filter: CertificationFilter, selfSigned: Boolean): Pair<Path, Int> {
+        var fp = fp // shadow for write access
+        var amount = 120
+
+        // nodes[0] is the root; nodes[nodes.len() - 1] is the target.
+        val nodes: MutableList<EdgeComponent> = mutableListOf()
+        while (true) {
+            val ec = fp.next ?: break
+
+            logger.debug("  {}", fp)
+
+            val fv = FilterValues(ec.trustDepth, ec.trustAmount, null)
+
+            val r = filter.cost(ec, fv, true)
+
+            assert(r) {
+                "cost function returned different result, but must be constant !"
+            }
+            amount = min(fv.amount, amount)
+
+            nodes.add(ec)
+            fp = bestNextNode[ec.target.fingerprint]!! // FIXME !!
+        }
+
+        if (selfSigned) {
+            val tail = nodes.last()
+            if (tail.userId != targetUserid) {
+                /// XXX: don't synthesize selfsigs
+                val selfsig = EdgeComponent(target, target, targetUserid, Date(),
+                        null, true, 120, Depth.limited(0), RegexSet.wildcard())
+                nodes.add(selfsig)
+            }
+        }
+
+        logger.debug("  {}", fp)
+
+        logger.debug("\nShortest path from {} to <{} <-> {}>:\n  {}",
+                issuer.fingerprint,
+                targetUserid, targetFpr,
+                nodes.withIndex().joinToString("\n  ") { (i, certification) ->
+                    "$i: $certification"
+                })
+
+        assert(nodes.size > 0)
+
+        val p = Path(issuer)
+        for (n in nodes.iterator()) {
+            p.append(n)
+        }
+
+        return Pair(p, amount)
     }
 }
