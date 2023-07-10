@@ -55,4 +55,8 @@ class Paths(private val _paths: MutableList<Item>) {
             return "$path ($amount)"
         }
     }
+
+    override fun toString(): String {
+        return paths.joinToString { it.toString() }
+    }
 }
