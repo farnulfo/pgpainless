@@ -196,34 +196,21 @@ class WebOfTrust(private val certificateStore: PGPCertificateStore) {
                 val issuer = nodeMap[issuerFingerprint]!!
 
                 try {
-                    val valid = verifyDelegation(candidate, delegation, issuerSigningKey, targetPrimaryKey, policy)
-                    if (valid) {
-                        networkBuilder.addEdge(fromDelegation(issuer, target, delegation))
-                        return // we're done
-                    }
+                    // Check signature type
+                    SignatureValidator.signatureIsOfType(SignatureType.KEY_REVOCATION, SignatureType.DIRECT_KEY).verify(delegation)
+                    // common verification steps that are shared by delegations and certifications
+                    verifyCommonSignatureCriteria(candidate, delegation, issuerSigningKey, targetPrimaryKey, policy)
+                    // check signature correctness
+                    SignatureValidator.correctSignatureOverKey(issuerSigningKey, targetPrimaryKey).verify(delegation)
+                    // only add the edge if the above checks did not throw
+                    networkBuilder.addEdge(fromDelegation(issuer, target, delegation))
+                    return // we're done
                 } catch (e: SignatureValidationException) {
                     val targetFingerprint = OpenPgpFingerprint.of(targetPrimaryKey)
                     LOGGER.warn("Cannot verify signature by $issuerFingerprint" +
                             " on cert of $targetFingerprint", e)
                 }
             }
-        }
-
-        /**
-         * Verify a delegation signature over a primary key.
-         * This method returns true, if the signature is correct and well-formed.
-         * It does not reject expired or revoked signatures.
-         */
-        fun verifyDelegation(issuer: KeyRingInfo, signature: PGPSignature, signingKey: PGPPublicKey, signedKey: PGPPublicKey, policy: Policy): Boolean {
-            // Check signature type
-            SignatureValidator.signatureIsOfType(SignatureType.KEY_REVOCATION, SignatureType.DIRECT_KEY).verify(signature)
-
-            // common verification steps that are shared by delegations and certifications
-            verifyCommonSignatureCriteria(issuer, signature, signingKey, signedKey, policy)
-
-            // check signature correctness
-            SignatureValidator.correctSignatureOverKey(signingKey, signedKey).verify(signature)
-            return true
         }
 
         /**
@@ -250,33 +237,23 @@ class WebOfTrust(private val certificateStore: PGPCertificateStore) {
                 val issuer = nodeMap[issuerFingerprint]!!
 
                 try {
-                    val valid = verifyCertification(candidate, certification, issuerSigningKey, targetPrimaryKey, userId, policy)
-                    if (valid) {
-                        networkBuilder.addEdge(fromCertification(issuer, target, userId, certification))
-                        return // we're done
-                    }
+                    // check signature type
+                    SignatureValidator.signatureIsOfType(
+                            SignatureType.CERTIFICATION_REVOCATION, SignatureType.GENERIC_CERTIFICATION,
+                            SignatureType.NO_CERTIFICATION, SignatureType.CASUAL_CERTIFICATION,
+                            SignatureType.POSITIVE_CERTIFICATION).verify(certification)
+                    // perform shared verification steps
+                    verifyCommonSignatureCriteria(candidate, certification, issuerSigningKey, targetPrimaryKey, policy)
+                    // check correct signature
+                    SignatureValidator.correctSignatureOverUserId(userId, issuerSigningKey, targetPrimaryKey).verify(certification)
+                    // Only add the edge, if the above checks did not throw
+                    networkBuilder.addEdge(fromCertification(issuer, target, userId, certification))
+                    return // we're done
                 } catch (e: SignatureValidationException) {
                     LOGGER.warn("Cannot verify signature for '$userId' by $issuerFingerprint" +
                             " on cert of ${target.fingerprint}", e)
                 }
             }
-        }
-
-        /**
-         * Verify a certification over a user-ID.
-         * This method returns true, if the signature is correct and well-formed.
-         * It does not reject expired or revoked signatures.
-         */
-        fun verifyCertification(issuer: KeyRingInfo, signature: PGPSignature, signingKey: PGPPublicKey, signedKey: PGPPublicKey, userId: String, policy: Policy): Boolean {
-            // check signature type
-            SignatureValidator.signatureIsOfType(SignatureType.CERTIFICATION_REVOCATION, SignatureType.GENERIC_CERTIFICATION, SignatureType.NO_CERTIFICATION, SignatureType.CASUAL_CERTIFICATION, SignatureType.POSITIVE_CERTIFICATION).verify(signature)
-
-            // perform shared verification steps
-            verifyCommonSignatureCriteria(issuer, signature, signingKey, signedKey, policy)
-
-            // check correct signature
-            SignatureValidator.correctSignatureOverUserId(userId, signedKey, signingKey).verify(signature)
-            return true
         }
 
         fun verifyCommonSignatureCriteria(issuer: KeyRingInfo,
