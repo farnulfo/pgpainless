@@ -4,9 +4,11 @@
 
 package org.pgpainless.wot.api
 
+import org.pgpainless.wot.dijkstra.Query
 import org.pgpainless.wot.network.Fingerprint
 import org.pgpainless.wot.network.Network
 import org.pgpainless.wot.network.ReferenceTime
+import org.pgpainless.wot.network.Roots
 
 /**
  * Web of Trust API, offering different operations.
@@ -21,7 +23,7 @@ import org.pgpainless.wot.network.ReferenceTime
  */
 class WoTAPI(
         val network: Network,
-        val trustRoots: List<Fingerprint>,
+        val trustRoots: Roots,
         val gossip: Boolean = false,
         val certificationNetwork: Boolean = false,
         val trustAmount: Int = AuthenticationLevel.Fully.amount,
@@ -32,7 +34,7 @@ class WoTAPI(
      * Secondary constructor, taking an [AuthenticationLevel] instead of an [Int].
      */
     constructor(network: Network,
-                trustRoots: List<Fingerprint>,
+                trustRoots: Roots,
                 gossip: Boolean = false,
                 certificationNetwork: Boolean = false,
                 trustAmount: AuthenticationLevel = AuthenticationLevel.Fully,
@@ -40,7 +42,9 @@ class WoTAPI(
             this(network,trustRoots, gossip,certificationNetwork, trustAmount.amount, referenceTime)
 
     override fun authenticate(arguments: AuthenticateAPI.Arguments): AuthenticateAPI.Result {
-        TODO("Not yet implemented")
+        val query = Query(network, trustRoots, certificationNetwork)
+        val paths = query.authenticate(arguments.fingerprint, arguments.userId, trustAmount)
+        return AuthenticateAPI.Result(arguments.fingerprint, arguments.userId, trustAmount, paths)
     }
 
     override fun identify(arguments: IdentifyAPI.Arguments): IdentifyAPI.Result {
