@@ -245,7 +245,7 @@ class WebOfTrust(private val certificateStore: PGPCertificateStore) {
                     // perform shared verification steps
                     verifyCommonSignatureCriteria(candidate, certification, issuerSigningKey, targetPrimaryKey, policy)
                     // check correct signature
-                    SignatureValidator.correctSignatureOverUserId(userId, issuerSigningKey, targetPrimaryKey).verify(certification)
+                    SignatureValidator.correctSignatureOverUserId(userId, targetPrimaryKey, issuerSigningKey).verify(certification)
                     // Only add the edge, if the above checks did not throw
                     networkBuilder.addEdge(fromCertification(issuer, target, userId, certification))
                     return // we're done
