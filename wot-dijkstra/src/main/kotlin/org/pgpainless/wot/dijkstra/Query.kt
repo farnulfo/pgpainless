@@ -253,6 +253,35 @@ class Query(
         return c
     }
 
+
+    private fun fpCost(fp0: ForwardPointer,
+                       bestNextNode: HashMap<Fingerprint, ForwardPointer>,
+                       filter: CertificationFilter,
+                       selfSigned: Boolean): Cost {
+        var fp = fp0
+
+        var amount = 120
+        var length: Int = if (selfSigned) 1 else 0
+
+        while (fp.next != null) {
+            val ec: EdgeComponent = fp.next!! // FIXME
+
+            val a = ec.trustAmount
+            val d = ec.trustDepth
+
+            val value = FilterValues(d, a, null)
+
+            val r = filter.cost(ec, value, true)
+            assert(r) { "cost function returned different result, but must be constant!" }
+
+            amount = min(value.amount, amount)
+            length += 1
+            fp = bestNextNode[ec.target.fingerprint]!!
+        }
+
+        return Cost(length, amount)
+    }
+
     /**
      * Implements the algorithm outlined in:
      * https://gitlab.com/sequoia-pgp/sequoia-wot/-/blob/main/spec/sequoia-wot.md#implementation-strategy
@@ -314,30 +343,6 @@ class Query(
         val bestNextNode: HashMap<Fingerprint, ForwardPointer> = HashMap()
         val queue: PairPriorityQueue<Fingerprint, Cost> = PairPriorityQueue()
 
-        fun fpCost(fp0: ForwardPointer): Cost {
-            var fp = fp0
-
-            var amount = 120
-            var length: Int = if (selfSigned) 1 else 0
-
-            while (fp.next != null) {
-                val ec: EdgeComponent = fp.next!! // FIXME
-
-                val a = ec.trustAmount
-                val d = ec.trustDepth
-
-                val value = FilterValues(d, a, null)
-
-                val r = filter.cost(ec, value, true)
-                assert(r) { "cost function returned different result, but must be constant!" }
-
-                amount = min(value.amount, amount)
-                length += 1
-                fp = bestNextNode[ec.target.fingerprint]!!
-            }
-
-            return Cost(length, amount)
-        }
 
         if (selfSigned) {
             // If the target is a trusted introducer and has self-signed
@@ -377,12 +382,8 @@ class Query(
             val signee = network.nodeByFpr(signeeFpr)!! // already looked up
 
             // Get the signee's current forward pointer.
-            //
-            // We need to clone this, because we want to manipulate
-            // 'distance' and we can't do that if there is a reference
-            // to something in it.
             val signeeFp: ForwardPointer = bestNextNode[signeeFpr]!!
-            val signeeFpCost = fpCost(signeeFp)
+            val signeeFpCost = fpCost(signeeFp, bestNextNode, filter, selfSigned)
 
             logger.debug("{}'s forward pointer: {}", signeeFpr, signeeFp.next?.target)
 
@@ -470,7 +471,7 @@ class Query(
 
                 // distance.entry takes a mutable ref, so we can't
                 // compute the current fp's cost in the next block.
-                val currentFpCost: Cost? = bestNextNode[issuerFpr]?.let { fpCost(it) }
+                val currentFpCost: Cost? = bestNextNode[issuerFpr]?.let { fpCost(it, bestNextNode, filter, selfSigned) }
 
                 when (val currentFp = bestNextNode[issuerFpr]) {
                     null -> {
