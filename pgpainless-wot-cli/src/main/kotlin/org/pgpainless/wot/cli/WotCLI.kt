@@ -13,6 +13,8 @@ import org.pgpainless.wot.api.WoTAPI
 import org.pgpainless.wot.cli.subcommands.*
 import org.pgpainless.wot.network.Fingerprint
 import org.pgpainless.wot.network.ReferenceTime
+import org.pgpainless.wot.network.Root
+import org.pgpainless.wot.network.Roots
 import pgp.cert_d.PGPCertificateStoreAdapter
 import pgp.cert_d.subkey_lookup.InMemorySubkeyLookupFactory
 import pgp.certificate_store.PGPCertificateStore
@@ -39,7 +41,7 @@ import kotlin.system.exitProcess
 )
 class WotCLI: Callable<Int> {
 
-    @Option(names = ["--trust-root", "-r"], required = true)
+    @Option(names = ["--trust-root", "-r"])
     var mTrustRoot: Array<String> = arrayOf()
 
     @ArgGroup(exclusive = true, multiplicity = "1")
@@ -62,10 +64,10 @@ class WotCLI: Callable<Int> {
 
     @Option(names = ["--keyserver"], description=["Change the default keyserver"])
     var keyServer: String = "hkps://keyserver.ubuntu.com"
+    */
 
     @Option(names = ["--gpg-ownertrust"])
     var gpgOwnertrust: Boolean = false
-     */
 
     @Option(names = ["--certification-network"], description = ["Treat the web of trust as a certification network instead of an authentication network."])
     var certificationNetwork = false
@@ -73,8 +75,8 @@ class WotCLI: Callable<Int> {
     @Option(names = ["--gossip"], description = ["Find arbitrary paths by treating all certificates as trust-roots with zero trust."])
     var gossip = false
 
-    @ArgGroup(exclusive = true, multiplicity = "1")
-    lateinit var mTrustAmount: TrustAmount
+    @ArgGroup(exclusive = true)
+    var mTrustAmount: TrustAmount = TrustAmount()
 
     class TrustAmount {
         @Option(names = ["--trust-amount", "-a"], description = ["The required amount of trust."])
@@ -104,13 +106,15 @@ class WotCLI: Callable<Int> {
             } ?: ReferenceTime.now()
         }
 
-    private val trustRoots: List<Fingerprint>
+    private val trustRoots: Roots
         get() {
-            if (mCertificateSource.gpg) {
-                return readGpgOwnertrust().plus(mTrustRoot.map { Fingerprint(it) })
+            val trustRootFingerprints = if (mCertificateSource.gpg || gpgOwnertrust) {
+                readGpgOwnertrust().plus(mTrustRoot.map { Fingerprint(it) })
+            } else {
+                mTrustRoot.map { Fingerprint(it) }
             }
 
-            return mTrustRoot.map { Fingerprint(it) }
+            return Roots(trustRootFingerprints.map { Root(it) })
         }
 
     private val amount: Int
