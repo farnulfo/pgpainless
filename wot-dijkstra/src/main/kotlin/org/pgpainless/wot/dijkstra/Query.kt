@@ -194,13 +194,56 @@ class Query(
      * FIXME: public for unit tests (undo!)
      */
     fun backwardPropagate(targetFpr: Fingerprint, targetUserid: String, filter: CertificationFilter): HashMap<Fingerprint, Pair<Path, Int>> {
+        // XXX: this is an experiment, calculating both variants is possibly not the most efficient approach.
 
-        // Prefer paths where the target User ID is self-signed as long as possible. (But .. Why?)
-        val authPaths = backwardPropagateInternal(targetFpr, targetUserid, true, filter)
-        if (authPaths.isNotEmpty()) return authPaths
+        // However, in terms of semantics, this function now simulates what would happen if
+        // backwardPropagateInternal() were generalized to find both types of paths:
 
-        // If we find no "self-signed" paths, return any others
-        return backwardPropagateInternal(targetFpr, targetUserid, false, filter)
+        // It would prefer shorter over longer paths, or higher trust amount - so this is what we do here.
+
+        val a = backwardPropagateInternal(targetFpr, targetUserid, true, filter)
+        val b = backwardPropagateInternal(targetFpr, targetUserid, false, filter)
+
+        val c = HashMap<Fingerprint, Pair<Path, Int>>()
+
+        val keys = a.keys.toMutableSet()
+        keys.addAll(b.keys)
+
+        for (fp in keys) {
+            val x = a[fp]
+            val y = b[fp]
+
+            if (x != null && y != null) {
+                // Pick the path we like better, first by length, then by amount
+                println("x: $x")
+                println("y: $y")
+
+                if (y.first.length < x.first.length) { // prefer smaller length
+                    println("XX found two for $fp! -> picking y by length")
+                    c[fp] = y
+                } else if (x.first.length < y.first.length) {
+                    println("XX found two for $fp! -> picking x by length")
+                    c[fp] = x
+                } else {
+                    // length is the same, pick by amount
+                    if (y.second > x.second) { // prefer bigger amount
+                        println("XX found two for $fp! -> picking y by amount")
+                        c[fp] = y
+                    } else {
+                        println("XX found two for $fp! -> picking x by amount")
+                        c[fp] = x
+                    }
+                }
+            } else if (x != null) {
+                println("XX found one for $fp, in x")
+                c[fp] = x
+            } else if (y != null) {
+                println("XX found one for $fp, in y")
+                c[fp] = y
+            }
+        }
+
+        return c
     }
 
     /**
