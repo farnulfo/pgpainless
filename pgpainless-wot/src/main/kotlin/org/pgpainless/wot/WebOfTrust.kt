@@ -127,7 +127,7 @@ class WebOfTrust(private val certificateStore: PGPCertificateStore) {
             byFingerprint.putIfAbsent(certFingerprint, cert)
 
             // index by key-ID
-            cert.validSubkeys.forEach {
+            cert.keys.publicKeys.forEach {
                 byKeyId.getOrPut(it.keyID) { mutableListOf() }.add(cert)
             }
 
