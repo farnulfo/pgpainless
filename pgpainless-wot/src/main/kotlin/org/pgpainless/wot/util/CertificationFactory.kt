@@ -5,6 +5,7 @@
 package org.pgpainless.wot.util
 
 import org.bouncycastle.openpgp.PGPSignature
+import org.pgpainless.algorithm.SignatureType
 import org.pgpainless.signature.subpackets.SignatureSubpacketsUtil
 import org.pgpainless.wot.network.Node
 import org.pgpainless.wot.network.EdgeComponent
@@ -35,16 +36,30 @@ class CertificationFactory {
                           target: Node,
                           targetUserId: String?,
                           signature: PGPSignature): EdgeComponent {
-            return EdgeComponent(
-                    issuer,
-                    target,
-                    targetUserId,
-                    SignatureSubpacketsUtil.getSignatureCreationTime(signature)!!.time,
-                    SignatureSubpacketsUtil.getSignatureExpirationTimeAsDate(signature),
-                    SignatureSubpacketsUtil.isExportable(signature),
-                    getTrustAmountFrom(signature),
-                    getTrustDepthFrom(signature),
-                    regexSetFrom(signature))
+            if (signature.signatureType == SignatureType.CERTIFICATION_REVOCATION.code) {
+                // Revocations equate to trust of 0/0
+                return EdgeComponent(
+                        issuer,
+                        target,
+                        targetUserId,
+                        SignatureSubpacketsUtil.getSignatureCreationTime(signature)!!.time,
+                        SignatureSubpacketsUtil.getSignatureExpirationTimeAsDate(signature),
+                        SignatureSubpacketsUtil.isExportable(signature),
+                        0,
+                        Depth.limited(0),
+                        regexSetFrom(signature))
+            } else {
+                return EdgeComponent(
+                        issuer,
+                        target,
+                        targetUserId,
+                        SignatureSubpacketsUtil.getSignatureCreationTime(signature)!!.time,
+                        SignatureSubpacketsUtil.getSignatureExpirationTimeAsDate(signature),
+                        SignatureSubpacketsUtil.isExportable(signature),
+                        getTrustAmountFrom(signature),
+                        getTrustDepthFrom(signature),
+                        regexSetFrom(signature))
+            }
         }
 
         @JvmStatic
