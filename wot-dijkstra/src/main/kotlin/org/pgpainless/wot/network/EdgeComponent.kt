@@ -37,7 +37,7 @@ data class EdgeComponent(
             "${issuer.fingerprint} certifies binding: $userId <-> ${target.fingerprint} [$trustAmount]"
         else {
             val scope = if (regexes.regexStrings.isEmpty()) "" else ", scope: $regexes"
-            "${issuer.fingerprint} delegates to ${target.fingerprint} [$trustAmount, depth $trustDepth$scope]"
+            "${issuer.fingerprint} delegates to ${target.fingerprint} [$trustAmount, depth $trustDepth$scope] at $creationTime"
         }
     }
 }
