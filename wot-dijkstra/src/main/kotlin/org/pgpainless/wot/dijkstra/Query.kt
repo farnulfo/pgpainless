@@ -190,8 +190,10 @@ class Query(
      * to longer paths. So the returned path(s) may not be optimal in terms of the amount of trust.
      * To compensate for this, the caller should run the algorithm again on
      * a residual network.
+     *
+     * FIXME: public for unit tests (undo!)
      */
-    private fun backwardPropagate(targetFpr: Fingerprint, targetUserid: String, filter: CertificationFilter): HashMap<Fingerprint, Pair<Path, Int>> {
+    fun backwardPropagate(targetFpr: Fingerprint, targetUserid: String, filter: CertificationFilter): HashMap<Fingerprint, Pair<Path, Int>> {
 
         // Prefer paths where the target User ID is self-signed as long as possible. (But .. Why?)
         val authPaths = backwardPropagateInternal(targetFpr, targetUserid, true, filter)
