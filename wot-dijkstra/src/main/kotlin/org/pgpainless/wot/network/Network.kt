@@ -4,6 +4,8 @@
 
 package org.pgpainless.wot.network
 
+import org.pgpainless.wot.dijkstra.NetworkView
+
 /**
  * A network consists of nodes, and edges between them.
  * For the Web of Trust, a [Node] is a certificate, while the [Edges][Edge] between them are sets of signatures
@@ -19,7 +21,7 @@ class Network(
         val nodes: Map<Fingerprint, Node>,
         val edges: Map<Fingerprint, List<Edge>>,
         val reverseEdges: Map<Fingerprint, List<Edge>>,
-        val referenceTime: ReferenceTime) {
+        val referenceTime: ReferenceTime) : NetworkView {
 
     companion object {
         @JvmStatic
@@ -53,6 +55,19 @@ class Network(
                     .flatMap { it.components.values }
                     .sumOf { it.size }
         }
+
+    override fun nodeByFpr(fpr:Fingerprint): Node? {
+        return nodes[fpr]
+    }
+
+    override fun reverseBySignee(fpr: Fingerprint): List<Edge>? {
+        return reverseEdges[fpr]
+    }
+
+    override fun referenceTime(): ReferenceTime {
+       return referenceTime
+    }
+
 
     override fun toString(): String {
         val sb = StringBuilder()

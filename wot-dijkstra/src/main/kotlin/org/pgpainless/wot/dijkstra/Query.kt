@@ -53,8 +53,15 @@ internal data class ForwardPointer(
         val next: EdgeComponent?
 )
 
+interface NetworkView {
+
+    fun nodeByFpr(fpr: Fingerprint): Node?
+    fun reverseBySignee(fpr: Fingerprint): List<Edge>?
+    fun referenceTime(): ReferenceTime
+}
+
 class Query(
-        private val network: Network,
+        private val network: NetworkView,
         private val roots: Roots,
         private val certificationNetwork: Boolean) {
 
@@ -272,24 +279,24 @@ class Query(
         logger.debug("Roots (${roots.size()}):\n{}",
                 roots.roots().withIndex().joinToString("\n") { (i, r) ->
                     val fpr = r.fingerprint
-                    network.nodes[fpr]?.let { "  {$i}. {$it}" } ?: "  {$i}. {$fpr} (not found)"
+                    network.nodeByFpr(fpr)?.let { "  {$i}. {$it}" } ?: "  {$i}. {$fpr} (not found)"
                 })
 
         logger.debug("target: {}, {}", targetFpr, targetUserid)
         logger.debug("self signed: {}", selfSigned)
 
         // If the node is not in the network, we're done.
-        val target = network.nodes[targetFpr] ?: return hashMapOf()
+        val target = network.nodeByFpr(targetFpr) ?: return hashMapOf()
 
         // Make sure the target is valid (not expired and not revoked
         // at the reference time).
         if ((target.expirationTime != null) &&
-                (target.expirationTime <= network.referenceTime.timestamp)) {
+                (target.expirationTime <= network.referenceTime().timestamp)) {
             logger.debug("{}: Target certificate is expired at reference time.", targetFpr)
             return hashMapOf()
         }
 
-        if (target.revocationState.isEffective(network.referenceTime)) {
+        if (target.revocationState.isEffective(network.referenceTime())) {
             logger.debug("{}: Target certificate is revoked at reference time.", targetFpr)
             return hashMapOf()
         }
@@ -299,7 +306,7 @@ class Query(
         // revoked it, then it can't be authenticated.
         val targetUa: RevocationState? = target.userIds[targetUserid]
         targetUa?.let {
-            if (it.isEffective(network.referenceTime)) {
+            if (it.isEffective(network.referenceTime())) {
                 logger.debug("{}: Target user id is revoked at reference time.", targetFpr)
                 return hashMapOf()
             }
@@ -369,7 +376,7 @@ class Query(
                 continue
             }
 
-            val signee = network.nodes[signeeFpr]!! // already looked up
+            val signee = network.nodeByFpr(signeeFpr)!! // already looked up
 
             // Get the signee's current forward pointer.
             //
@@ -385,7 +392,7 @@ class Query(
 
             // Not limiting by required_depth, because 'network' doesn't expose an interface for this
             val certificationSets: List<Edge> =
-                    network.reverseEdges[signeeFpr].orEmpty() // "certifications_of"
+                    network.reverseBySignee(signeeFpr).orEmpty() // "certifications_of"
 
             if (certificationSets.isEmpty()) {
                 // Nothing certified it.  The path is a dead end.
@@ -577,7 +584,7 @@ class Query(
                                 // target_ua.map(|ua| ua.binding_signature_creation_time())
                                 //    .unwrap_or(self.network().reference_time()))
 
-                                network.referenceTime.timestamp,
+                                network.referenceTime().timestamp,
 
                                 null, true, 120, Depth.limited(0), RegexSet.wildcard()
                         )
@@ -602,28 +609,28 @@ class Query(
                         continue
                     }
 
-            logger.debug("Recovering path starting at {}", network.nodes[issuerFpr])
+            logger.debug("Recovering path starting at {}", network.nodeByFpr(issuerFpr))
 
             var amount = 120
 
             // nodes[0] is the root; nodes[nodes.len() - 1] is the target.
             val nodes: MutableList<EdgeComponent> = mutableListOf()
             while (true) {
-                val c = fp.next ?: break
+                val ec = fp.next ?: break
 
                 logger.debug("  {}", fp)
 
-                val fv = FilterValues(c.trustDepth, c.trustAmount, null)
+                val fv = FilterValues(ec.trustDepth, ec.trustAmount, null)
 
-                val r = filter.cost(c, fv, true)
+                val r = filter.cost(ec, fv, true)
 
                 assert(r) {
                     "cost function returned different result, but must be constant !"
                 }
                 amount = min(fv.amount, amount)
 
-                nodes.add(c)
-                fp = bestNextNode[c.target.fingerprint]!! // FIXME !!
+                nodes.add(ec)
+                fp = bestNextNode[ec.target.fingerprint]!! // FIXME !!
             }
 
             if (selfSigned) {
