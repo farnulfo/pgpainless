@@ -305,11 +305,9 @@ class Query(
         // User ID to authenticate the User ID.  But if the target has
         // revoked it, then it can't be authenticated.
         val targetUa: RevocationState? = target.userIds[targetUserid]
-        targetUa?.let {
-            if (it.isEffective(network.referenceTime())) {
-                logger.debug("{}: Target user id is revoked at reference time.", targetFpr)
-                return hashMapOf()
-            }
+        if (targetUa != null && targetUa.isEffective(network.referenceTime())) {
+            logger.debug("{}: Target user id is revoked at reference time.", targetFpr)
+            return hashMapOf()
         }
 
         // Dijkstra.
