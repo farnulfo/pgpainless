@@ -494,55 +494,10 @@ class Query(
 
                         val currentFpCost = currentFpCost!! // shadow the variable
 
-                        val cn = currentFp.next // cache value for debug output
-                        logger.debug("    Current: {}, amount: {}, depth: {}",
-                                cn?.target ?: "target", currentFpCost.amount, currentFpCost.length)
-
-                        // We prefer a shorter path (in terms of
-                        // edges) as this allows us to reach more of
-                        // the graph.
-                        //
-                        // If the path length is equal, we prefer the
-                        // larger amount of trust.
-
-                        if (proposedFpCost.length < currentFpCost.length) {
-                            if (proposedFpCost.amount < currentFpCost.amount) {
-                                // We have two local optima: one has a shorter path, the other a
-                                // higher trust amount.  We prefer the shorter path.
-
-                                logger.debug("    Preferring proposed: current has a shorter path ({} < {}), but worse amount of trust ({} < {})",
-                                        proposedFpCost.length, currentFpCost.length,
-                                        proposedFpCost.amount, currentFpCost.amount)
-
-                                bestNextNode[issuerFpr] = proposedFp
-                            } else {
-                                // Proposed fp is strictly better.
-
-                                logger.debug("    Preferring proposed: current has a shorter path ({} < {}), and a better amount of trust ({} < {})",
-                                        proposedFpCost.length, currentFpCost.length,
-                                        proposedFpCost.amount, currentFpCost.amount)
-
-                                bestNextNode[issuerFpr] = proposedFp
-                            }
-                        } else if (proposedFpCost.length == currentFpCost.length
-                                && proposedFpCost.amount > currentFpCost.amount) {
-                            // Strictly better.
-
-                            logger.debug("    Preferring proposed fp: same path length ({}), better amount ({} > {})",
-                                    proposedFpCost.length,
-                                    proposedFpCost.amount, currentFpCost.amount)
-
+                        // If the proposed Fp is better, replace it in the forward pointer list
+                        if (proposedFpCost > currentFpCost) {
+                            logger.debug("    Preferring proposed: current {}, proposed {}", currentFpCost, proposedFpCost)
                             bestNextNode[issuerFpr] = proposedFp
-                        } else if (proposedFpCost.length > currentFpCost.length
-                                && proposedFpCost.amount > currentFpCost.amount) {
-                            // There's another possible path through here.
-                            logger.debug("    Preferring current fp: proposed has more trust ({} > {}), but a longer path ({} > {})",
-                                    proposedFpCost.amount, currentFpCost.amount,
-                                    proposedFpCost.length, currentFpCost.length)
-                        } else {
-                            logger.debug("    Preferring current fp: it is strictly better (depth: {}, {}; amount: {}, {})",
-                                    proposedFpCost.length, currentFpCost.length,
-                                    proposedFpCost.amount, currentFpCost.amount)
                         }
                     }
                 }
