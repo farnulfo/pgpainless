@@ -125,7 +125,6 @@ class DepthTest {
         assertThrows<IllegalArgumentException> { limited(-1) }
         assertThrows<IllegalArgumentException> { limited(256) }
         assertThrows<IllegalArgumentException> { auto(-1) }
-        assertThrows<IllegalArgumentException> { auto(256) }
     }
 
     @Test

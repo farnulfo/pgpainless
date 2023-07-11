@@ -15,12 +15,15 @@ import org.pgpainless.wot.network.Fingerprint
 import org.pgpainless.wot.network.ReferenceTime
 import org.pgpainless.wot.network.Root
 import org.pgpainless.wot.network.Roots
+import pgp.cert_d.PGPCertificateDirectory
 import pgp.cert_d.PGPCertificateStoreAdapter
+import pgp.cert_d.SpecialNames
 import pgp.cert_d.subkey_lookup.InMemorySubkeyLookupFactory
 import pgp.certificate_store.PGPCertificateStore
 import picocli.CommandLine
 import picocli.CommandLine.*
 import java.io.File
+import java.text.SimpleDateFormat
 import java.util.concurrent.Callable
 import kotlin.system.exitProcess
 
@@ -108,22 +111,28 @@ class WotCLI: Callable<Int> {
 
     private val trustRoots: Roots
         get() {
-            val trustRootFingerprints = if (mCertificateSource.gpg || gpgOwnertrust) {
-                readGpgOwnertrust().plus(mTrustRoot.map { Fingerprint(it) })
-            } else {
-                mTrustRoot.map { Fingerprint(it) }
+            var trustRootFingerprints = mTrustRoot.map { Fingerprint(it) }.map { Root(it) }
+            if (mCertificateSource.gpg || gpgOwnertrust) {
+                trustRootFingerprints = trustRootFingerprints.plus(readGpgOwnertrust())
             }
-
-            return Roots(trustRootFingerprints.map { Root(it) })
+            if (mCertificateSource.pgpCertD != null) {
+                try {
+                    val rootCert = certificateStore.getCertificate(SpecialNames.TRUST_ROOT)
+                    trustRootFingerprints = trustRootFingerprints.plus(Root(Fingerprint(rootCert.fingerprint), Int.MAX_VALUE))
+                } catch (e: NoSuchElementException) {
+                    // ignore
+                }
+            }
+            return Roots(trustRootFingerprints)
         }
 
     private val amount: Int
         get() = when {
-            mTrustAmount.amount != null -> mTrustAmount.amount!!  // --amount=XY
+            mTrustAmount.amount != null -> mTrustAmount.amount!! // --amount=XY
             mTrustAmount.partial -> 40                           // --partial
             mTrustAmount.full -> 120                             // --full
             mTrustAmount.double -> 240                           // --double
-            else -> if (certificationNetwork) 1200 else 120     // default 120, if --certification-network -> 1200
+            else -> if (certificationNetwork) 1200 else 120      // default 120, if --certification-network -> 1200
         }
 
     private val certificateStore: PGPCertificateStore
@@ -149,15 +158,31 @@ class WotCLI: Callable<Int> {
             return PGPCertificateStoreAdapter(certD)
         }
 
-    fun readGpgOwnertrust(): List<Fingerprint> = Runtime.getRuntime()
+    fun readGpgOwnertrust(): List<Root> = Runtime.getRuntime()
             .exec("/usr/bin/gpg --export-ownertrust")
             .inputStream
             .bufferedReader()
             .readLines()
+            .asSequence()
             .filterNot { it.startsWith("#") }
             .filterNot { it.isBlank() }
-            .map { it.substring(0, it.indexOf(':')) }
-            .map { Fingerprint(it) }
+            .map {
+                Fingerprint(it.substring(0, it.indexOf(':'))) to it.elementAt(it.indexOf(':') + 1) }
+            .map {
+                it.first to when (it.second.digitToInt()) {
+                    2 -> null   // unknown
+                    3 -> 0      // not trust
+                    4 -> 40     // marginally trusted
+                    5 -> 120    // fully trusted
+                    6 -> Int.MAX_VALUE    // ultimately trusted
+                    else -> null
+                }
+            }
+            .filterNot { it.second == null }
+            .map {
+                Root(it.first, it.second!!)
+            }
+            .toList()
 
     /**
      * Execute the command.
@@ -195,6 +220,9 @@ class WotCLI: Callable<Int> {
         fun main(args: Array<String>): Unit = exitProcess(
                 CommandLine(WotCLI()).execute(*args)
         )
+
+        @JvmStatic
+        val dateFormat: SimpleDateFormat = SimpleDateFormat("yyyy-MM-dd")
 
     }
 

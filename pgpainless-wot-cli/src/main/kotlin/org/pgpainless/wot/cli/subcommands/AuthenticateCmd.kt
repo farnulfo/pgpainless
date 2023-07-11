@@ -45,7 +45,7 @@ class AuthenticateCmd: Callable<Int> {
     @CommandLine.Option(names = ["--email"], description = ["Consider all user-IDs that contain the given email address."])
     var email = false
 
-    private val dateFormat: SimpleDateFormat = SimpleDateFormat("yyyy-MM-dd")
+
 
     /**
      * Execute the command.
@@ -83,7 +83,7 @@ class AuthenticateCmd: Callable<Int> {
                         sb.appendLine("    ├ ${certification.issuer.fingerprint}${issuerUserId}")
                     }
                 }
-                sb.appendLine("    │   certified the following binding on ${dateFormat.format(certification.creationTime)}")
+                sb.appendLine("    │   certified the following binding on ${WotCLI.dateFormat.format(certification.creationTime)}")
             }
             sb.appendLine("    └ ${result.fingerprint} \"${result.userId}\"")
         }

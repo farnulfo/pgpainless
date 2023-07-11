@@ -9,6 +9,8 @@ import org.pgpainless.wot.network.Fingerprint
 import org.pgpainless.wot.network.Network
 import org.pgpainless.wot.network.ReferenceTime
 import org.pgpainless.wot.network.Roots
+import org.pgpainless.wot.query.Path
+import org.pgpainless.wot.query.Paths
 
 /**
  * Web of Trust API, offering different operations.
@@ -48,7 +50,16 @@ class WoTAPI(
     }
 
     override fun identify(arguments: IdentifyAPI.Arguments): IdentifyAPI.Result {
-        TODO("Not yet implemented")
+        val cert = network.nodes[arguments.fingerprint] ?: return IdentifyAPI.Result(mutableMapOf(), null, trustAmount)
+        val allPaths = mutableMapOf<String, Paths>()
+        cert.userIds.keys.toList().forEach {
+            val query = Query(network, trustRoots, certificationNetwork)
+            val paths = query.authenticate(arguments.fingerprint, it, trustAmount)
+            if (paths.amount != 0) {
+                allPaths[it] = paths
+            }
+        }
+        return IdentifyAPI.Result(allPaths, cert, trustAmount)
     }
 
     override fun list(): ListAPI.Result {
