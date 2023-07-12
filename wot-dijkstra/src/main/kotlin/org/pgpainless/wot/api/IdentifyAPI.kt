@@ -14,12 +14,5 @@ interface IdentifyAPI {
 
     data class Arguments(val fingerprint: Fingerprint)
 
-    data class Result(val paths: Map<String, Paths>, val target: Node?, val targetAmount: Int) {
-        fun percentage(userId: String): Int? {
-            if (paths[userId] == null) {
-                return null
-            }
-            return paths[userId]!!.amount * 100 / targetAmount
-        }
-    }
+    data class Result(val bindings: List<Binding>, val targetAmount: Int)
 }

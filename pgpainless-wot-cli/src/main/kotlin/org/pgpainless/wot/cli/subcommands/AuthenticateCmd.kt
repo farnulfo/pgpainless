@@ -54,7 +54,7 @@ class AuthenticateCmd: Callable<Int> {
     override fun call(): Int {
         val result = parent.api.authenticate(AuthenticateAPI.Arguments(
                 Fingerprint(fingerprint), userId, email))
-        print(formatResult(result))
+        formatResult(result)
         if (result.percentage < 100) {
             return -1
         }
@@ -64,30 +64,10 @@ class AuthenticateCmd: Callable<Int> {
     /**
      * Format the [AuthenticateAPI.Result] as a [String] which can be printed to standard out.
      */
-    internal fun formatResult(result: AuthenticateAPI.Result): String {
+    internal fun formatResult(result: AuthenticateAPI.Result) {
         if (result.percentage < 100) {
-            return "No paths found."
+            println("No paths found.")
         }
-
-        val sb = StringBuilder()
-        sb.appendLine("[✓] ${result.fingerprint} ${result.userId}: fully authenticated (${result.percentage}%)")
-        for ((pIndex, path: Path) in result.paths.paths.withIndex()) {
-            sb.appendLine("  Path #${pIndex + 1} of ${result.paths.paths.size}, trust amount ${path.amount}:")
-            for ((cIndex, certification) in path.certifications.withIndex()) {
-                val issuerUserId = certification.issuer.userIds.keys.firstOrNull()?.let { " (\"${it}\")" } ?: ""
-                when (cIndex) {
-                    0 -> {
-                        sb.appendLine("    ◯ ${certification.issuer.fingerprint}${issuerUserId}")
-                    }
-                    else -> {
-                        sb.appendLine("    ├ ${certification.issuer.fingerprint}${issuerUserId}")
-                    }
-                }
-                sb.appendLine("    │   certified the following binding on ${WotCLI.dateFormat.format(certification.creationTime)}")
-            }
-            sb.appendLine("    └ ${result.fingerprint} \"${result.userId}\"")
-        }
-
-        return sb.toString()
+        println(result.binding.toConsoleOut(result.targetAmount, WotCLI.dateFormat))
     }
 }

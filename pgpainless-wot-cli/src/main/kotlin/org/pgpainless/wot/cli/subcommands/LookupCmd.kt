@@ -4,6 +4,7 @@
 
 package org.pgpainless.wot.cli.subcommands
 
+import org.pgpainless.wot.api.LookupAPI
 import org.pgpainless.wot.cli.WotCLI
 import picocli.CommandLine.*
 import java.util.concurrent.Callable
@@ -27,6 +28,10 @@ class LookupCmd: Callable<Int> {
      */
     override fun call(): Int {
         val api = parent.api
-        TODO("Not yet implemented")
+        val result = api.lookup(LookupAPI.Arguments(userId, email))
+        result.bindings.forEach {
+            println(it.toConsoleOut(api.trustAmount, WotCLI.dateFormat))
+        }
+        return if (result.bindings.isEmpty()) -1 else 0
     }
 }

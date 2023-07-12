@@ -22,6 +22,12 @@ class ListCmd: Callable<Int> {
      */
     override fun call(): Int {
         val api = parent.api
-        TODO("Not yet implemented")
+        val result = api.list()
+        println(buildString {
+            result.bindings.forEach {
+                appendLine(it.toConsoleOut(api.trustAmount, WotCLI.dateFormat))
+            }
+        })
+        return 0
     }
 }
