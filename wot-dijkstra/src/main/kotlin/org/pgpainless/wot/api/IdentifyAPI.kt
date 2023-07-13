@@ -14,5 +14,10 @@ interface IdentifyAPI {
 
     data class Arguments(val fingerprint: Fingerprint)
 
-    data class Result(val bindings: List<Binding>, val targetAmount: Int)
+    data class Result(val bindings: List<Binding>, val targetAmount: Int) {
+        val acceptable: Boolean
+            get() = bindings.any {
+                it.paths.amount >= targetAmount
+            }
+    }
 }

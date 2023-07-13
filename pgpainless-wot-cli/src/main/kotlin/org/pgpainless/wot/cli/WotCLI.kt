@@ -9,15 +9,14 @@ import org.pgpainless.certificate_store.PGPainlessCertD
 import org.pgpainless.util.DateUtil
 import org.pgpainless.wot.KeyRingCertificateStore
 import org.pgpainless.wot.WebOfTrust
-import org.pgpainless.wot.api.Binding
+import org.pgpainless.wot.cli.format.Formatter
 import org.pgpainless.wot.api.WoTAPI
+import org.pgpainless.wot.cli.format.HumanReadableFormatter
 import org.pgpainless.wot.cli.subcommands.*
 import org.pgpainless.wot.network.Fingerprint
 import org.pgpainless.wot.network.ReferenceTime
 import org.pgpainless.wot.network.Root
 import org.pgpainless.wot.network.Roots
-import org.pgpainless.wot.query.Path
-import pgp.cert_d.PGPCertificateDirectory
 import pgp.cert_d.PGPCertificateStoreAdapter
 import pgp.cert_d.SpecialNames
 import pgp.cert_d.subkey_lookup.InMemorySubkeyLookupFactory
@@ -159,6 +158,8 @@ class WotCLI: Callable<Int> {
                     InMemorySubkeyLookupFactory())
             return PGPCertificateStoreAdapter(certD)
         }
+
+    val formatter: Formatter = HumanReadableFormatter()
 
     fun readGpgOwnertrust(): List<Root> = Runtime.getRuntime()
             .exec("/usr/bin/gpg --export-ownertrust")

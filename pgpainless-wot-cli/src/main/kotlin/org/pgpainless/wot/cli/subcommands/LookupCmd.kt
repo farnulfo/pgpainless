@@ -27,11 +27,9 @@ class LookupCmd: Callable<Int> {
      * @return exit code
      */
     override fun call(): Int {
-        val api = parent.api
-        val result = api.lookup(LookupAPI.Arguments(userId, email))
-        result.bindings.forEach {
-            println(it.toConsoleOut(api.trustAmount, WotCLI.dateFormat))
-        }
-        return if (result.bindings.isEmpty()) -1 else 0
+        val result = parent.api.lookup(LookupAPI.Arguments(userId, email))
+
+        print(parent.formatter.format(result))
+        return if (result.acceptable) 0 else 1
     }
 }

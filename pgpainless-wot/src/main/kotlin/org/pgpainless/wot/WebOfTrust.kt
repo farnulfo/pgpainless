@@ -115,7 +115,7 @@ class WebOfTrust(private val certificateStore: PGPCertificateStore) {
             val expirationDate: Date? = try {
                 cert.getExpirationDateForUse(KeyFlag.CERTIFY_OTHER)
             } catch (e: NoSuchElementException) {
-                LOGGER.warn("Could not deduce expiration time of ${cert.fingerprint}. " +
+                LOGGER.debug("Could not deduce expiration time of ${cert.fingerprint}. " +
                         "Possibly hard revoked cert or illegal algorithms? Skip certificate.");
                 // Some keys are malformed and have no KeyFlags
                 // TODO: We also end up here for expired keys unfortunately
@@ -207,7 +207,7 @@ class WebOfTrust(private val certificateStore: PGPCertificateStore) {
                     return // we're done
                 } catch (e: SignatureValidationException) {
                     val targetFingerprint = OpenPgpFingerprint.of(targetPrimaryKey)
-                    LOGGER.warn("Cannot verify signature by $issuerFingerprint" +
+                    LOGGER.debug("Cannot verify signature by $issuerFingerprint" +
                             " on cert of $targetFingerprint", e)
                 }
             }
@@ -250,7 +250,7 @@ class WebOfTrust(private val certificateStore: PGPCertificateStore) {
                     networkBuilder.addEdge(fromCertification(issuer, target, userId, certification))
                     return // we're done
                 } catch (e: SignatureValidationException) {
-                    LOGGER.warn("Cannot verify signature for '$userId' by $issuerFingerprint" +
+                    LOGGER.debug("Cannot verify signature for '$userId' by $issuerFingerprint" +
                             " on cert of ${target.fingerprint}", e)
                 }
             }

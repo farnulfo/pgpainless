@@ -8,5 +8,5 @@ interface ListAPI {
 
     fun list(): Result
 
-    data class Result(val bindings: List<Binding>)
+    data class Result(val bindings: List<Binding>, val targetAmount: Int)
 }

@@ -28,26 +28,9 @@ class IdentifyCmd: Callable<Int> {
      * @return exit code
      */
     override fun call(): Int {
-        val api = parent.api
-        val result = api.identify(IdentifyAPI.Arguments(Fingerprint(fingerprint)))
-        println(formatResult(result, api.trustAmount, WotCLI.dateFormat))
-        return exitCode(result)
+        val result = parent.api.identify(IdentifyAPI.Arguments(Fingerprint(fingerprint)))
+
+        print(parent.formatter.format(result))
+        return if (result.acceptable) 0 else 1
     }
-
-    fun formatResult(result: IdentifyAPI.Result, targetAmount: Int, dateFormat: SimpleDateFormat): String {
-        if (result.bindings.isEmpty()) {
-            return "No paths found."
-        }
-
-        return buildString {
-            result.bindings.forEach {
-                appendLine(it.toConsoleOut(targetAmount, dateFormat))
-            }
-        }
-    }
-
-    fun exitCode(result: IdentifyAPI.Result): Int {
-        return if(result.bindings.isEmpty()) -1 else 0
-    }
-
 }

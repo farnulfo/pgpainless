@@ -21,13 +21,9 @@ class ListCmd: Callable<Int> {
      * @return exit code
      */
     override fun call(): Int {
-        val api = parent.api
-        val result = api.list()
-        println(buildString {
-            result.bindings.forEach {
-                appendLine(it.toConsoleOut(api.trustAmount, WotCLI.dateFormat))
-            }
-        })
+        val result = parent.api.list()
+
+        println(parent.formatter.format(result))
         return 0
     }
 }

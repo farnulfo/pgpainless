@@ -38,6 +38,9 @@ interface AuthenticateAPI {
     data class Result(val binding: Binding, val targetAmount: Int) {
         val percentage: Int
             get() = binding.percentage(targetAmount)
+
+        val acceptable: Boolean
+            get() = binding.paths.amount >= targetAmount
     }
 
 }

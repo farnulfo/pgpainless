@@ -45,8 +45,6 @@ class AuthenticateCmd: Callable<Int> {
     @CommandLine.Option(names = ["--email"], description = ["Consider all user-IDs that contain the given email address."])
     var email = false
 
-
-
     /**
      * Execute the command.
      * @return exit code
@@ -54,20 +52,8 @@ class AuthenticateCmd: Callable<Int> {
     override fun call(): Int {
         val result = parent.api.authenticate(AuthenticateAPI.Arguments(
                 Fingerprint(fingerprint), userId, email))
-        formatResult(result)
-        if (result.percentage < 100) {
-            return -1
-        }
-        return 0
-    }
 
-    /**
-     * Format the [AuthenticateAPI.Result] as a [String] which can be printed to standard out.
-     */
-    internal fun formatResult(result: AuthenticateAPI.Result) {
-        if (result.percentage < 100) {
-            println("No paths found.")
-        }
-        println(result.binding.toConsoleOut(result.targetAmount, WotCLI.dateFormat))
+        println(parent.formatter.format(result))
+        return if (result.acceptable) 0 else 1
     }
 }

@@ -64,14 +64,12 @@ class WoTAPI(
         network.nodes.forEach {
             bindings.addAll(identify(IdentifyAPI.Arguments(it.key)).bindings)
         }
-        return ListAPI.Result(bindings)
+        return ListAPI.Result(bindings, trustAmount)
     }
 
     override fun lookup(arguments: LookupAPI.Arguments): LookupAPI.Result {
         val userId = arguments.userId
         val email = arguments.email
-
-        println("Looking up $userId email=$email")
 
         val candidates = network.nodes.values.mapNotNull { node ->
             val matches = node.mapToMatchingUserIds(userId, email)
@@ -80,11 +78,6 @@ class WoTAPI(
             } else {
                 node to matches
             }
-        }
-
-        println("found ${candidates.size} candidates:")
-        candidates.joinToString {
-            "${it.first.fingerprint} ${it.second.joinToString { u -> u }}"
         }
 
         val results = mutableListOf<Binding>()
@@ -101,7 +94,7 @@ class WoTAPI(
             }
         }
 
-        return LookupAPI.Result(results)
+        return LookupAPI.Result(results, trustAmount)
     }
 
     override fun path(arguments: PathAPI.Arguments): PathAPI.Result {
