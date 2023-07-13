@@ -36,6 +36,7 @@ dependencies {
 
     // Logging
     testImplementation "ch.qos.logback:logback-classic:$logbackVersion"
+    implementation "ch.qos.logback:logback-classic:$logbackVersion"
 
     // Web of Trust
     implementation(project(":pgpainless-wot"))
@@ -48,21 +49,6 @@ mainClassName = 'org.pgpainless.wot.cli.WotCLI'
 
 application {
     mainClass = mainClassName
-}
-
-jar {
-    duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
-    manifest {
-        attributes 'Main-Class': "$mainClassName"
-    }
-
-    from {
-        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
-    } {
-        exclude "META-INF/*.SF"
-        exclude "META-INF/*.DSA"
-        exclude "META-INF/*.RSA"
-    }
 }
 
 test {
