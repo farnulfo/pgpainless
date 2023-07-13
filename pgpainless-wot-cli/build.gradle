@@ -42,7 +42,7 @@ dependencies {
     implementation(project(":pgpainless-wot"))
 
     // Web Key Directory
-    implementation("org.pgpainless:wkd-java:0.1.1")
+    // implementation("org.pgpainless:wkd-java:0.1.2")
 }
 
 mainClassName = 'org.pgpainless.wot.cli.WotCLI'
