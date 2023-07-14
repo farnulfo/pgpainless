@@ -9,7 +9,10 @@ import org.junit.jupiter.api.assertThrows
 import org.pgpainless.wot.network.Depth.Companion.auto
 import org.pgpainless.wot.network.Depth.Companion.limited
 import org.pgpainless.wot.network.Depth.Companion.unconstrained
-import kotlin.test.*
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
+import kotlin.test.assertTrue
 
 class DepthTest {
 
@@ -22,14 +25,15 @@ class DepthTest {
     @Test
     fun `verify Depth#unconstrained() has null depth`() {
         val depth = unconstrained()
-        assertNull(depth.limit)
+        assert(depth.isUnconstrained())
+        assertEquals(depth.value(), 255)
     }
 
     @Test
     fun `verify Depth#limited(2) initializes properly`() {
         val limited = limited(2)
-        assertNotNull(limited.limit)
-        assertEquals(2, limited.limit)
+        assert(!limited.isUnconstrained())
+        assertEquals(2, limited.value())
     }
 
     @Test
@@ -50,7 +54,7 @@ class DepthTest {
         val limited = limited(3)
         val decreased = limited.decrease(2)
         assertFalse(decreased.isUnconstrained())
-        assertEquals(1, decreased.limit)
+        assertEquals(1, decreased.value())
     }
 
     @Test
@@ -63,17 +67,21 @@ class DepthTest {
     @Test
     fun `verify proper function of compareTo()`() {
         val unlimited = unconstrained()
-        val unlimited2 = unconstrained()
         val depth2 = limited(2)
-        val depth2_ = limited(2)
         val depth5 = limited(5)
-        assertEquals(0, unlimited.compareTo(unlimited2))
-        assertTrue(unlimited.compareTo(depth2) > 0)
-        assertTrue(unlimited.compareTo(depth5) > 0)
-        assertTrue(depth2.compareTo(unlimited) < 0)
-        assertTrue(depth2.compareTo(depth5) < 0)
-        assertTrue(depth5.compareTo(depth2) > 0)
-        assertEquals(0, depth2.compareTo(depth2_))
+        assertTrue(unlimited > 0)
+        assertTrue(unlimited > 255)
+        assertTrue(unlimited > 256)
+
+        assertTrue(depth2 > 0)
+        assertTrue(depth2 > 1)
+        assertFalse(depth2 > 2)
+        assertFalse(depth2 > 256)
+
+        assertTrue(depth5 > 1)
+        assertTrue(depth5 > 4)
+        assertFalse(depth5 > 5)
+        assertFalse(depth5 > 256)
     }
 
     @Test
@@ -108,7 +116,7 @@ class DepthTest {
     @Test
     fun `verify that Depth#auto(255) yields an unconstrained Depth`() {
         assertTrue { auto(255).isUnconstrained() }
-        assertNull(auto(255).limit)
+        assertEquals(auto(255).value(), 255)
     }
 
     @Test
@@ -117,7 +125,7 @@ class DepthTest {
         assertFalse { auto(120).isUnconstrained() }
         assertFalse { auto(254).isUnconstrained() }
 
-        assertNotNull(auto(42).limit)
+        assertNotNull(auto(42).value())
     }
 
     @Test

@@ -7,16 +7,16 @@ package org.pgpainless.wot.network
 /**
  * Depth of a trust signature.
  */
-class Depth private constructor(val limit: Int?) : Comparable<Depth> {
+class Depth private constructor(private val limit: Int) : Comparable<Int> {
+
+    // Uses a byte for internal representation, like in the OpenPGP "Trust Signature" subpacket
 
     companion object {
         /**
          * The target is trusted to an unlimited degree.
          */
         @JvmStatic
-        fun unconstrained() : Depth {
-            return Depth(null)
-        }
+        fun unconstrained() = Depth(255)
 
         /**
          * The target is trusted to a limited degree.
@@ -34,40 +34,35 @@ class Depth private constructor(val limit: Int?) : Comparable<Depth> {
          */
         @JvmStatic
         fun auto(limit: Int): Depth {
-            return if (limit == 255) {
-                unconstrained()
-            } else {
-                limited(limit)
+            require(limit in 0..255) {
+                "Trust depth MUST be a value between 0 and 255."
             }
+            return Depth(limit)
         }
     }
 
     /**
      * Return true, if the [Depth] is unconstrained.
      */
-    fun isUnconstrained() : Boolean {
-        return limit == null
-    }
+    fun isUnconstrained() = limit == 255
 
     /**
      * The value of this Depth, as used in OpenPGP.
      *
      * Unlimited is 255.
      */
-    fun value(): Int {
-        return limit ?: 255
-    }
+    fun value() = limit
 
     /**
-     * Decrease the trust depth by one and return the result.
+     * Decrease the trust depth by `value` and return the result.
      * If the [Depth] is unconstrained, the result will still be unconstrained.
      * @throws IllegalArgumentException if the [Depth] cannot be decreased any further
      */
-    fun decrease(value : Int) : Depth {
+    fun decrease(value: Int): Depth {
         return if (isUnconstrained()) {
             unconstrained()
         } else {
-            if (limit!! >= value) {
+            if (limit >= value) {
                 limited(limit - value)
             } else {
                 throw IllegalArgumentException("Depth cannot be decreased.")
@@ -78,20 +73,20 @@ class Depth private constructor(val limit: Int?) : Comparable<Depth> {
     /**
      * Return the minimum [Depth] of this and the other [Depth].
      */
-    fun min(other: Depth) : Depth {
-        return if (compareTo(other) <= 0) {
-            this
-        } else {
+    fun min(other: Depth): Depth {
+        return if (limit > other.limit) {
             other
+        } else {
+            this
         }
     }
 
-    override fun compareTo(other: Depth): Int {
-        return when (Pair(isUnconstrained(), other.isUnconstrained())) {
-            Pair(true, true) -> 0
-            Pair(true, false) -> 1
-            Pair(false, true) -> -1
-            else -> limit!!.compareTo(other.limit!!)
+    override fun compareTo(other: Int): Int {
+        return if (isUnconstrained()) {
+            // If this is unconstrained, it is bigger than `other`
+            1
+        } else {
+            limit.compareTo(other)
         }
     }
 
@@ -103,11 +98,13 @@ class Depth private constructor(val limit: Int?) : Comparable<Depth> {
         return limit == other.limit
     }
 
-    override fun toString() : String {
-        return if (isUnconstrained()) { "unconstrained" } else { limit!!.toString() }
+    override fun toString(): String {
+        return if (isUnconstrained()) {
+            "unconstrained"
+        } else {
+            limit.toString()
+        }
     }
 
-    override fun hashCode(): Int {
-        return limit ?: 0 // TODO: 255?
-    }
+    override fun hashCode() = limit
 }

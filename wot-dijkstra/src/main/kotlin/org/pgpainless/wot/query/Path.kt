@@ -97,7 +97,7 @@ class Path(
         require(target.fingerprint == nComponent.issuer.fingerprint) {
             "Cannot append edge to path: Path's tail is not issuer of the edge."
         }
-        require(residualDepth.isUnconstrained() || residualDepth.limit!! > 0) {
+        require(residualDepth > 0) {
             "Not enough depth."
         }
 

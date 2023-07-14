@@ -33,11 +33,11 @@ data class EdgeComponent(
 ) {
 
     override fun toString(): String {
-        return if (trustDepth.limit == 0)
-            "${issuer.fingerprint} certifies binding: $userId <-> ${target.fingerprint} [$trustAmount]"
-        else {
+        return if (trustDepth > 0) {
             val scope = if (regexes.regexStrings.isEmpty()) "" else ", scope: $regexes"
             "${issuer.fingerprint} delegates to ${target.fingerprint} [$trustAmount, depth $trustDepth$scope]"
+        } else {
+            "${issuer.fingerprint} certifies binding: $userId <-> ${target.fingerprint} [$trustAmount]"
         }
     }
 }
