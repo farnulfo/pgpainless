@@ -10,19 +10,20 @@ import org.pgpainless.wot.KeyRingCertificateStore
 import org.pgpainless.wot.WebOfTrust
 import org.pgpainless.wot.network.Network
 import org.pgpainless.wot.network.ReferenceTime
+import java.io.InputStream
 
 interface ArtifactVectors {
 
     fun getResourceName(): String
 
     fun getNetworkAt(referenceTime: ReferenceTime, policy: Policy = PGPainless.getPolicy()): Network {
-        return getNetworkAt(getResourceName(), referenceTime, policy)
-    }
-
-    private fun getNetworkAt(resourceName: String, referenceTime: ReferenceTime, policy: Policy): Network {
-        val inputStream = ArtifactVectors::class.java.classLoader.getResourceAsStream(resourceName)!!
+        val inputStream = keyRingInputStream()
         val keyRing = PGPainless.readKeyRing().publicKeyRingCollection(inputStream)
         val store = KeyRingCertificateStore(keyRing)
         return WebOfTrust(store).buildNetwork(policy, referenceTime)
+    }
+
+    fun keyRingInputStream(): InputStream {
+        return ArtifactVectors::class.java.classLoader.getResourceAsStream(getResourceName())!!
     }
 }
