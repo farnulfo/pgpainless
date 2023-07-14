@@ -9,5 +9,6 @@ include 'pgpainless-core',
         'pgpainless-cli',
         'pgpainless-wot',
         'pgpainless-wot-cli',
-        'wot-dijkstra'
+        'wot-dijkstra',
+        'sequoia-wot-vectors'
 

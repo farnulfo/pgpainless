@@ -78,3 +78,8 @@ License: Apache-2.0
 Files: pgpainless-wot/*
 Copyright: 2023 Paul Schaub <info@pgpainless.org>
 License: Apache-2.0
+
+# Sequoia WOT Vectors
+Files: sequoia-wot-vectors/src/testFixtures/resources/*
+Copyright: 2023 Neal H. Walfield <neal@pep.foundation>
+License: BSD-3-Clause
