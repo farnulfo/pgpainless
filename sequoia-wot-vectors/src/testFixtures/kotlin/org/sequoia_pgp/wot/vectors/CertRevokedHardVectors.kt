@@ -28,6 +28,30 @@ class CertRevokedHardVectors: ArtifactVectors {
     // Certified by: BF680710128E6BCCB2268154569F5F6BFB95C544
     // Certified by: 90E02BFB03FAA04714D1D3D87543157EF3B12BE9
 
+    /**
+     * A, B, C, D are generated.
+     */
+    val t0 = parseReferenceTime("2020-01-01 00:00:00 UTC")
+
+    /**
+     * A certifies B - 2/120.
+     * B certifies D - 1/60.
+     * A certifies C - 2/30.
+     * C certifies D - 1/120.
+     */
+    val t1 = parseReferenceTime("2020-02-01 00:00:00 UTC")
+
+    /**
+     * B is hard revoked.
+     */
+    val t2 = parseReferenceTime("2020-03-01 00:00:00 UTC")
+
+    /**
+     * A certifies B (amount = 120).
+     * B certifies D (amount = 120).
+     */
+    val t3 = parseReferenceTime("2020-04-01 00:00:00 UTC")
+
     override fun getResourceName(): String {
         return "org/sequoia_pgp/wot/vectors/cert-revoked-hard.pgp"
     }

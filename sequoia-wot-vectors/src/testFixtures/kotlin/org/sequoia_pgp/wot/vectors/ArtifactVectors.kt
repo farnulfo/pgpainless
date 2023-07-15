@@ -11,8 +11,30 @@ import org.pgpainless.wot.WebOfTrust
 import org.pgpainless.wot.network.Network
 import org.pgpainless.wot.network.ReferenceTime
 import java.io.InputStream
+import java.lang.IllegalArgumentException
+import java.text.ParseException
+import java.text.SimpleDateFormat
+import java.util.*
 
 interface ArtifactVectors {
+
+    private fun parseDate(string: String): Date {
+        return try {
+            SimpleDateFormat("yyyy-MM-dd HH:mm:ss z")
+                    .apply { timeZone = TimeZone.getTimeZone("UTC") }
+                    .parse(string)
+        } catch (e: ParseException) {
+            SimpleDateFormat("yyyy-MM-dd")
+                    .apply {timeZone = TimeZone.getTimeZone("UTC") }
+                    .parse(string)
+        } catch (e: ParseException) {
+            throw IllegalArgumentException(e)
+        }
+    }
+
+    fun parseReferenceTime(string: String): ReferenceTime {
+        return ReferenceTime.timestamp(parseDate(string))
+    }
 
     fun getResourceName(): String
 

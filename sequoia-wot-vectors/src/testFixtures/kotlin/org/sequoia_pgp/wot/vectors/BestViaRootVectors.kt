@@ -19,6 +19,10 @@ import org.pgpainless.wot.network.Fingerprint
  *
  * When the root is B, then the path that we find for A should be `A -> B
  * -> C -> Target`, not `A -> Y -> Z -> Target`.
+ *
+ * Timeline:
+ * - t0: keys are generated.
+ * - t1: third-party certifications are issued.
  */
 class BestViaRootVectors: ArtifactVectors {
 
@@ -45,6 +49,16 @@ class BestViaRootVectors: ArtifactVectors {
     val zebra_fpr = Fingerprint("56D44411F982758169E4681B402E8D5D9D7D6567")
     val zebra_uid = "<zebra@example.org>"
     // Certified by: 86CB4639D1FE096BA941D05822B8AF50198C49DD
+
+    /**
+     * Create A, B, C, Y, Z, Target.
+     */
+    val t0 = parseReferenceTime("2021-09-27 12:51:50 UTC")
+
+    /**
+     * Create certifications.
+     */
+    val t1 = parseReferenceTime("2021-09-27 12:52:50 UTC")
 
     override fun getResourceName(): String {
         return "org/sequoia_pgp/wot/vectors/best-via-root.pgp"

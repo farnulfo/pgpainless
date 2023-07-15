@@ -56,6 +56,27 @@ class CertificationRevokedVectors: ArtifactVectors {
     val carolUid = "<carol@example.org>"
     // Certified by: 4258ACF6C3C8FCE130D6EBAB0CC5158AEA25F24A
 
+    /**
+     * A, B, C are created.
+     */
+    val t0 = parseReferenceTime("2020-01-01 00:00:00 UTC")
+
+    /**
+     * A certifies B, B certifies C.
+     */
+    val t1 = parseReferenceTime("2020-02-01 00:00:00 UTC")
+
+    /**
+     * A revokes their certification of B.
+     * A should now no longer be able to authenticate B or C.
+     */
+    val t2 = parseReferenceTime("2020-03-01 00:00:00 UTC")
+
+    /**
+     * A re-certifies B.
+     */
+    val t3 = parseReferenceTime("2020-04-01 00:00:00 UTC")
+
     override fun getResourceName(): String {
         return "org/sequoia_pgp/wot/vectors/certification-revoked.pgp"
     }

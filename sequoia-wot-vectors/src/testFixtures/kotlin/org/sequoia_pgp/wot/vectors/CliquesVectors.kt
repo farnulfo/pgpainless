@@ -105,6 +105,11 @@ open class CliquesVectors: ArtifactVectors {
     val targetFpr = Fingerprint("CE22ECD282F219AA99598BA3B58A7DA61CA97F55")
     val targetUid = "<target@example.org>"
 
+    /**
+     * A few minutes after the network is fully generated.
+     */
+    val t0 = parseReferenceTime("2021-02-14 00:00:00 UTC")
+
     override fun getResourceName(): String {
         return "org/sequoia_pgp/wot/vectors/cliques.pgp"
     }

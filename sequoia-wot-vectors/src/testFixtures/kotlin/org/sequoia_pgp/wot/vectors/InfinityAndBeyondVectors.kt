@@ -280,6 +280,11 @@ class InfinityAndBeyondVectors: ArtifactVectors {
             Fingerprint("B69A678AA242FA4F0BBF12205C0608799B0E3C51"),
     )
 
+    /**
+     * A few minutes after the network has been generated.
+     */
+    val t0 = parseReferenceTime("2022-01-28 15:18:00 UTC")
+
     override fun getResourceName(): String {
         return "org/sequoia_pgp/wot/vectors/infinity-and-beyond.pgp"
     }

@@ -49,6 +49,11 @@ class CycleVectors: ArtifactVectors {
     val frankUid = "<frank@example.org>"
     // Certified by: 78C3814EFD16E68F4F1AB4B874E30AE11FFCFB1B
 
+    /**
+     * A few minutes after the network has been generated.
+     */
+    val t0 = parseReferenceTime("2021-10-01 12:00:00 UTC")
+
     override fun getResourceName(): String {
         return "org/sequoia_pgp/wot/vectors/cycle.pgp"
     }

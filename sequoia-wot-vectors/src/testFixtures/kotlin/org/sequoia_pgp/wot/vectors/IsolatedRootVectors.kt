@@ -18,6 +18,15 @@ class IsolatedRootVectors: ArtifactVectors {
     val aliceUid = "<alice@example.org>"
     val aliceOtherOrguid = "<alice@other.org>"
 
+    /**
+     * A is created.
+     */
+    val t0 = parseReferenceTime("2020-01-01 00:00:00 UTC")
+
+    /**
+     * A's UserID is revoked.
+     */
+    val t1 = parseReferenceTime("2020-02-01 00:00:00 UTC")
 
     override fun getResourceName(): String {
         return "org/sequoia_pgp/wot/vectors/isolated-root.pgp"

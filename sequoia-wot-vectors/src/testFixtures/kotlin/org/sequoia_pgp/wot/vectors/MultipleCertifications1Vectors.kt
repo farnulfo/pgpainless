@@ -43,6 +43,11 @@ class MultipleCertifications1Vectors: ArtifactVectors {
     val dave_uid = "<dave@example.org>"
     // Certified by: 853304031E7B0B116BBD0B398734F11945313904
 
+    /**
+     * A few moments after the network has been generated.
+     */
+    val t0 = parseReferenceTime("2021-10-06 12:20:00 UTC")
+
     override fun getResourceName(): String {
         return "org/sequoia_pgp/wot/vectors/multiple-certifications-1.pgp"
     }

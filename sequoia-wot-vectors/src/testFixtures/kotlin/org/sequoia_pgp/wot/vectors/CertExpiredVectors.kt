@@ -43,6 +43,26 @@ class CertExpiredVectors: ArtifactVectors {
     val carolUid = "<carol@example.org>"
     // Certified by: B166B31AE5F95600B3F7184FE74C6CE62821686F
 
+    /**
+     * Create A, B, C.
+     */
+    val t0 = parseReferenceTime("2020-01-01 00:00:00 UTC")
+
+    /**
+     * Create certifications (amount = 60).
+     */
+    val t1 = parseReferenceTime("2020-02-01 00:00:00 UTC")
+
+    /**
+     * B expires.
+     */
+    val t2 = parseReferenceTime("2020-02-15 00:00:00 UTC")
+
+    /**
+     * Create certifications (amount = 120).
+     */
+    val t3 = parseReferenceTime("2020-04-01 00:00:00 UTC")
+
     override fun getResourceName(): String {
         return "org/sequoia_pgp/wot/vectors/cert-expired.pgp"
     }

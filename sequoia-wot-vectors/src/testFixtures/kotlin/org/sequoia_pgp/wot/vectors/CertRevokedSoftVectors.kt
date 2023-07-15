@@ -122,6 +122,32 @@ class CertRevokedSoftVectors: ArtifactVectors {
     // Certified by: AB4E3F8EE8BBD3459754D75ACE570F9B8C7DC75D
     // Certified by: 4CD8737F76C2B897C4F058DBF28C47540FA2C3B3
 
+
+    /**
+     * A, B, C, D are generated.
+     */
+    val t0 = parseReferenceTime("2020-01-01 00:00:00 UTC")
+
+    /**
+     * A certifies B - 2/120.
+     * B certifies D - 1/60.
+     * A certifies C - 2/30.
+     * C certifies D - 1/120.
+     */
+    val t1 = parseReferenceTime("2020-02-01 00:00:00 UTC")
+
+    /**
+     * B is soft revoked.
+     */
+    val t2 = parseReferenceTime("2020-03-01 00:00:00 UTC")
+
+    /**
+     * A certifies B (amount = 120).
+     * B certifies D (amount = 120).
+     */
+    val t3 = parseReferenceTime("2020-04-01 00:00:00 UTC")
+
+
     override fun getResourceName(): String {
         return "org/sequoia_pgp/wot/vectors/cert-revoked-soft.pgp"
     }

@@ -78,6 +78,11 @@ class LocalOptimaVectors: ArtifactVectors {
     val henryUid = "<henry@example.org>"
     // Certified by: 70507A9058A57FEAE18CC3CE6A398AC9051D9CA8
 
+    /**
+     * A few minutes after the network has been generated.
+     */
+    val t0 = parseReferenceTime("2021-10-01 10:27:00 UTC")
+
     override fun getResourceName(): String {
         return "org/sequoia_pgp/wot/vectors/local-optima.pgp"
     }
