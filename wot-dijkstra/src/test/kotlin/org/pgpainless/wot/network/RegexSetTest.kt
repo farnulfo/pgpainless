@@ -2,6 +2,7 @@ package org.pgpainless.wot.network
 
 import org.junit.jupiter.api.Test
 import org.pgpainless.wot.dsl.NetworkDSL
+import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
@@ -63,5 +64,24 @@ class RegexSetTest: NetworkDSL {
         val regex = domainRegex("pgpainless.org")
         assertTrue { regex.matches("Alice <alice@pgpainless.org>") }
         assertFalse { regex.matches("<alice@pgpainless\\.org>") }
+    }
+
+    @Test
+    fun `verify that wildcard()_toString() equals empty string`() {
+        val regex = RegexSet.wildcard()
+        assertEquals("", regex.toString())
+    }
+
+    @Test
+    fun `verify that single regex _toString() returns the regex`() {
+        val regex = domainRegex("pgpainless.org")
+        assertEquals("<[^>]+[@.]pgpainless\\.org>\$", regex.toString())
+    }
+
+    @Test
+    fun `verify that multiple regex _toString returns comma separated values`() {
+        val list = listOf("<[^>]+[@.]pgpainless\\.org>\$", "<[^>]+[@.]example\\.com>\$")
+        val regex = RegexSet.fromExpressionList(list)
+        assertEquals("<[^>]+[@.]pgpainless\\.org>\$, <[^>]+[@.]example\\.com>\$", regex.toString())
     }
 }
