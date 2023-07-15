@@ -20,7 +20,7 @@ import java.util.*
  * @param trustDepth degree to which the issuer trusts the target as trusted introducer
  * @param regexes regular expressions for user-ids which the target is allowed to introduce
  */
-data class EdgeComponent(
+open class EdgeComponent(
         val issuer: Node,
         val target: Node,
         val userId: String?,
@@ -30,14 +30,55 @@ data class EdgeComponent(
         val trustAmount: Int,
         val trustDepth: Depth,
         val regexes: RegexSet
-) {
+)
+
+class Certification(
+        issuer: Node,
+        target: Node,
+        userId: String,
+        creationTime: Date,
+        expirationTime: Date?,
+        exportable: Boolean,
+        trustAmount: Int?,
+        trustDepth: Depth?,
+): EdgeComponent(
+        issuer,
+        target,
+        userId,
+        creationTime,
+        expirationTime,
+        exportable,
+        trustAmount ?: 120,
+        trustDepth ?: Depth.limited(0),
+        RegexSet.wildcard()) {
 
     override fun toString(): String {
-        return if (trustDepth > 0) {
-            val scope = if (regexes.regexStrings.isEmpty()) "" else ", scope: $regexes"
-            "${issuer.fingerprint} delegates to ${target.fingerprint} [$trustAmount, depth $trustDepth$scope]"
-        } else {
-            "${issuer.fingerprint} certifies binding: $userId <-> ${target.fingerprint} [$trustAmount]"
-        }
+        return "${issuer.fingerprint} certifies binding: $userId <-> ${target.fingerprint} [$trustAmount]"
+    }
+}
+
+class Delegation(
+        issuer: Node,
+        target: Node,
+        creationTime: Date,
+        expirationTime: Date?,
+        exportable: Boolean,
+        trustAmount: Int,
+        trustDepth: Depth,
+        regexes: RegexSet
+): EdgeComponent(
+        issuer,
+        target,
+        null,
+        creationTime,
+        expirationTime,
+        exportable,
+        trustAmount,
+        trustDepth,
+        regexes) {
+
+    override fun toString(): String {
+        val scope = if (regexes.regexStrings.isEmpty()) "" else ", scope: $regexes"
+        return "${issuer.fingerprint} delegates to ${target.fingerprint} [$trustAmount, depth $trustDepth$scope]"
     }
 }

@@ -7,10 +7,7 @@ package org.pgpainless.wot.util
 import org.bouncycastle.openpgp.PGPSignature
 import org.pgpainless.algorithm.SignatureType
 import org.pgpainless.signature.subpackets.SignatureSubpacketsUtil
-import org.pgpainless.wot.network.Node
-import org.pgpainless.wot.network.EdgeComponent
-import org.pgpainless.wot.network.Depth
-import org.pgpainless.wot.network.RegexSet
+import org.pgpainless.wot.network.*
 import org.pgpainless.wot.network.RegexSet.Companion.fromExpressionList
 
 class CertificationFactory {
@@ -20,7 +17,15 @@ class CertificationFactory {
         fun fromDelegation(issuer: Node,
                            target: Node,
                            signature: PGPSignature): EdgeComponent {
-            return fromSignature(issuer, target, null, signature)
+            return Delegation(issuer,
+                    target,
+                    SignatureSubpacketsUtil.getSignatureCreationTime(signature)!!.time,
+                    SignatureSubpacketsUtil.getSignatureExpirationTimeAsDate(signature),
+                    SignatureSubpacketsUtil.isExportable(signature),
+                    getTrustAmountFrom(signature),
+                    getTrustDepthFrom(signature),
+                    regexSetFrom(signature)
+            )
         }
 
         @JvmStatic
@@ -28,48 +33,32 @@ class CertificationFactory {
                               target: Node,
                               targetUserId: String,
                               signature: PGPSignature): EdgeComponent {
-            return fromSignature(issuer, target, targetUserId, signature)
-        }
-
-        @JvmStatic
-        fun fromSignature(issuer: Node,
-                          target: Node,
-                          targetUserId: String?,
-                          signature: PGPSignature): EdgeComponent {
-            if (signature.signatureType == SignatureType.CERTIFICATION_REVOCATION.code) {
-                // Revocations equate to trust of 0/0
-                return EdgeComponent(
-                        issuer,
-                        target,
-                        targetUserId,
-                        SignatureSubpacketsUtil.getSignatureCreationTime(signature)!!.time,
-                        SignatureSubpacketsUtil.getSignatureExpirationTimeAsDate(signature),
-                        SignatureSubpacketsUtil.isExportable(signature),
-                        0,
-                        Depth.limited(0),
-                        regexSetFrom(signature))
-            } else {
-                return EdgeComponent(
-                        issuer,
-                        target,
-                        targetUserId,
-                        SignatureSubpacketsUtil.getSignatureCreationTime(signature)!!.time,
-                        SignatureSubpacketsUtil.getSignatureExpirationTimeAsDate(signature),
-                        SignatureSubpacketsUtil.isExportable(signature),
-                        getTrustAmountFrom(signature),
-                        getTrustDepthFrom(signature),
-                        regexSetFrom(signature))
-            }
+            return Certification(issuer,
+                    target,
+                    targetUserId,
+                    SignatureSubpacketsUtil.getSignatureCreationTime(signature)!!.time,
+                    SignatureSubpacketsUtil.getSignatureExpirationTimeAsDate(signature),
+                    SignatureSubpacketsUtil.isExportable(signature),
+                    getTrustAmountFrom(signature),
+                    getTrustDepthFrom(signature))
         }
 
         @JvmStatic
         private fun getTrustAmountFrom(signature: PGPSignature): Int {
+            if (signature.signatureType in intArrayOf(PGPSignature.KEY_REVOCATION, PGPSignature.CERTIFICATION_REVOCATION)) {
+                return 0
+            }
+
             val packet = SignatureSubpacketsUtil.getTrustSignature(signature)
             return packet?.trustAmount ?: 120
         }
 
         @JvmStatic
         private fun getTrustDepthFrom(signature: PGPSignature): Depth {
+            if (signature.signatureType in intArrayOf(PGPSignature.KEY_REVOCATION, PGPSignature.CERTIFICATION_REVOCATION)) {
+                return Depth.auto(0)
+            }
+
             val packet = SignatureSubpacketsUtil.getTrustSignature(signature)
             return if (packet != null) {
                 Depth.auto(packet.depth)
