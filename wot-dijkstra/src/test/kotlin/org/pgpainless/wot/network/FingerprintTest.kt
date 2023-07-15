@@ -33,4 +33,14 @@ class FingerprintTest {
         assert(finger1 != finger2)
         assertFalse { finger1.equals("2222222222222222222222222222222222222222") }
     }
+
+    @Test
+    fun `verify Fingerprints get sorted lexicographically`() {
+        val list = mutableListOf(Fingerprint("A"), Fingerprint("C"), Fingerprint("B"))
+        list.sort()
+
+        assertEquals(
+                listOf(Fingerprint("A"), Fingerprint("B"), Fingerprint("C")),
+                list)
+    }
 }
