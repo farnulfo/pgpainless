@@ -76,10 +76,6 @@ class Network(
             return this
         }
 
-        fun getNode(fingerprint: Fingerprint): Node? {
-            return nodes[fingerprint]
-        }
-
         fun addEdge(edge: EdgeComponent): Builder {
             protoEdges.getOrPut(Pair(edge.issuer.fingerprint, edge.target.fingerprint)) {
                 Edge.empty(edge.issuer, edge.target)
