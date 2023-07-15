@@ -101,8 +101,18 @@ class Path(
             "Not enough depth."
         }
 
-        // root is c's target -> illegal cycle
-        var cyclic = root.fingerprint == nComponent.target.fingerprint
+        var cyclic = false
+
+        // An edge that points to the root is only allowed as the first and last edge
+        if ((edges.size > 0) && (root.fingerprint == nComponent.target.fingerprint)) {
+            cyclic = true
+        }
+        // And it's only legal if the edge points to the target User ID
+        // (XX: Do we know the target User ID here? Currently, we only check for != null)
+        if ((edges.size == 0) && (root.fingerprint == nComponent.target.fingerprint) && (nComponent.userId == null)) {
+            cyclic = true
+        }
+
         for ((i, component) in edges.withIndex()) {
             if (cyclic) {
                 break

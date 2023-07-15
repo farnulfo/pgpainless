@@ -7,7 +7,7 @@ import org.pgpainless.wot.dsl.NetworkDSL
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-class PathTest: NetworkDSL {
+class PathTest : NetworkDSL {
 
     private val root = Node("aabbccddeeAABBCCDDEEaabbccddeeAABBCCDDEE")
     private val alice = Node("0000000000000000000000000000000000000000")
@@ -15,14 +15,36 @@ class PathTest: NetworkDSL {
 
     // Root -(255, 255)-> Alice
     private val root_alice__fully_trusted = EdgeComponent(root, alice, 255, Depth.unconstrained())
+
     // Root -(60,0)-> Alice
     private val root_alice__marginally_trusted = EdgeComponent(root, alice, 60, Depth.limited(0))
+
     // Alice -(255,255)-> Root
     private val alice_root = EdgeComponent(alice, root, 255, Depth.unconstrained())
-    // Alice -(120, 1)-> Bob
+
+    // Alice -(120, 0)-> Bob
     private val alice_bob = EdgeComponent(alice, bob)
+
+    // Alice -(120, 1)-> Bob
+    private val alice_bob_depth_1 = EdgeComponent(alice, bob, 120, Depth.auto(1))
+
     // Root -> Root
     private val root_root = EdgeComponent(root, root, 120, Depth.limited(1))
+
+    private val root_selfsig = EdgeComponent(root, root, "root@example.org")
+
+    private val bob_selfsig = EdgeComponent(bob, bob, "bob@example.org")
+
+    @Test
+    fun `longer path that ends in a selfsig`() {
+        val path = Path(root)
+        path.append(root_alice__fully_trusted)
+        path.append(alice_bob_depth_1)
+        path.append(bob_selfsig)
+
+        assertEquals(120, path.amount)
+        assertEquals(0, path.residualDepth.value())
+    }
 
     @Test
     fun `verify that an empty Path is properly initialized`() {
@@ -86,8 +108,19 @@ class PathTest: NetworkDSL {
     }
 
     @Test
-    fun `verify that a Path cannot point to its own root`() {
+    fun `trust root binding its identity is fine`() {
         val path = Path(root)
-        assertThrows<IllegalArgumentException> { path.append(root_root) }
+        path.append(root_selfsig)
+
+        assertEquals(2, path.length)
+    }
+
+
+    @Test
+    fun `verify that a Path cannot point to its own root via a delegation`() {
+        val path = Path(root)
+        assertThrows<IllegalArgumentException> {
+            path.append(root_root)
+        }
     }
 }
