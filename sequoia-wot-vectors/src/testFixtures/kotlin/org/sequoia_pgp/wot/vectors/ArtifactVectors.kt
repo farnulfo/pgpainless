@@ -38,7 +38,7 @@ interface ArtifactVectors {
 
     fun getResourceName(): String
 
-    fun getNetworkAt(referenceTime: ReferenceTime, policy: Policy = PGPainless.getPolicy()): Network {
+    fun getNetworkAt(referenceTime: ReferenceTime = ReferenceTime.now(), policy: Policy = PGPainless.getPolicy()): Network {
         val inputStream = keyRingInputStream()
         val keyRing = PGPainless.readKeyRing().publicKeyRingCollection(inputStream)
         val store = KeyRingCertificateStore(keyRing)
