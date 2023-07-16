@@ -698,10 +698,18 @@ class AuthenticateTest {
 
         sp(q2, t.aliceFpr, t.aliceUid, listOf(Pair(90, listOf(t.aliceFpr))), null)
 
+        // NOTE: original expectation from sequoia-wot:
+        //        sp(q2, t.bobFpr, t.bobUid,
+        //                listOf(Pair(90, listOf(t.bobFpr)),
+        //                        Pair(90, listOf(t.aliceFpr, t.bobFpr))), null)
+
+        // Our changed expectation: the order has changed because we return self-signed roots including the
+        // self-certification edge.
+        // This also happens to result in different ordering of the two paths, in this case.
         sp(q2, t.bobFpr, t.bobUid,
-                listOf(Pair(90, listOf(t.bobFpr)),
-                        Pair(90, listOf(t.aliceFpr, t.bobFpr))),
-                null)
+                listOf(Pair(90, listOf(t.aliceFpr, t.bobFpr)),
+                        Pair(90, listOf(t.bobFpr))
+                ), null)
     }
 
     @Test
