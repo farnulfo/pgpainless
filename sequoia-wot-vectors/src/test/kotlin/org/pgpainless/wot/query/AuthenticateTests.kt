@@ -55,7 +55,15 @@ class AuthenticateTest {
                 }.zip(expected).withIndex()
                         .forEach { (i, b) ->
                             val g = b.first
-                            val e = b.second
+                            var e = b.second
+
+                            // Adjust test expectations: sequoia-wot returns 1-step paths for self-signed roots.
+                            // We return a 2-step path.
+                            if (e.second.size == 1) {
+                                val list = e.second.toMutableList()
+                                list.add(list[0])
+                                e = Pair(e.first, list.toList())
+                            }
 
                             assertEquals(e, g, "got vs. expected path (#$i)")
                             assertEquals(e.first, g.first, "got vs. expected trust amount (#$i)")
