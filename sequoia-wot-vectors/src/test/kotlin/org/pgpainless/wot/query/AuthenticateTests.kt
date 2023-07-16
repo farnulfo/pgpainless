@@ -317,10 +317,26 @@ class AuthenticateTest {
                         Pair(20, listOf(t.aliceFpr, t.bobFpr, t.georgeFpr)),
                 ), 240)
 
+
+        // NOTE: original expectation from sequoia-wot:
+        //        sp(q3, t.henryFpr, t.henryUid,
+        //                listOf(Pair(60, listOf(t.aliceFpr, t.bobFpr, t.georgeFpr, t.henryFpr)),
+        //                        Pair(60, listOf(t.jennyFpr, t.georgeFpr, t.henryFpr))
+        //                ), null)
+
+        // NOTE: Adjusted expectation for pgpainless.
+        // sequoia-wot searches for paths in a very specific way:
+        // backward_propagate() gets called twice in succession, from `authenticate()`, with two different search
+        // modes. The results get merged in a very specific way. In this test, that approach leads to a different
+        // distribution of trust amounts found for the two paths, which also happens to switch the ordering of the
+        // two paths.
+        // Note that the authentication result (the trust amount) remains unchanged, the total flow of 120 remains,
+        // it's just distributed differently between the two available paths. Both results are correct.
         sp(q3, t.henryFpr, t.henryUid,
-                listOf(Pair(60, listOf(t.aliceFpr, t.bobFpr, t.georgeFpr, t.henryFpr)),
-                        Pair(60, listOf(t.jennyFpr, t.georgeFpr, t.henryFpr))
+                listOf(Pair(100, listOf(t.jennyFpr, t.georgeFpr, t.henryFpr)),
+                        Pair(20, listOf(t.aliceFpr, t.bobFpr, t.georgeFpr, t.henryFpr))
                 ), null)
+
 
         sp(q3, t.isaacFpr, t.isaacUid, listOf(Pair(60, listOf(t.aliceFpr, t.bobFpr, t.georgeFpr, t.henryFpr, t.isaacFpr))), null)
 
