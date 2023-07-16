@@ -33,7 +33,7 @@ class BestViaRoot : TestCase(BestViaRootVectors()) {
         val keyRing = tempKeyRingFile.absolutePath
         val v = vectors as BestViaRootVectors
         val p = Runtime.getRuntime().exec(
-                "$executable --keyring=$keyRing -r ${v.alice_fpr} --full authenticate ${v.target_fpr} ${v.target_uid}",
+                "$executable --keyring=$keyRing -r ${v.aliceFpr} --full authenticate ${v.targetFpr} ${v.targetUid}",
                 env)
         val output = p.inputStream.let {
             val bOut = ByteArrayOutputStream()

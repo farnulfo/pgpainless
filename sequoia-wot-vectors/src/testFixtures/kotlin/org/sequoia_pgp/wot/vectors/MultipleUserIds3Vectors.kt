@@ -28,30 +28,30 @@ import org.pgpainless.wot.network.Fingerprint
  */
 class MultipleUserIds3Vectors: ArtifactVectors {
 
-    val alice_fpr = Fingerprint("DA3CFC60BD4B8835702A66782C7A431946C12DF7")
-    val alice_uid = "<alice@example.org>"
+    val aliceFpr = Fingerprint("DA3CFC60BD4B8835702A66782C7A431946C12DF7")
+    val aliceUid = "<alice@example.org>"
 
-    val bob_fpr = Fingerprint("28C108707090FCDFF630D1E141FB02F0E397D55E")
-    val bob_uid = "<bob@other.org>"
+    val bobFpr = Fingerprint("28C108707090FCDFF630D1E141FB02F0E397D55E")
+    val bobUid = "<bob@other.org>"
     // Certified by: DA3CFC60BD4B8835702A66782C7A431946C12DF7
-    val bob_some_org_uid = "<bob@some.org>"
+    val bobSomeOrgUid = "<bob@some.org>"
     // Certified by: DA3CFC60BD4B8835702A66782C7A431946C12DF7
-    val bob_third_org_uid = "<bob@third.org>"
+    val bobThirdOrgUid = "<bob@third.org>"
 
-    val carol_fpr = Fingerprint("9FB1D2F41AB5C478378E728C8DD5A5A434EEAAB8")
-    val carol_uid = "<carol@example.org>"
+    val carolFpr = Fingerprint("9FB1D2F41AB5C478378E728C8DD5A5A434EEAAB8")
+    val carolUid = "<carol@example.org>"
     // Certified by: 28C108707090FCDFF630D1E141FB02F0E397D55E
 
-    val dave_fpr = Fingerprint("0C131F8959F45D08B6136FDAAD2E16A26F73D48E")
-    val dave_uid = "<dave@example.org>"
+    val daveFpr = Fingerprint("0C131F8959F45D08B6136FDAAD2E16A26F73D48E")
+    val daveUid = "<dave@example.org>"
     // Certified by: 28C108707090FCDFF630D1E141FB02F0E397D55E
 
-    val ed_fpr = Fingerprint("296935FAE420CCCF3AEDCEC9232BFF0AE9A7E5DB")
-    val ed_uid = "<ed@example.org>"
+    val edFpr = Fingerprint("296935FAE420CCCF3AEDCEC9232BFF0AE9A7E5DB")
+    val edUid = "<ed@example.org>"
     // Certified by: 0C131F8959F45D08B6136FDAAD2E16A26F73D48E
 
-    val frank_fpr = Fingerprint("A72AA1B7D9D8CB04D988F1520A404E37A7766608")
-    val frank_uid = "<frank@example.org>"
+    val frankFpr = Fingerprint("A72AA1B7D9D8CB04D988F1520A404E37A7766608")
+    val frankUid = "<frank@example.org>"
     // Certified by: 9FB1D2F41AB5C478378E728C8DD5A5A434EEAAB8
     // Certified by: 296935FAE420CCCF3AEDCEC9232BFF0AE9A7E5DB
 

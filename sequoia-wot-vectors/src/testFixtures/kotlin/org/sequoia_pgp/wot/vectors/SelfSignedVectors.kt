@@ -34,7 +34,7 @@ class SelfSignedVectors: ArtifactVectors {
     val carolFpr = Fingerprint("830230061426EE99A0455E6ADA869CF879A5630D")
     val carolUid = "<carol@example.org>"
     // Certified by: 7A7B5DE6C8F464CAB78BEFB9CE14BEE51D4DEC01
-    val carol_other_orgUid = "<carol@other.org>"
+    val carolOtherOrgUid = "<carol@other.org>"
 
     val daveFpr = Fingerprint("51A5E15F87AC6ECAFBEA930FA5F30AF6EB6EF14A")
     val daveUid = "<dave@example.org>"

@@ -16,7 +16,7 @@ class IsolatedRootVectors: ArtifactVectors {
 
     val aliceFpr = Fingerprint("DCF3020AAB76ECC7F0E5AC0D375DCE1BEE264B87")
     val aliceUid = "<alice@example.org>"
-    val aliceOtherOrguid = "<alice@other.org>"
+    val aliceOtherOrgUid = "<alice@other.org>"
 
     /**
      * A is created.

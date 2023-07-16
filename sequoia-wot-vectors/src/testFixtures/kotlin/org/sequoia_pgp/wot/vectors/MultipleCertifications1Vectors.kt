@@ -26,21 +26,21 @@ import org.pgpainless.wot.network.Fingerprint
  */
 class MultipleCertifications1Vectors: ArtifactVectors {
 
-    val alice_fpr = Fingerprint("9219941467AA737C6EC1207959A2CEFC112C359A")
-    val alice_uid = "<alice@example.org>"
+    val aliceFpr = Fingerprint("9219941467AA737C6EC1207959A2CEFC112C359A")
+    val aliceUid = "<alice@example.org>"
 
-    val bob_fpr = Fingerprint("72CAA0F0A4A020F5FA20CD8CB5CC04473AA88123")
-    val bob_uid = "<bob@example.org>"
+    val bobFpr = Fingerprint("72CAA0F0A4A020F5FA20CD8CB5CC04473AA88123")
+    val bobUid = "<bob@example.org>"
     // Certified by: 9219941467AA737C6EC1207959A2CEFC112C359A
     // Certified by: 9219941467AA737C6EC1207959A2CEFC112C359A
     // Certified by: 9219941467AA737C6EC1207959A2CEFC112C359A
 
-    val carol_fpr = Fingerprint("853304031E7B0B116BBD0B398734F11945313904")
-    val carol_uid = "<carol@example.org>"
+    val carolFpr = Fingerprint("853304031E7B0B116BBD0B398734F11945313904")
+    val carolUid = "<carol@example.org>"
     // Certified by: 72CAA0F0A4A020F5FA20CD8CB5CC04473AA88123
 
-    val dave_fpr = Fingerprint("4C77ABDBE4F855E0C3C7A7D549F6B2BFDA83E424")
-    val dave_uid = "<dave@example.org>"
+    val daveFpr = Fingerprint("4C77ABDBE4F855E0C3C7A7D549F6B2BFDA83E424")
+    val daveUid = "<dave@example.org>"
     // Certified by: 853304031E7B0B116BBD0B398734F11945313904
 
     /**
