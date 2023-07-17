@@ -5,6 +5,8 @@
 package org.pgpainless.wot.cli.format
 
 import org.pgpainless.wot.api.Binding
+import org.pgpainless.wot.network.Depth
+import org.pgpainless.wot.network.EdgeComponent
 import java.text.SimpleDateFormat
 
 class SQWOTFormatter: Formatter {
@@ -43,11 +45,11 @@ class SQWOTFormatter: Formatter {
                 append(indent); appendLine("◯ ${path.root.fingerprint}$originUserId")
                 for ((eIndex, edge) in path.certifications.withIndex()) {
                     val targetUserId = if (edge.userId == null) "" else " \"${edge.userId}\""
-                    append(indent); appendLine("│   ${certDegree(edge.trustAmount)} the following " +
+                    append(indent); appendLine("│   ${certDegree(edge.trustAmount)}the following " +
                             (if (edge.userId == null) "binding" else "certificate") +
                             " on ${dateFormat.format(edge.creationTime)}" +
                             (if (edge.expirationTime == null) "" else " (expiry: ${dateFormat.format(edge.expirationTime)})") +
-                            " as a TODO trusted TODO-introducer (depth: ${edge.trustDepth.value()})"
+                            introducerType(edge)
                     )
 
                     append(indent); append(if (eIndex != path.certifications.lastIndex) "├ " else "└ ")
@@ -58,6 +60,22 @@ class SQWOTFormatter: Formatter {
                 }
             }
         }
+    }
+
+    private fun introducerDegree(amount: Int): String {
+        return when (amount) {
+            in 1..119 -> "partially"
+            else -> if (amount <= 0) "not" else "fully"
+        }
+    }
+
+    private fun introducerType(edge: EdgeComponent): String {
+        return when (edge.trustDepth.value()) {
+            0 -> ""
+            1 -> " as a ${introducerDegree(edge.trustAmount)} trusted introducer (depth: ${edge.trustDepth.value()})"
+            else -> " as a ${introducerDegree(edge.trustAmount)} trusted meta-introducer (depth: ${edge.trustDepth.value()})"
+        }
+
     }
 
     private fun certDegree(amount: Int): String {
