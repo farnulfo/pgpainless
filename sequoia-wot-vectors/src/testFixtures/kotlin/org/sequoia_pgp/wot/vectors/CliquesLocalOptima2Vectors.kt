@@ -6,6 +6,9 @@ package org.sequoia_pgp.wot.vectors
 
 class CliquesLocalOptima2Vectors: CliquesVectors() {
 
+    override val tempFilePrefix: String
+        get() = "cliques-local-optima-2"
+
     override fun getResourceName(): String {
         return "org/sequoia_pgp/wot/vectors/cliques-local-optima-2.pgp"
     }

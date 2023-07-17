@@ -110,6 +110,9 @@ open class CliquesVectors: ArtifactVectors {
      */
     val t0 = parseReferenceTime("2021-02-14 00:00:00 UTC")
 
+    override val tempFilePrefix: String
+        get() = "cliques"
+
     override fun getResourceName(): String {
         return "org/sequoia_pgp/wot/vectors/cliques.pgp"
     }

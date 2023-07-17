@@ -58,6 +58,9 @@ class GpgTrustrootsVectors: ArtifactVectors {
      */
     val t1 = parseReferenceTime("2020-02-01 00:00:00 UTC")
 
+    override val tempFilePrefix: String
+        get() = "gpg-trustroots"
+
     override fun getResourceName(): String {
         return "org/sequoia_pgp/wot/vectors/gpg-trustroots.pgp"
     }

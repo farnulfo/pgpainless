@@ -48,6 +48,9 @@ class MultipleCertifications1Vectors: ArtifactVectors {
      */
     val t0 = parseReferenceTime("2021-10-06 12:20:00 UTC")
 
+    override val tempFilePrefix: String
+        get() = "multiple-certifications-1"
+
     override fun getResourceName(): String {
         return "org/sequoia_pgp/wot/vectors/multiple-certifications-1.pgp"
     }

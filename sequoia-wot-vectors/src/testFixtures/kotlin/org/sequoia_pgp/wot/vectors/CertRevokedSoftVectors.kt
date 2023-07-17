@@ -147,6 +147,8 @@ class CertRevokedSoftVectors: ArtifactVectors {
      */
     val t3 = parseReferenceTime("2020-04-01 00:00:00 UTC")
 
+    override val tempFilePrefix: String
+        get() = "cert-revoked-soft"
 
     override fun getResourceName(): String {
         return "org/sequoia_pgp/wot/vectors/cert-revoked-soft.pgp"

@@ -23,6 +23,9 @@ class PunyCodeVectors: ArtifactVectors {
 
     // TODO: Extract fingerprints and UIDs
 
+    override val tempFilePrefix: String
+        get() = "puny-code"
+
     override fun getResourceName(): String {
         return "org/sequoia_pgp/wot/vectors/puny-code.pgp"
     }

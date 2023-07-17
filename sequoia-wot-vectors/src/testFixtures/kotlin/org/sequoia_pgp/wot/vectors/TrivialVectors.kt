@@ -8,6 +8,9 @@ class TrivialVectors: ArtifactVectors {
 
     // TODO: Extract fingerprints and UIDs
 
+    override val tempFilePrefix: String
+        get() = "trivial"
+
     override fun getResourceName(): String {
         return "org/sequoia_pgp/wot/vectors/trivial.pgp"
     }

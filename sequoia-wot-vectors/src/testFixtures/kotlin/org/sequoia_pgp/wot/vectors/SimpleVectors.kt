@@ -50,6 +50,9 @@ class SimpleVectors: ArtifactVectors {
     val frankFpr = Fingerprint("2693237D2CED0BB68F118D78DC86A97CD2C819D9")
     val frankUid = "<frank@example.org>"
 
+    override val tempFilePrefix: String
+        get() = "simple"
+
     override fun getResourceName(): String {
         return "org/sequoia_pgp/wot/vectors/simple.pgp"
     }

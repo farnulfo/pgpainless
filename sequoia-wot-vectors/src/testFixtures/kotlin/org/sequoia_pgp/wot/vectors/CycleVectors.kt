@@ -54,6 +54,9 @@ class CycleVectors: ArtifactVectors {
      */
     val t0 = parseReferenceTime("2021-10-01 12:00:00 UTC")
 
+    override val tempFilePrefix: String
+        get() = "cycle"
+
     override fun getResourceName(): String {
         return "org/sequoia_pgp/wot/vectors/cycle.pgp"
     }

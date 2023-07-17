@@ -83,6 +83,9 @@ class LocalOptimaVectors: ArtifactVectors {
      */
     val t0 = parseReferenceTime("2021-10-01 10:27:00 UTC")
 
+    override val tempFilePrefix: String
+        get() = "local-optima"
+
     override fun getResourceName(): String {
         return "org/sequoia_pgp/wot/vectors/local-optima.pgp"
     }

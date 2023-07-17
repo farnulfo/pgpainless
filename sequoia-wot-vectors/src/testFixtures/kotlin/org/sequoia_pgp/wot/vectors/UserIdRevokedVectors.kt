@@ -54,6 +54,9 @@ class UserIdRevokedVectors: ArtifactVectors {
     // Certified by: EA479A77CD074458EAFE56B4861BF42FF490C581
     // Certified by: EA479A77CD074458EAFE56B4861BF42FF490C581
 
+    override val tempFilePrefix: String
+        get() = "userid-revoked"
+
     override fun getResourceName(): String {
         return "org/sequoia_pgp/wot/vectors/userid-revoked.pgp"
     }

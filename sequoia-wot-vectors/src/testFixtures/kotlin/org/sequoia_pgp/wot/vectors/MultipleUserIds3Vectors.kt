@@ -55,6 +55,9 @@ class MultipleUserIds3Vectors: ArtifactVectors {
     // Certified by: 9FB1D2F41AB5C478378E728C8DD5A5A434EEAAB8
     // Certified by: 296935FAE420CCCF3AEDCEC9232BFF0AE9A7E5DB
 
+    override val tempFilePrefix: String
+        get() = "multiple-userids-3"
+
     override fun getResourceName(): String {
         return "org/sequoia_pgp/wot/vectors/multiple-userids-3.pgp"
     }

@@ -285,6 +285,9 @@ class InfinityAndBeyondVectors: ArtifactVectors {
      */
     val t0 = parseReferenceTime("2022-01-28 15:18:00 UTC")
 
+    override val tempFilePrefix: String
+        get() = "infinity-and-beyond"
+
     override fun getResourceName(): String {
         return "org/sequoia_pgp/wot/vectors/infinity-and-beyond.pgp"
     }

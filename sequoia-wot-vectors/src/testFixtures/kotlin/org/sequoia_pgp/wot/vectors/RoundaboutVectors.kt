@@ -79,6 +79,9 @@ class RoundaboutVectors: ArtifactVectors {
     val jennyFpr = Fingerprint("AE40578962411356F9609CAA9C2447E61FFDBB15")
     val jennyUid = "<jenny@example.org>"
 
+    override val tempFilePrefix: String
+        get() = "roundabout"
+
     override fun getResourceName(): String {
         return "org/sequoia_pgp/wot/vectors/roundabout.pgp"
     }

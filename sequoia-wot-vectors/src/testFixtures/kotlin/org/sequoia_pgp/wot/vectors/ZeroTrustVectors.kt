@@ -39,6 +39,9 @@ class ZeroTrustVectors: ArtifactVectors {
     val carolUid = "<carol@example.org>"
     // Certified by: A1042B157AFA71F005208D645915549D8D21A97B
 
+    override val tempFilePrefix: String
+        get() = "zero-trust"
+
     override fun getResourceName(): String {
         return "org/sequoia_pgp/wot/vectors/zero-trust.pgp"
     }

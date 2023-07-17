@@ -11,6 +11,9 @@ class Sha1Vectors: ArtifactVectors {
 
     // TODO: Extract fingerprints and UIDs
 
+    override val tempFilePrefix: String
+        get() = "sha1"
+
     override fun getResourceName(): String {
         return "org/sequoia_pgp/wot/vectors/sha1.pgp"
     }

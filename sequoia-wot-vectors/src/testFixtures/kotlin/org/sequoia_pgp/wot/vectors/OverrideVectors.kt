@@ -21,6 +21,9 @@ class OverrideVectors: ArtifactVectors {
 
     // TODO: Extract fingerprints and UIDs
 
+    override val tempFilePrefix: String
+        get() = "override"
+
     override fun getResourceName(): String {
         return "org/sequoia_pgp/wot/vectors/override.pgp"
     }

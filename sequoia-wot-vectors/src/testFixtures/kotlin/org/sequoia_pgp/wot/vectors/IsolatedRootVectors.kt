@@ -28,6 +28,9 @@ class IsolatedRootVectors: ArtifactVectors {
      */
     val t1 = parseReferenceTime("2020-02-01 00:00:00 UTC")
 
+    override val tempFilePrefix: String
+        get() = "isolated-root"
+
     override fun getResourceName(): String {
         return "org/sequoia_pgp/wot/vectors/isolated-root.pgp"
     }

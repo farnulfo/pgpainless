@@ -41,6 +41,9 @@ class CertificationNetworkVectors: ArtifactVectors {
      */
     val t0 = parseReferenceTime("2023-01-19 12:00:00 UTC")
 
+    override val tempFilePrefix: String
+        get() = "certification-network"
+
     override fun getResourceName(): String {
         return "org/sequoia_pgp/wot/vectors/certification-network.pgp"
     }

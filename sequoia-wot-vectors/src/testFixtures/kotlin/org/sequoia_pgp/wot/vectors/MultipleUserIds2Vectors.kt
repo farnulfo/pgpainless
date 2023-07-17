@@ -54,6 +54,9 @@ class MultipleUserIds2Vectors: ArtifactVectors {
     val frankUid = "<frank@other.org>"
     // Certified by: 5528B9E5DAFC519ED2E37F0377B332E4111456CB
 
+    override val tempFilePrefix: String
+        get() = "multiple-userids-2"
+
     override fun getResourceName(): String {
         return "org/sequoia_pgp/wot/vectors/multiple-userids-2.pgp"
     }

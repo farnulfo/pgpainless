@@ -40,6 +40,9 @@ class SelfSignedVectors: ArtifactVectors {
     val daveUid = "<dave@example.org>"
     // Certified by: 830230061426EE99A0455E6ADA869CF879A5630D
 
+    override val tempFilePrefix: String
+        get() = "self-signed"
+
     override fun getResourceName(): String {
         return "org/sequoia_pgp/wot/vectors/self-signed.pgp"
     }

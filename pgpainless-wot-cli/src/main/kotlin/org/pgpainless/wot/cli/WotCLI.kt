@@ -221,8 +221,12 @@ class WotCLI: Callable<Int> {
 
         @JvmStatic
         fun main(args: Array<String>): Unit = exitProcess(
-                CommandLine(WotCLI()).execute(*args)
+                execute(args)
         )
+
+        fun execute(args: Array<String>): Int {
+            return CommandLine(WotCLI()).execute(*args)
+        }
 
         @JvmStatic
         val dateFormat: SimpleDateFormat = SimpleDateFormat("yyyy-MM-dd")

@@ -42,6 +42,9 @@ class Regex2Vectors: ArtifactVectors {
     val edUid = "<ed@example.org>"
     // Certified by: 58077E659732526C1B8BF9837EFC0EDE07B506A8
 
+    override val tempFilePrefix: String
+        get() = "regex-2"
+
     override fun getResourceName(): String {
         return "org/sequoia_pgp/wot/vectors/regex-2.pgp"
     }

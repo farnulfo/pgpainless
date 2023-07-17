@@ -59,6 +59,9 @@ class BestViaRootVectors: ArtifactVectors {
      * Create certifications.
      */
     val t1 = parseReferenceTime("2021-09-27 12:52:50 UTC")
+    
+    override val tempFilePrefix: String
+        get() = "best-via-root"
 
     override fun getResourceName(): String {
         return "org/sequoia_pgp/wot/vectors/best-via-root.pgp"
