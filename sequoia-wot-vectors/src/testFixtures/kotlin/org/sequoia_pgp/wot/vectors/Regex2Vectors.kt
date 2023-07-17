@@ -23,23 +23,23 @@ import org.pgpainless.wot.network.Fingerprint
  */
 class Regex2Vectors: ArtifactVectors {
 
-    val alice_fpr = Fingerprint("5C396C920399898461F17CB747FDBF3EB3453919")
-    val alice_uid = "<alice@some.org>"
+    val aliceFpr = Fingerprint("5C396C920399898461F17CB747FDBF3EB3453919")
+    val aliceUid = "<alice@some.org>"
 
-    val bob_fpr = Fingerprint("584D195AD89CE0354D2CCBAEBCDD9EBC09692780")
-    val bob_uid = "<bob@some.org>"
+    val bobFpr = Fingerprint("584D195AD89CE0354D2CCBAEBCDD9EBC09692780")
+    val bobUid = "<bob@some.org>"
     // Certified by: 5C396C920399898461F17CB747FDBF3EB3453919
 
-    val carol_fpr = Fingerprint("FC7A96D4810D0CF477031956AED58C644370C183")
-    val carol_uid = "<carol@other.org>"
+    val carolFpr = Fingerprint("FC7A96D4810D0CF477031956AED58C644370C183")
+    val carolUid = "<carol@other.org>"
     // Certified by: 584D195AD89CE0354D2CCBAEBCDD9EBC09692780
 
-    val dave_fpr = Fingerprint("58077E659732526C1B8BF9837EFC0EDE07B506A8")
-    val dave_uid = "<dave@their.org>"
+    val daveFpr = Fingerprint("58077E659732526C1B8BF9837EFC0EDE07B506A8")
+    val daveUid = "<dave@their.org>"
     // Certified by: FC7A96D4810D0CF477031956AED58C644370C183
 
-    val ed_fpr = Fingerprint("36089C49F18BF6FC6BCA35E3BB85877766C009E4")
-    val ed_uid = "<ed@example.org>"
+    val edFpr = Fingerprint("36089C49F18BF6FC6BCA35E3BB85877766C009E4")
+    val edUid = "<ed@example.org>"
     // Certified by: 58077E659732526C1B8BF9837EFC0EDE07B506A8
 
     override fun getResourceName(): String {
