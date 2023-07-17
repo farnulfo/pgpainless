@@ -1,10 +1,6 @@
-// SPDX-FileCopyrightText: 2023 Heiko Schaefer <heiko@schaefer.name>
-//
-// SPDX-License-Identifier: Apache-2.0
+package org.pgpainless.wot.query
 
-package org.pgpainless.wot.dijkstra
-
-import java.util.PriorityQueue
+import java.util.*
 
 /**
  * A de-duplicating min-priority queue for key-value pairs.
