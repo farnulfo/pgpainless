@@ -5,7 +5,7 @@
 package org.sequoia_pgp.wot.suite.harness
 
 import org.pgpainless.wot.cli.WotCLI
-import org.sequoia_pgp.wot.suite.TestCase
+import org.sequoia_pgp.wot.suite.ExecutionCallback
 import org.sequoia_pgp.wot.vectors.ArtifactVectors
 import java.io.ByteArrayOutputStream
 import java.io.PrintStream
@@ -15,8 +15,8 @@ import java.io.PrintStream
  */
 class WotCLIHarness: Harness() {
 
-    override fun runner(): TestCase.ExecutionCallback {
-        return object: TestCase.ExecutionCallback {
+    override fun runner(): ExecutionCallback {
+        return object: ExecutionCallback {
 
             override fun execute(vectors: ArtifactVectors, arguments: Array<String>): Pair<String, Int> {
                 val origStdout = System.out

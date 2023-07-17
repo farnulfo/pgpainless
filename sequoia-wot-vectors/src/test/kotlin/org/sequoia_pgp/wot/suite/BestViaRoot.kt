@@ -6,7 +6,7 @@ package org.sequoia_pgp.wot.suite
 
 import org.sequoia_pgp.wot.vectors.BestViaRootVectors
 
-class BestViaRoot : TestCase(BestViaRootVectors()) {
+class BestViaRoot : SimpleTestCase(BestViaRootVectors()) {
 
     override fun arguments(): Array<String> {
         val v = vectors as BestViaRootVectors

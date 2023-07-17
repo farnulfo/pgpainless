@@ -4,15 +4,16 @@
 
 package org.sequoia_pgp.wot.suite.harness
 
-import org.sequoia_pgp.wot.suite.TestCase
+import org.sequoia_pgp.wot.suite.ExecutionCallback
+import org.sequoia_pgp.wot.suite.SimpleTestCase
 
 /**
- * Abstract class to produce [TestCase.ExecutionCallback] instances for WOT CLI implementations.
+ * Abstract class to produce [SimpleTestCase.ExecutionCallback] instances for WOT CLI implementations.
  */
 abstract class Harness {
 
     /**
-     * Return a [TestCase.ExecutionCallback] which executes a [TestCase] using a custom WOT implementation.
+     * Return a [SimpleTestCase.ExecutionCallback] which executes a [SimpleTestCase] using a custom WOT implementation.
      */
-    abstract fun runner(): TestCase.ExecutionCallback
+    abstract fun runner(): ExecutionCallback
 }

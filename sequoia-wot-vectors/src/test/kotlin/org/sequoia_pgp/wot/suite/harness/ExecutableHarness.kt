@@ -5,7 +5,7 @@
 package org.sequoia_pgp.wot.suite.harness
 
 import org.bouncycastle.util.io.Streams
-import org.sequoia_pgp.wot.suite.TestCase
+import org.sequoia_pgp.wot.suite.ExecutionCallback
 import org.sequoia_pgp.wot.vectors.ArtifactVectors
 import java.io.ByteArrayOutputStream
 
@@ -16,8 +16,8 @@ import java.io.ByteArrayOutputStream
  */
 class ExecutableHarness(val executable: String, val environment: Array<String>): Harness() {
 
-    override fun runner(): TestCase.ExecutionCallback {
-        return object: TestCase.ExecutionCallback {
+    override fun runner(): ExecutionCallback {
+        return object: ExecutionCallback {
 
             override fun execute(vectors: ArtifactVectors, arguments: Array<String>): Pair<String, Int> {
                 val command = arrayOf(executable).plus(arguments)
