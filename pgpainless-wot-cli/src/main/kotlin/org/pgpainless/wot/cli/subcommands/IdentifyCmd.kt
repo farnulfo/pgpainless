@@ -4,10 +4,13 @@
 
 package org.pgpainless.wot.cli.subcommands
 
+import org.pgpainless.wot.api.IdentifyAPI
 import org.pgpainless.wot.cli.WotCLI
+import org.pgpainless.wot.network.Fingerprint
 import picocli.CommandLine
 import picocli.CommandLine.Command
 import picocli.CommandLine.Parameters
+import java.text.SimpleDateFormat
 import java.util.concurrent.Callable
 
 @Command(name = "identify")
@@ -25,8 +28,9 @@ class IdentifyCmd: Callable<Int> {
      * @return exit code
      */
     override fun call(): Int {
-        val api = parent.api
-        TODO("Not yet implemented")
-    }
+        val result = parent.api.identify(IdentifyAPI.Arguments(Fingerprint(fingerprint)))
 
+        print(parent.formatter.format(result))
+        return if (result.acceptable) 0 else 1
+    }
 }

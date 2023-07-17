@@ -5,6 +5,7 @@
 package org.pgpainless.wot.api
 
 import org.pgpainless.wot.network.Fingerprint
+import org.pgpainless.wot.network.Node
 import org.pgpainless.wot.query.Paths
 
 interface IdentifyAPI {
@@ -13,5 +14,10 @@ interface IdentifyAPI {
 
     data class Arguments(val fingerprint: Fingerprint)
 
-    data class Result(val paths: Paths)
+    data class Result(val bindings: List<Binding>, val targetAmount: Int) {
+        val acceptable: Boolean
+            get() = bindings.any {
+                it.paths.amount >= targetAmount
+            }
+    }
 }

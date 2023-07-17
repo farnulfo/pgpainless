@@ -21,7 +21,9 @@ class ListCmd: Callable<Int> {
      * @return exit code
      */
     override fun call(): Int {
-        val api = parent.api
-        TODO("Not yet implemented")
+        val result = parent.api.list()
+
+        println(parent.formatter.format(result))
+        return 0
     }
 }

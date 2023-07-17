@@ -4,11 +4,9 @@
 
 package org.pgpainless.wot.api
 
-import org.pgpainless.wot.query.Paths
-
 interface ListAPI {
 
     fun list(): Result
 
-    data class Result(val paths: Paths)
+    data class Result(val bindings: List<Binding>, val targetAmount: Int)
 }

@@ -5,7 +5,6 @@
 package org.pgpainless.wot.api
 
 import org.pgpainless.wot.network.Fingerprint
-import org.pgpainless.wot.query.Paths
 
 /**
  * Authenticate a binding.
@@ -36,13 +35,12 @@ interface AuthenticateAPI {
      * @param targetAmount the targeted trust amount required to achieve full authentication
      * @param paths the number of paths
      */
-    data class Result(val fingerprint: Fingerprint, val userId: String, private val targetAmount: Int, val paths: Paths) {
-
-        /**
-         * Percentage of authentication. 100% means fully authenticated binding.
-         */
+    data class Result(val binding: Binding, val targetAmount: Int) {
         val percentage: Int
-            get() = paths.amount * 100 / targetAmount
+            get() = binding.percentage(targetAmount)
+
+        val acceptable: Boolean
+            get() = binding.paths.amount >= targetAmount
     }
 
 }

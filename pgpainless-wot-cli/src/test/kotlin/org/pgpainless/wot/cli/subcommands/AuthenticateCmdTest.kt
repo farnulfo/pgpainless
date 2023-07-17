@@ -6,6 +6,8 @@ package org.pgpainless.wot.cli.subcommands
 
 import org.junit.jupiter.api.Test
 import org.pgpainless.wot.api.AuthenticateAPI
+import org.pgpainless.wot.api.Binding
+import org.pgpainless.wot.cli.format.SQWOTFormatter
 import org.pgpainless.wot.network.*
 import org.pgpainless.wot.query.Path
 import org.pgpainless.wot.query.Paths
@@ -17,7 +19,6 @@ class AuthenticateCmdTest {
     @Test
     fun testFormatting() {
         val dateFormat = SimpleDateFormat("yyyy-MM-dd")
-        val cmd = AuthenticateCmd()
         val paths = Paths()
         val neal = Node(
                 Fingerprint("F7173B3C7C685CD9ECC4191B74E445BA0E15C957"),
@@ -46,19 +47,18 @@ class AuthenticateCmdTest {
                 Depth.limited(0),
                 RegexSet.wildcard())
         paths.add(Path(neal, mutableListOf(edgeComponent), Depth.auto(0)), 120)
-        val testResult = AuthenticateAPI.Result(
+        val testResult = AuthenticateAPI.Result(Binding(
                 Fingerprint("CBCD8F030588653EEDD7E2659B7DD433F254904A"),
                 "Justus Winter <justus@sequoia-pgp.org>",
-                120,
-                paths)
+                paths),
+                120, )
 
-        val formatted = cmd.formatResult(testResult)
+        val formatted = SQWOTFormatter().format(testResult)
         assertEquals(buildString {
-            append("[✓] CBCD8F030588653EEDD7E2659B7DD433F254904A Justus Winter <justus@sequoia-pgp.org>: fully authenticated (100%)\n")
-            append("  Path #1 of 1, trust amount 120:\n")
-            append("    ◯ F7173B3C7C685CD9ECC4191B74E445BA0E15C957 (\"Neal H. Walfield (Code Signing Key) <neal@pep.foundation>\")\n")
-            append("    │   certified the following binding on 2022-02-04\n")
-            append("    └ CBCD8F030588653EEDD7E2659B7DD433F254904A \"Justus Winter <justus@sequoia-pgp.org>\"\n")
+            appendLine("[✓] CBCD8F030588653EEDD7E2659B7DD433F254904A Justus Winter <justus@sequoia-pgp.org>: fully authenticated (100%)")
+            appendLine("  ◯ F7173B3C7C685CD9ECC4191B74E445BA0E15C957 (\"Neal H. Walfield (Code Signing Key) <neal@pep.foundation>\")")
+            appendLine("  │   certified the following binding on 2022-02-04")
+            appendLine("  └ CBCD8F030588653EEDD7E2659B7DD433F254904A \"Justus Winter <justus@sequoia-pgp.org>\"")
         }, formatted)
     }
 }
