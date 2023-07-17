@@ -5,7 +5,6 @@
 package org.pgpainless.wot.cli.format
 
 import org.pgpainless.wot.api.Binding
-import org.pgpainless.wot.network.Depth
 import org.pgpainless.wot.network.EdgeComponent
 import java.text.SimpleDateFormat
 
@@ -46,7 +45,7 @@ class SQWOTFormatter: Formatter {
                 for ((eIndex, edge) in path.certifications.withIndex()) {
                     val targetUserId = if (edge.userId == null) "" else " \"${edge.userId}\""
                     append(indent); appendLine("│   ${certDegree(edge.trustAmount)}the following " +
-                            (if (edge.userId == null) "binding" else "certificate") +
+                            (if (edge.userId != null) "binding" else "certificate") +
                             " on ${dateFormat.format(edge.creationTime)}" +
                             (if (edge.expirationTime == null) "" else " (expiry: ${dateFormat.format(edge.expirationTime)})") +
                             introducerType(edge)
