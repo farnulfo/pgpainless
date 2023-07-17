@@ -1,12 +1,9 @@
-// SPDX-FileCopyrightText: 2023 Heiko Schaefer <heiko@schaefer.name>
-//
-// SPDX-License-Identifier: Apache-2.0
+package org.pgpainless.wot.query
 
-package org.pgpainless.wot.dijkstra
-
-import org.pgpainless.wot.network.*
-import org.pgpainless.wot.query.Path
-import org.pgpainless.wot.query.Paths
+import org.pgpainless.wot.network.Fingerprint
+import org.pgpainless.wot.network.Network
+import org.pgpainless.wot.network.Node
+import org.pgpainless.wot.network.Roots
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import kotlin.math.max

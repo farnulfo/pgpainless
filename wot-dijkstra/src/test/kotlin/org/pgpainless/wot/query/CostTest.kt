@@ -2,8 +2,9 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package org.pgpainless.wot.dijkstra
+package org.pgpainless.wot.query
 
+import org.pgpainless.wot.query.Cost
 import kotlin.test.Test
 
 class CostTest {
