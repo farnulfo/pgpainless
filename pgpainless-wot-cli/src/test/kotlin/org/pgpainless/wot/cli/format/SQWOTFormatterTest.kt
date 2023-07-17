@@ -35,10 +35,10 @@ class SQWOTFormatterTest {
                                     null,
                                     true,
                                     120,
-                                    Depth.auto(10),
+                                    Depth.auto(0),
                                     RegexSet.wildcard())
                                     )),
-                                    Depth.auto(9)),
+                                    Depth.auto(0)),
                             120)
                 }
         )
