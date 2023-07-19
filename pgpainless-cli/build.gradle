@@ -44,7 +44,7 @@ dependencies {
     implementation "org.pgpainless:sop-java-picocli:$sopJavaVersion"
 
     // https://mvnrepository.com/artifact/com.google.code.findbugs/jsr305
-    implementation group: 'com.google.code.findbugs', name: 'jsr305', version: '3.0.2'
+    implementation "com.google.code.findbugs:jsr305:3.0.2"
 }
 
 mainClassName = 'org.pgpainless.cli.PGPainlessCLI'

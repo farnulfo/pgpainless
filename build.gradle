@@ -19,6 +19,7 @@ buildscript {
 
 plugins {
     id 'ru.vyarus.animalsniffer' version '1.5.3'
+    id 'version-catalog'
 }
 
 apply from: 'version.gradle'
@@ -221,6 +222,40 @@ def getGitCommit() {
     }
 
     gitCommit
+}
+
+catalog {
+    versionCatalog {
+        // Junit
+        library("junit-api", "org.junit.jupiter:junit-jupiter-api:$junitVersion")
+        library("junit-params", "org.junit.jupiter:junit-jupiter-params:$junitVersion")
+        library("junit-engine", "org.junit.jupiter:junit-jupiter-engine:$junitVersion")
+        library("junit-system-exit", "com.ginsberg:junit5-system-exit:1.1.2")
+
+        // Mockito
+        library("mockito", "org.mockito:mockito-core:$mockitoVersion")
+
+        // Logging
+        library("slf4j", "org.slf4j:slf4j-api:$slf4jVersion")
+        library("slf4j-nop", "org.slf4j:slf4j-nop:$slf4jVersion")
+        library("logback", "ch.qos.logback:logback-classic:$logbackVersion")
+
+        // Bouncy Castle
+        library("bcutil", "org.bouncycastle:bcutil-jdk15to18:$bouncyCastleVersion")
+        library("bcprov", "org.bouncycastle:bcprov-jdk15to18:$bouncyCastleVersion")
+        library("bcpg", "org.bouncycastle:bcpg-jdk15to18:$bouncyCastleVersion")
+
+        // Jackson Databind
+        library("jackson-databind", "com.fasterxml.jackson.core:jackson-databind:2.15.2")
+        library("jackson-dataformat-xml", "com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.15.2")
+
+        // @Nullable, @Nonnull
+        library("jsr305", "com.google.code.findbugs:jsr305:3.0.2")
+
+        // Picocli
+        library("picocli", "info.picocli:picocli:4.6.3")
+        library("picocli-codegen", "info.picocli:picocli-codegen:4.6.3")
+    }
 }
 
 apply plugin: "com.github.kt3k.coveralls"
