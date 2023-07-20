@@ -253,7 +253,7 @@ DecryptionResult result = readyWithResult.writeTo(out);
 Note, that in both cases you acquire a `DecryptionResult` object. This contains information about the message,
 such as which signatures could successfully be verified.
 
-If you provided the senders certificate for the purpose of signature verification via `verifyWith(_)`, you now
+If you provided the senders certificate for the purpose of signature verification via `verifyWithCert(_)`, you now
 probably want to check, if the message was actually signed by the sender by checking `result.getVerifications()`.
 
 :::{note}
