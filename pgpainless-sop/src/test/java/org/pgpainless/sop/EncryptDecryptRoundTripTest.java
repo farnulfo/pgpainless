@@ -101,7 +101,7 @@ public class EncryptDecryptRoundTripTest {
 
         ByteArrayAndResult<DecryptionResult> bytesAndResult = sop.decrypt()
                 .withKey(aliceKeyNoArmor)
-                .verifyWithCert(aliceCertNoArmor)
+                .(aliceCertNoArmor)
                 .ciphertext(encrypted)
                 .toByteArrayAndResult();
 
@@ -349,7 +349,7 @@ public class EncryptDecryptRoundTripTest {
     }
 
     @Test
-    public void verifyWith_noDataThrowsBadData() {
+    public void verifyWithCert_noDataThrowsBadData() {
         assertThrows(SOPGPException.BadData.class, () -> sop.decrypt()
                 .verifyWithCert(new byte[0]));
     }
